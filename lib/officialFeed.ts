@@ -191,6 +191,9 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
 }
 
 export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerStat[]> {
+  const portalStats = await fetchKLeaguePortalPlayerStats();
+  if (portalStats.length) return portalStats;
+
   const html = await fetchText(playerRankUrl);
   const $ = cheerio.load(html);
   const lines = $("body")
@@ -233,6 +236,122 @@ export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerS
   }
 
   return stats.slice(0, limit);
+}
+
+async function fetchKLeaguePortalPlayerStats(): Promise<LeaguePlayerStat[]> {
+  const html = await fetchText(portalMainUrl);
+  const $ = cheerio.load(html);
+  const lines = $("body")
+    .text()
+    .split("\n")
+    .map(normalize)
+    .filter(Boolean);
+  const stats = new Map<string, LeaguePlayerStat>();
+
+  addPortalFeaturedStat(lines, "\ub4dd\uc810\uc21c\uc704", "\ub4dd\uc810", "goals", stats);
+  addPortalFeaturedStat(lines, "\ub3c4\uc6c0\uc21c\uc704", "\ub3c4\uc6c0", "assists", stats);
+  addPortalRankingStats(lines, "\ub4dd\uc810\uc21c\uc704", "\ub4dd\uc810", "goals", stats);
+  addPortalRankingStats(lines, "\ub3c4\uc6c0\uc21c\uc704", "\ub3c4\uc6c0", "assists", stats);
+
+  return Array.from(stats.values()).sort((a, b) => a.rank - b.rank);
+}
+
+function addPortalFeaturedStat(
+  lines: string[],
+  sectionTitle: string,
+  statLabel: string,
+  statKey: "goals" | "assists",
+  stats: Map<string, LeaguePlayerStat>
+) {
+  const startIndex = lines.findIndex((line) => line === sectionTitle);
+  if (startIndex === -1) return;
+
+  const statIndex = lines.slice(startIndex, startIndex + 40).findIndex((line) => line === statLabel);
+  if (statIndex === -1) return;
+
+  const scope = lines.slice(startIndex, startIndex + 40);
+  const club = scope.find((line, index) => line.startsWith("* ") && scope[index + 1]?.startsWith("* "))?.replace("* ", "");
+  const name = scope.find((line, index) => scope[index - 1]?.startsWith("* ") && line.startsWith("* "))?.replace("* ", "");
+  const value = Number(scope[statIndex + 1]?.replace("* ", ""));
+  const playedLabelIndex = scope.findIndex((line) => line === "\ucd9c\uc804");
+  const played = Number(scope[playedLabelIndex + 1]?.replace("* ", "")) || 0;
+
+  if (!club || !name || Number.isNaN(value)) return;
+
+  upsertPortalStat(stats, {
+    rank: 1,
+    name,
+    club: normalizePortalClub(club),
+    goals: statKey === "goals" ? value : 0,
+    assists: statKey === "assists" ? value : 0,
+    attackPoints: value,
+    yellowCards: 0,
+    redCards: 0,
+    played
+  });
+}
+
+function addPortalRankingStats(
+  lines: string[],
+  sectionTitle: string,
+  statLabel: string,
+  statKey: "goals" | "assists",
+  stats: Map<string, LeaguePlayerStat>
+) {
+  const headerIndex = lines.findIndex((line) => line === `\uc21c\uc704 \uc120\uc218 \uad6c\ub2e8 ${statLabel} \uacbd\uae30\ub2f9`);
+  if (headerIndex === -1) return;
+
+  for (const line of lines.slice(headerIndex + 1, headerIndex + 8)) {
+    if (line.startsWith("###")) break;
+    const matched = line.match(/^(\d{1,2})\s+(.+?)\s+([\uac00-\ud7a3A-Za-z0-9]+)\s+(\d+)\s+[\d.]+$/);
+    if (!matched) continue;
+
+    const [, rank, name, club, value] = matched;
+    upsertPortalStat(stats, {
+      rank: Number(rank),
+      name,
+      club: normalizePortalClub(club),
+      goals: statKey === "goals" ? Number(value) : 0,
+      assists: statKey === "assists" ? Number(value) : 0,
+      attackPoints: Number(value),
+      yellowCards: 0,
+      redCards: 0,
+      played: 0
+    });
+  }
+}
+
+function upsertPortalStat(stats: Map<string, LeaguePlayerStat>, next: LeaguePlayerStat) {
+  const key = `${next.name}-${next.club}`;
+  const current = stats.get(key);
+
+  if (!current) {
+    stats.set(key, next);
+    return;
+  }
+
+  stats.set(key, {
+    ...current,
+    rank: Math.min(current.rank, next.rank),
+    goals: Math.max(current.goals, next.goals),
+    assists: Math.max(current.assists, next.assists),
+    attackPoints: Math.max(current.attackPoints, next.attackPoints)
+  });
+}
+
+function normalizePortalClub(club: string) {
+  const clubMap: Record<string, string> = {
+    "\uac15\uc6d0": "GANGWON",
+    "\uc778\ucc9c": "INCHEON",
+    "\ud3ec\ud56d": "POHANG",
+    "\uc6b8\uc0b0": "ULSAN",
+    "\ub300\uc804": "DAEJEON HANA",
+    "\uc548\uc591": "ANYANG",
+    "\uc11c\uc6b8": "SEOUL",
+    "\uae40\ucc9c": "GIMCHEON"
+  };
+
+  return clubMap[club] ?? club;
 }
 
 export async function fetchKLeagueStandings(): Promise<Standing[]> {
