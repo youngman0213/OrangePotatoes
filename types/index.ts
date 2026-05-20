@@ -75,10 +75,19 @@ export interface Player {
   name: string;
   number: number;
   position: PlayerPosition;
-  birthDate: string;
-  nationality: string;
-  imageUrl: string;
-  appearances: number;
-  goals: number;
-  assists: number;
+  birthDate?: string;
+  nationality?: string;
+  imageUrl?: string;
+  appearances?: number;
+  goals?: number;
+  assists?: number;
+  profileUrl?: string;
+}
+
+export interface Coach {
+  id: string;
+  name: string;
+  role: string;
+  imageUrl?: string;
+  profileUrl?: string;
 }

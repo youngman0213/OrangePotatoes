@@ -1,37 +1,74 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { CoachCard } from "@/components/CoachCard";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterTabs } from "@/components/FilterTabs";
+import { LoadingState } from "@/components/LoadingState";
 import { PlayerCard } from "@/components/PlayerCard";
 import { SectionHeader } from "@/components/SectionHeader";
-import { players } from "@/data/mock";
+import { coaches as mockCoaches, players as mockPlayers } from "@/data/mock";
+import type { Coach, Player } from "@/types";
 
-const tabs = [
-  { label: "전체", value: "all" },
+const positionTabs = [
+  { label: "\uc804\uccb4", value: "all" },
   { label: "GK", value: "GK" },
   { label: "DF", value: "DF" },
   { label: "MF", value: "MF" },
   { label: "FW", value: "FW" }
 ];
 
+const groupTabs = [
+  { label: "\uc120\uc218", value: "players" },
+  { label: "\ucf54\uce6d\uc2a4\ud0dc\ud504", value: "coaches" }
+];
+
 export default function PlayersPage() {
+  const [group, setGroup] = useState("players");
   const [position, setPosition] = useState("all");
+  const [players, setPlayers] = useState<Player[]>(mockPlayers);
+  const [coaches, setCoaches] = useState<Coach[]>(mockCoaches);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/squad")
+      .then((response) => response.json())
+      .then((data: { players?: Player[]; coaches?: Coach[] }) => {
+        if (data.players?.length) setPlayers(data.players);
+        if (data.coaches?.length) setCoaches(data.coaches);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const filteredPlayers = useMemo(
     () => players.filter((player) => position === "all" || player.position === position),
-    [position]
+    [players, position]
   );
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="선수단" eyebrow="Squad" />
-      <FilterTabs tabs={tabs} active={position} onChange={setPosition} />
-      {filteredPlayers.length ? (
+      <SectionHeader title="\uc120\uc218\ub2e8" eyebrow="Squad" />
+      <div className="grid gap-3">
+        <FilterTabs tabs={groupTabs} active={group} onChange={setGroup} />
+        {group === "players" ? <FilterTabs tabs={positionTabs} active={position} onChange={setPosition} /> : null}
+      </div>
+
+      {loading ? (
+        <LoadingState />
+      ) : group === "players" ? (
+        filteredPlayers.length ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {filteredPlayers.map((player) => <PlayerCard key={player.id} player={player} />)}
+          </div>
+        ) : (
+          <EmptyState title="\uc870\uac74\uc5d0 \ub9de\ub294 \uc120\uc218\uac00 \uc5c6\uc2b5\ub2c8\ub2e4." />
+        )
+      ) : coaches.length ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredPlayers.map((player) => <PlayerCard key={player.id} player={player} />)}
+          {coaches.map((coach) => <CoachCard key={coach.id} coach={coach} />)}
         </div>
       ) : (
-        <EmptyState title="조건에 맞는 선수가 없습니다." />
+        <EmptyState title="\ucf54\uce6d\uc2a4\ud0dc\ud504 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4." />
       )}
     </div>
   );

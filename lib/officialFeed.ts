@@ -1,8 +1,10 @@
 import * as cheerio from "cheerio";
-import type { ClubPlatform, ClubPost, Match } from "@/types";
+import type { ClubPlatform, ClubPost, Coach, Match, Player, PlayerPosition } from "@/types";
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
+const playerUrl = `${officialBaseUrl}/squad/player`;
+const coachUrl = `${officialBaseUrl}/squad/coach`;
 
 const ko = {
   gangwon: "\uac15\uc6d0FC",
@@ -109,6 +111,76 @@ export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
   }
 
   return matches.slice(0, limit);
+}
+
+export async function fetchOfficialPlayers(): Promise<Player[]> {
+  const html = await fetchText(playerUrl);
+  const $ = cheerio.load(html);
+  const players = new Map<string, Player>();
+
+  $("a").each((_, element) => {
+    const title = normalize($(element).text());
+    const matched = title.match(/^(\d{1,2})\s+(GK|DF|MF|FW)\s+(.+?)\s+\ub354\ubcf4\uae30$/);
+    const href = $(element).attr("href");
+
+    if (!matched) return;
+
+    const [, number, position, name] = matched;
+    const id = `official-player-${number}-${position}`;
+    players.set(id, {
+      id,
+      name,
+      number: Number(number),
+      position: position as PlayerPosition,
+      profileUrl: href ? toAbsoluteUrl(href) : playerUrl
+    });
+  });
+
+  return Array.from(players.values()).sort((a, b) => a.number - b.number);
+}
+
+export async function fetchOfficialCoaches(): Promise<Coach[]> {
+  const html = await fetchText(coachUrl);
+  const $ = cheerio.load(html);
+  const lines = $("body")
+    .text()
+    .split("\n")
+    .map(normalize)
+    .filter(Boolean);
+
+  const rolePattern = /^(\uac10\ub3c5|\uc218\uc11d\ucf54\uce58|GK\ucf54\uce58|\ucf54\uce58|\ud53c\uc9c0\uceec\ucf54\uce58|\uc804\ub825\ubd84\uc11d\uad00|\uc758\ubb34\ud300\uc7a5|\uc758\ubb34\ud2b8\ub808\uc774\ub108|\ud1b5\uc5ed|\uc7a5\ube44\uad00\ub9ac\uc0ac)$/;
+  const coaches: Coach[] = [];
+  const seen = new Set<string>();
+
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    const role = lines[index];
+    const name = lines[index + 1];
+
+    if (!rolePattern.test(role)) continue;
+    if (!name || /Image|GANGWON|home|COPYRIGHT/.test(name)) continue;
+
+    const id = `official-coach-${role}-${name}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    coaches.push({
+      id,
+      role,
+      name,
+      profileUrl: coachUrl
+    });
+  }
+
+  const headCoachName = lines.find((line, index) => lines[index - 1] === "GANGWON FC HEAD COACH");
+  if (headCoachName && !coaches.some((coach) => coach.name === headCoachName)) {
+    coaches.unshift({
+      id: `official-coach-head-${headCoachName}`,
+      role: "\uac10\ub3c5",
+      name: headCoachName,
+      profileUrl: coachUrl
+    });
+  }
+
+  return coaches;
 }
 
 async function fetchText(url: string) {
