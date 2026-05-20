@@ -2,10 +2,10 @@ import type { Player } from "@/types";
 
 export function PlayerCard({ player }: { player: Player }) {
   const content = (
-    <div className="relative min-h-24 overflow-hidden rounded-lg bg-white p-4">
-      <span className="inline-flex rounded-full bg-gangwon-orange px-3 py-1 text-xs font-black text-white">{player.position}</span>
-      <span className="pointer-events-none absolute right-4 top-2 text-6xl font-black leading-none text-gangwon-orange/25">{player.number}</span>
-      <h3 className="relative mt-7 text-xl font-black text-gangwon-navy">{player.name}</h3>
+    <div className="relative min-h-28 overflow-hidden rounded-lg bg-white p-4">
+      <span className="inline-flex rounded-full bg-gangwon-orange px-2.5 py-1 text-[11px] font-black text-white sm:px-3 sm:text-xs">{player.position}</span>
+      <span className="pointer-events-none absolute right-3 top-3 text-5xl font-black leading-none text-gangwon-orange/25 sm:right-4 sm:top-2 sm:text-6xl">{player.number}</span>
+      <h3 className="relative mt-8 break-keep text-lg font-black text-gangwon-navy sm:text-xl">{player.name}</h3>
     </div>
   );
 

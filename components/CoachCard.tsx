@@ -3,8 +3,8 @@ import type { Coach } from "@/types";
 export function CoachCard({ coach }: { coach: Coach }) {
   const content = (
     <>
-      <span className="rounded-full bg-gangwon-navy px-3 py-1 text-xs font-black text-white">{coach.role}</span>
-      <h3 className="mt-4 text-lg font-black text-gangwon-navy">{coach.name}</h3>
+      <span className="rounded-full bg-gangwon-navy px-2.5 py-1 text-[11px] font-black text-white sm:px-3 sm:text-xs">{coach.role}</span>
+      <h3 className="mt-4 break-keep text-lg font-black text-gangwon-navy">{coach.name}</h3>
     </>
   );
 
