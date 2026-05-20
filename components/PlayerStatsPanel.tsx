@@ -1,37 +1,60 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import { FilterTabs } from "@/components/FilterTabs";
 import type { LeaguePlayerStat } from "@/types";
 
 interface PlayerStatsPanelProps {
   stats: LeaguePlayerStat[];
 }
 
+type StatKey = "goals" | "assists" | "yellowCards";
+
 const labels = {
-  title: "\uac1c\uc778 \uae30\ub85d",
-  loadFailed: "K\ub9ac\uadf8 \uacf5\uc2dd \uac1c\uc778 \uae30\ub85d\uc744 \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.",
-  topScorer: "\uac15\uc6d0 \ucd5c\ub2e4 \ub4dd\uc810",
-  topAssister: "\uac15\uc6d0 \ucd5c\ub2e4 \ub3c4\uc6c0",
-  topYellowCards: "\uac15\uc6d0 \uacbd\uace0 \uc0c1\uc704",
-  officialBasis: "\uacf5\uc2dd \uae30\ub85d \uae30\uc900",
-  pageBasis: "\ud45c\uc2dc\ub41c \uac15\uc6d0 \uc120\uc218 \uae30\ub85d \uae30\uc900",
-  goalsRank: "\uac15\uc6d0 \ub4dd\uc810",
-  assistsRank: "\uac15\uc6d0 \ub3c4\uc6c0",
-  yellowRank: "\uac15\uc6d0 \uacbd\uace0",
+  gangwonTitle: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d",
+  leagueTitle: "\ub9ac\uadf8 \uac1c\uc778 \uc21c\uc704",
+  loadFailed: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d\uc744 \ud45c\uc2dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  goals: "\ub4dd\uc810",
+  assists: "\ub3c4\uc6c0",
+  yellowCards: "\uacbd\uace0",
   goal: "\uace8",
   assist: "\ub3c4\uc6c0",
-  card: "\uc7a5"
+  card: "\uc7a5",
+  played: "\ucd9c\uc804",
+  games: "\uacbd\uae30",
+  empty: "\ud45c\uc2dc\ud560 \uae30\ub85d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  gangwonBadge: "\uac15\uc6d0"
+};
+
+const gangwonTabs = [
+  { label: labels.goals, value: "goals" },
+  { label: labels.assists, value: "assists" },
+  { label: labels.yellowCards, value: "yellowCards" }
+];
+
+const leagueTabs = [
+  { label: labels.goals, value: "goals" },
+  { label: labels.assists, value: "assists" }
+];
+
+const suffixMap: Record<StatKey, string> = {
+  goals: labels.goal,
+  assists: labels.assist,
+  yellowCards: labels.card
 };
 
 export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
-  const gangwonStats = stats.filter((item) => item.club === "GANGWON");
-  const topScorer = [...gangwonStats].sort((a, b) => b.goals - a.goals)[0];
-  const topAssister = [...gangwonStats].sort((a, b) => b.assists - a.assists)[0];
-  const goals = [...gangwonStats].filter((row) => row.goals > 0).sort((a, b) => b.goals - a.goals).slice(0, 5);
-  const assists = [...gangwonStats].filter((row) => row.assists > 0).sort((a, b) => b.assists - a.assists).slice(0, 5);
-  const yellows = [...gangwonStats].filter((row) => row.yellowCards > 0).sort((a, b) => b.yellowCards - a.yellowCards).slice(0, 5);
+  const [activeGangwon, setActiveGangwon] = useState<StatKey>("goals");
+  const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
+  const gangwonStats = useMemo(() => stats.filter((item) => item.club === "GANGWON"), [stats]);
+  const gangwonRows = useMemo(() => getTopRows(gangwonStats, activeGangwon), [activeGangwon, gangwonStats]);
+  const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
 
-  if (!stats.length) {
+  if (!gangwonStats.length) {
     return (
       <section className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
-        <h2 className="text-lg font-black text-gangwon-navy">{labels.title}</h2>
+        <h2 className="text-lg font-black text-gangwon-navy">{labels.gangwonTitle}</h2>
         <p className="mt-2 text-sm font-bold text-slate-500">{labels.loadFailed}</p>
       </section>
     );
@@ -39,61 +62,85 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
 
   return (
     <section className="grid gap-4">
-      <div className="grid gap-4 md:grid-cols-3">
-        <RecordSummary title={labels.topScorer} value={topScorer ? `${topScorer.name}` : "-"} meta={topScorer ? `${topScorer.goals}${labels.goal} ${topScorer.assists}${labels.assist}` : labels.officialBasis} />
-        <RecordSummary title={labels.topAssister} value={topAssister ? `${topAssister.name}` : "-"} meta={topAssister ? `${topAssister.goals}${labels.goal} ${topAssister.assists}${labels.assist}` : labels.officialBasis} />
-        <RecordSummary title={labels.topYellowCards} value={yellows[0]?.name ?? "-"} meta={yellows[0] ? `${yellows[0].yellowCards}${labels.card}` : labels.officialBasis} />
-      </div>
+      <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
+        <StatsHeader eyebrow="Gangwon Player Stats" title={labels.gangwonTitle}>
+          <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as StatKey)} />
+        </StatsHeader>
+        <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
+      </article>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <RankingList title={labels.goalsRank} rows={goals} valueKey="goals" suffix={labels.goal} emptyText={labels.officialBasis} />
-        <RankingList title={labels.assistsRank} rows={assists} valueKey="assists" suffix={labels.assist} emptyText={labels.officialBasis} />
-        <RankingList title={labels.yellowRank} rows={yellows} valueKey="yellowCards" suffix={labels.card} emptyText={labels.officialBasis} />
-      </div>
+      <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
+        <StatsHeader eyebrow="League Player Rank" title={labels.leagueTitle}>
+          <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
+        </StatsHeader>
+        <StatsList rows={leagueRows} valueKey={activeLeague} showClub />
+      </article>
     </section>
   );
 }
 
-function RecordSummary({ title, value, meta }: { title: string; value: string; meta: string }) {
+function getTopRows(rows: LeaguePlayerStat[], key: StatKey) {
+  return [...rows]
+    .filter((row) => row[key] > 0)
+    .sort((a, b) => b[key] - a[key])
+    .slice(0, 5);
+}
+
+function StatsHeader({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
   return (
-    <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black uppercase text-gangwon-orange">{title}</p>
-      <h3 className="mt-2 text-xl font-black text-gangwon-navy">{value}</h3>
-      <p className="mt-2 text-sm font-bold text-slate-500">{meta}</p>
-    </article>
+    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-xs font-black uppercase text-gangwon-orange">{eyebrow}</p>
+        <h2 className="text-xl font-black text-gangwon-navy">{title}</h2>
+      </div>
+      {children}
+    </div>
   );
 }
 
-function RankingList({
-  title,
+function StatsList({
   rows,
   valueKey,
-  suffix
-  ,
-  emptyText
+  highlighted = false,
+  showClub = false
 }: {
-  title: string;
   rows: LeaguePlayerStat[];
-  valueKey: "goals" | "assists" | "yellowCards";
-  suffix: string;
-  emptyText: string;
+  valueKey: StatKey;
+  highlighted?: boolean;
+  showClub?: boolean;
 }) {
+  if (!rows.length) {
+    return <p className="rounded-lg bg-slate-50 px-4 py-5 text-sm font-bold text-slate-500">{labels.empty}</p>;
+  }
+
   return (
-    <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
-      <h3 className="mb-4 text-lg font-black text-gangwon-navy">{title}</h3>
-      <div className="grid gap-3">
-        {rows.length ? rows.map((row, index) => (
-          <div key={`${title}-${row.name}-${index}`} className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="truncate font-black text-slate-800">{index + 1}. {row.name}</p>
-              <p className="text-xs font-bold text-slate-400">GANGWON</p>
+    <div className="grid gap-3">
+      {rows.map((row, index) => {
+        const isGangwon = row.club === "GANGWON";
+        const rowHighlighted = highlighted || (showClub && isGangwon);
+
+        return (
+          <div key={`${valueKey}-${row.name}-${index}`} className={`flex items-center justify-between gap-3 rounded-lg px-4 py-3 ${rowHighlighted ? "bg-orange-50 ring-1 ring-orange-100" : "bg-slate-50"}`}>
+            <div className="flex min-w-0 items-center gap-3">
+              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black ${rowHighlighted ? "bg-gangwon-orange text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}>
+                {index + 1}
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="truncate font-black text-slate-900">{row.name}</p>
+                  {showClub && isGangwon ? <span className="shrink-0 rounded-full bg-gangwon-orange px-2 py-0.5 text-[10px] font-black text-white">{labels.gangwonBadge}</span> : null}
+                </div>
+                <p className="text-xs font-bold text-slate-400">
+                  {showClub ? row.club : `${labels.played} ${row.played || "-"}${labels.games}`}
+                </p>
+              </div>
             </div>
-            <span className="shrink-0 rounded-full bg-orange-50 px-3 py-1 text-sm font-black text-gangwon-orange">
-              {row[valueKey]}{suffix}
+            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange ring-1 ring-orange-100">
+              {row[valueKey]}{suffixMap[valueKey]}
             </span>
           </div>
-        )) : <p className="text-sm font-bold text-slate-500">{emptyText}</p>}
-      </div>
-    </article>
+        );
+      })}
+    </div>
   );
 }
