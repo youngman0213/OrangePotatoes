@@ -11,7 +11,7 @@ import { coaches as mockCoaches, players as mockPlayers } from "@/data/mock";
 import type { Coach, Player } from "@/types";
 
 const positionTabs = [
-  { label: "\uc804\uccb4", value: "all" },
+  { label: decodeLabel("\uc804\uccb4"), value: "all" },
   { label: "GK", value: "GK" },
   { label: "DF", value: "DF" },
   { label: "MF", value: "MF" },
@@ -19,9 +19,15 @@ const positionTabs = [
 ];
 
 const groupTabs = [
-  { label: "\uc120\uc218", value: "players" },
-  { label: "\ucf54\uce6d\uc2a4\ud0dc\ud504", value: "coaches" }
+  { label: decodeLabel("\uc120\uc218"), value: "players" },
+  { label: decodeLabel("\ucf54\uce6d\uc2a4\ud0dc\ud504"), value: "coaches" }
 ];
+
+const labels = {
+  squad: decodeLabel("\uc120\uc218\ub2e8"),
+  noPlayers: decodeLabel("\uc870\uac74\uc5d0 \ub9de\ub294 \uc120\uc218\uac00 \uc5c6\uc2b5\ub2c8\ub2e4."),
+  noCoaches: decodeLabel("\ucf54\uce6d\uc2a4\ud0dc\ud504 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.")
+};
 
 export default function PlayersPage() {
   const [group, setGroup] = useState("players");
@@ -47,7 +53,7 @@ export default function PlayersPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="\uc120\uc218\ub2e8" eyebrow="Squad" />
+      <SectionHeader title={labels.squad} eyebrow="Squad" />
       <div className="grid gap-3">
         <FilterTabs tabs={groupTabs} active={group} onChange={setGroup} />
         {group === "players" ? <FilterTabs tabs={positionTabs} active={position} onChange={setPosition} /> : null}
@@ -61,15 +67,19 @@ export default function PlayersPage() {
             {filteredPlayers.map((player) => <PlayerCard key={player.id} player={player} />)}
           </div>
         ) : (
-          <EmptyState title="\uc870\uac74\uc5d0 \ub9de\ub294 \uc120\uc218\uac00 \uc5c6\uc2b5\ub2c8\ub2e4." />
+          <EmptyState title={labels.noPlayers} />
         )
       ) : coaches.length ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {coaches.map((coach) => <CoachCard key={coach.id} coach={coach} />)}
         </div>
       ) : (
-        <EmptyState title="\ucf54\uce6d\uc2a4\ud0dc\ud504 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4." />
+        <EmptyState title={labels.noCoaches} />
       )}
     </div>
   );
+}
+
+function decodeLabel(value: string) {
+  return value;
 }
