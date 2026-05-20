@@ -59,7 +59,9 @@ Invoke-Git add .
 
 $status = git status --porcelain
 if (-not $status) {
-  Write-Host "No changes to commit." -ForegroundColor Yellow
+  Write-Host "No file changes to commit. Creating a deploy trigger commit." -ForegroundColor Yellow
+  Write-Step "Creating empty deploy trigger commit"
+  Invoke-Git commit --allow-empty -m "Trigger Vercel deploy"
 } else {
   Write-Step "Creating commit"
   Invoke-Git commit -m $CommitMessage
