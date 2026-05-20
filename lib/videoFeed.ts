@@ -39,7 +39,7 @@ export async function fetchGangwonVideos(limit = 12): Promise<Video[]> {
 
   return entries.slice(0, limit).map((entry, index) => {
     const youtubeId = entry.videoId ?? "";
-    const title = entry.title ?? "강원FC 영상";
+    const title = entry.title ?? "\uac15\uc6d0FC \uc601\uc0c1";
 
     return {
       id: `youtube-${youtubeId || index}`,
@@ -53,10 +53,10 @@ export async function fetchGangwonVideos(limit = 12): Promise<Video[]> {
 }
 
 function categorizeVideo(title: string): VideoCategory {
-  if (/(하이라이트|골장면|골모음|득점)/.test(title)) return "highlight";
-  if (/(인터뷰|수훈|소감|기자회견)/.test(title)) return "interview";
-  if (/(훈련|트레이닝|연습)/.test(title)) return "training";
-  if (/(비하인드|출근길|라커룸|브이로그|스케치)/.test(title)) return "behind";
+  if (/(\ud558\uc774\ub77c\uc774\ud2b8|\uace8\uc7a5\uba74|\uace8\ubaa8\uc74c|\ub4dd\uc810)/.test(title)) return "highlight";
+  if (/(\uc778\ud130\ubdf0|\uc218\ud6c8|\uc18c\uac10|\uae30\uc790\ud68c\uacac)/.test(title)) return "interview";
+  if (/(\ud6c8\ub828|\ud2b8\ub808\uc774\ub2dd|\uc5f0\uc2b5)/.test(title)) return "training";
+  if (/(\ube44\ud558\uc778\ub4dc|\ucd9c\uadfc\uae38|\ub77c\ucee4\ub8f8|\ube0c\uc774\ub85c\uadf8|\uc2a4\ucf00\uce58)/.test(title)) return "behind";
 
   return "other";
 }

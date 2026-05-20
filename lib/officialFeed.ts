@@ -1,8 +1,25 @@
 import * as cheerio from "cheerio";
-import type { ClubPost, Match } from "@/types";
+import type { ClubPlatform, ClubPost, Match } from "@/types";
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
+
+const ko = {
+  gangwon: "\uac15\uc6d0FC",
+  gangwonShort: "\uac15\uc6d0",
+  officialYoutube: "\uac15\uc6d0FC \uacf5\uc2dd \uc720\ud29c\ube0c \ucc44\ub110",
+  officialInstagram: "\uac15\uc6d0FC \uacf5\uc2dd \uc778\uc2a4\ud0c0\uadf8\ub7a8",
+  officialShop: "\uac15\uc6d0FC \uacf5\uc2dd \uc628\ub77c\uc778 \uc2a4\ud1a0\uc5b4",
+  video: "\uc601\uc0c1",
+  notice: "\uacf5\uc9c0",
+  ticket: "\ud2f0\ucf13",
+  md: "MD",
+  event: "\uc774\ubca4\ud2b8",
+  bid: "\uacf5\uace0",
+  kLeague: "K\ub9ac\uadf81",
+  koreaCup: "\ucf54\ub9ac\uc544\ucef5",
+  hanaBank: "\ud558\ub098\uc740\ud589 "
+};
 
 export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
   const html = await fetchText(officialBaseUrl);
@@ -16,7 +33,7 @@ export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
     const href = $(element).attr("href");
 
     if (!date || !href || seen.has(title)) return;
-    if (!/(공지|안내|공고|모집|시즌|홈경기|티켓|유니폼|푸드트럭|채용|강원FC)/.test(title)) return;
+    if (!isOfficialNoticeLike(title)) return;
 
     seen.add(title);
     posts.push({
@@ -29,33 +46,13 @@ export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
     });
   });
 
-  return [
-    ...posts.slice(0, limit),
-    {
-      id: "official-youtube",
-      title: "강원FC 공식 유튜브 채널",
-      platform: "youtube",
-      url: "https://www.youtube.com/user/gangwonfc",
-      publishedAt: new Date().toISOString(),
-      type: "영상"
-    },
-    {
-      id: "official-instagram",
-      title: "강원FC 공식 인스타그램",
-      platform: "instagram",
-      url: "https://www.instagram.com/gangwon_fc",
-      publishedAt: new Date().toISOString(),
-      type: "SNS"
-    },
-    {
-      id: "official-shop",
-      title: "강원FC 공식 온라인 스토어",
-      platform: "md",
-      url: "https://gangwon-fc.imweb.me/",
-      publishedAt: new Date().toISOString(),
-      type: "MD"
-    }
-  ].slice(0, limit);
+  const channelPosts: ClubPost[] = [
+    makeChannelPost("official-youtube", ko.officialYoutube, "youtube", "https://www.youtube.com/user/gangwonfc", ko.video),
+    makeChannelPost("official-instagram", ko.officialInstagram, "instagram", "https://www.instagram.com/gangwon_fc", "SNS"),
+    makeChannelPost("official-shop", ko.officialShop, "md", "https://gangwon-fc.imweb.me/", ko.md)
+  ];
+
+  return [...posts, ...channelPosts].slice(0, limit);
 }
 
 export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
@@ -78,11 +75,11 @@ export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
 
     for (let cursor = index + 1; cursor < lines.length; cursor += 1) {
       if (/^\d{2}\/\d{2}\s+\(.+\)\s+\d{2}:\d{2}$/.test(lines[cursor])) break;
-      if (/개인정보처리방침|대표전화|COPYRIGHT/.test(lines[cursor])) break;
+      if (/COPYRIGHT/.test(lines[cursor])) break;
       block.push(lines[cursor]);
     }
 
-    const competition = block.find((line) => /K리그|코리아컵|AFC|ACLE/.test(line)) ?? "K리그1";
+    const competition = block.find((line) => /K\ub9ac\uadf8|\ucf54\ub9ac\uc544\ucef5|AFC|ACLE/.test(line)) ?? ko.kLeague;
     const scoreIndex = block.findIndex((line) => /^\d+:\d+$/.test(line) || line === "VS");
 
     if (scoreIndex < 2 || !block[scoreIndex + 1]) continue;
@@ -95,13 +92,13 @@ export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
 
     matches.push({
       id: `official-match-${matches.length}`,
-      competition: competition.includes("코리아컵") ? "코리아컵" : competition.includes("AFC") || competition.includes("ACLE") ? "AFC" : "K리그1",
-      round: competition.replace("하나은행 ", "").trim(),
+      competition: normalizeCompetition(competition),
+      round: competition.replace(ko.hanaBank, "").trim(),
       date: toIsoDate(year, dateText),
       homeTeam: normalizeTeam(homeTeam),
       awayTeam: normalizeTeam(awayTeam),
       venue,
-      isHome: normalizeTeam(homeTeam) === "강원FC",
+      isHome: normalizeTeam(homeTeam) === ko.gangwon,
       status: score === "VS" ? "scheduled" : "finished",
       homeScore,
       awayScore,
@@ -129,13 +126,34 @@ async function fetchText(url: string) {
   return response.text();
 }
 
-function getClubPostType(title: string) {
-  if (/티켓|입장|예매/.test(title)) return "티켓";
-  if (/유니폼|스토어|MD/.test(title)) return "MD";
-  if (/이벤트|모집/.test(title)) return "이벤트";
-  if (/채용|입찰|공고/.test(title)) return "공고";
+function makeChannelPost(id: string, title: string, platform: ClubPlatform, url: string, type: string): ClubPost {
+  return {
+    id,
+    title,
+    platform,
+    url,
+    publishedAt: new Date().toISOString(),
+    type
+  };
+}
 
-  return "공지";
+function isOfficialNoticeLike(title: string) {
+  return /(\uacf5\uc9c0|\uc548\ub0b4|\uacf5\uace0|\ubaa8\uc9d1|\uc2dc\uc98c|\ud648\uacbd\uae30|\ud2f0\ucf13|\uc720\ub2c8\ud3fc|\ud478\ub4dc\ud2b8\ub7ed|\ucc44\uc6a9|\uac15\uc6d0FC)/.test(title);
+}
+
+function getClubPostType(title: string) {
+  if (/(\ud2f0\ucf13|\uc785\uc7a5|\uc608\ub9e4)/.test(title)) return ko.ticket;
+  if (/(\uc720\ub2c8\ud3fc|\uc2a4\ud1a0\uc5b4|MD)/.test(title)) return ko.md;
+  if (/(\uc774\ubca4\ud2b8|\ubaa8\uc9d1)/.test(title)) return ko.event;
+  if (/(\ucc44\uc6a9|\uc785\ucc30|\uacf5\uace0)/.test(title)) return ko.bid;
+
+  return ko.notice;
+}
+
+function normalizeCompetition(competition: string) {
+  if (competition.includes(ko.koreaCup)) return ko.koreaCup;
+  if (competition.includes("AFC") || competition.includes("ACLE")) return "AFC";
+  return ko.kLeague;
 }
 
 function findScheduleYear(lines: string[]) {
@@ -152,7 +170,7 @@ function toIsoDate(year: number, dateText: string) {
 }
 
 function normalizeTeam(team: string) {
-  return team === "강원" ? "강원FC" : team;
+  return team === ko.gangwonShort ? ko.gangwon : team;
 }
 
 function normalize(value: string) {
