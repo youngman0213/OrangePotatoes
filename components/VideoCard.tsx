@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { ExternalLink, Play } from "lucide-react";
+import { ExternalImage } from "@/components/ExternalImage";
 import type { Video } from "@/types";
 import { formatShortDate } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ export function VideoCard({ video }: { video: Video }) {
   return (
     <article className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
       <div className="relative aspect-video bg-slate-100">
-        <Image src={video.thumbnailUrl} alt="" fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover" />
+        <ExternalImage src={video.thumbnailUrl} />
         <span className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-xs font-black text-white">{videoCategoryLabels[video.category]}</span>
         <span className="absolute inset-0 m-auto flex h-12 w-12 items-center justify-center rounded-full bg-gangwon-orange text-white shadow-lg">
           <Play size={22} fill="currentColor" aria-hidden="true" />

@@ -70,5 +70,11 @@ function stripHtml(value: string) {
 }
 
 function cleanText(value: string) {
-  return value.replace(/&quot;/g, "\"").replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+  return value
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 }

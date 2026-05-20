@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { ExternalImage } from "@/components/ExternalImage";
 import type { Player } from "@/types";
 import { formatShortDate } from "@/lib/utils";
 
@@ -6,7 +6,7 @@ export function PlayerCard({ player }: { player: Player }) {
   return (
     <article className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
       <div className="relative aspect-[4/3] bg-slate-100">
-        <Image src={player.imageUrl} alt={`${player.name} 선수 이미지`} fill sizes="(min-width: 768px) 260px, 50vw" className="object-cover" />
+        <ExternalImage src={player.imageUrl} alt={`${player.name} 선수 이미지`} />
         <span className="absolute left-3 top-3 rounded-full bg-gangwon-orange px-3 py-1 text-sm font-black text-white">#{player.number}</span>
         <span className="absolute right-3 top-3 rounded-full bg-gangwon-navy px-3 py-1 text-xs font-black text-white">{player.position}</span>
       </div>

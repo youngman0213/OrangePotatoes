@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { ExternalLink } from "lucide-react";
+import { ExternalImage } from "@/components/ExternalImage";
 import type { NewsItem } from "@/types";
 import { formatShortDate } from "@/lib/utils";
 
@@ -16,7 +16,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
   return (
     <article className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
       <div className="relative aspect-[16/9] bg-slate-100">
-        <Image src={item.thumbnailUrl} alt="" fill sizes="(min-width: 768px) 320px, 100vw" className="object-cover" />
+        <ExternalImage src={item.thumbnailUrl} />
       </div>
       <div className="p-4">
         <div className="mb-2 flex items-center justify-between gap-3">
