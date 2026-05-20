@@ -9,6 +9,8 @@ const coachUrl = `${officialBaseUrl}/squad/coach`;
 const ko = {
   gangwon: "\uac15\uc6d0FC",
   gangwonShort: "\uac15\uc6d0",
+  headCoach: "\uc815\uacbd\ud638",
+  headCoachRole: "\uac10\ub3c5",
   officialYoutube: "\uac15\uc6d0FC \uacf5\uc2dd \uc720\ud29c\ube0c \ucc44\ub110",
   officialInstagram: "\uac15\uc6d0FC \uacf5\uc2dd \uc778\uc2a4\ud0c0\uadf8\ub7a8",
   officialShop: "\uac15\uc6d0FC \uacf5\uc2dd \uc628\ub77c\uc778 \uc2a4\ud1a0\uc5b4",
@@ -151,14 +153,14 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
   const rolePattern = /^(\uac10\ub3c5|\uc218\uc11d\ucf54\uce58|GK\ucf54\uce58|\ucf54\uce58|\ud53c\uc9c0\uceec\ucf54\uce58|\uc804\ub825\ubd84\uc11d\uad00|\uc758\ubb34\ud300\uc7a5|\uc758\ubb34\ud2b8\ub808\uc774\ub108|\ud1b5\uc5ed|\uc7a5\ube44\uad00\ub9ac\uc0ac)$/;
   const coaches: Coach[] = [];
   const seen = new Set<string>();
-  const headCoach = findHeadCoach(lines);
+  const headCoach = findHeadCoach(lines) ?? ko.headCoach;
 
   if (headCoach) {
     const headCoachId = `official-coach-head-${headCoach}`;
     seen.add(headCoachId);
     coaches.push({
       id: headCoachId,
-      role: "\uac10\ub3c5",
+      role: ko.headCoachRole,
       name: headCoach,
       profileUrl: coachUrl
     });
@@ -170,6 +172,7 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
 
     if (!rolePattern.test(role)) continue;
     if (!name || /Image|GANGWON|home|COPYRIGHT/.test(name)) continue;
+    if (role === ko.headCoachRole && name === headCoach) continue;
 
     const id = `official-coach-${role}-${name}`;
     if (seen.has(id)) continue;
@@ -231,10 +234,10 @@ function normalizeCompetition(competition: string) {
 }
 
 function findHeadCoach(lines: string[]) {
-  const headCoachIndex = lines.findIndex((line) => line === "GANGWON FC HEAD COACH");
+  const headCoachIndex = lines.findIndex((line) => line.includes("HEAD COACH"));
   if (headCoachIndex === -1) return null;
 
-  return lines.slice(headCoachIndex + 1).find((line) => /^[가-힣]{2,5}$/.test(line)) ?? null;
+  return lines.slice(headCoachIndex + 1).find((line) => /^[\uac00-\ud7a3]{2,5}$/.test(line)) ?? null;
 }
 
 function findScheduleYear(lines: string[]) {
