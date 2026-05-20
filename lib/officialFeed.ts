@@ -7,6 +7,7 @@ const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
 const playerRankUrl = "https://www.kleague.com/record/player.do";
 const portalMainUrl = "https://portal.kleague.com/user/loginById.do?portalGuest=rstNE9zxjdkUC9kbUA08XQ%3D%3D";
+const gangwonSquadStatsUrl = "https://www.zentoto.com/sports/soccer/k-classic/team/gangwon/squad/A144gewT";
 
 const ko = {
   gangwon: "\uac15\uc6d0FC",
@@ -191,9 +192,76 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
 }
 
 export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerStat[]> {
-  const portalStats = await fetchKLeaguePortalPlayerStats();
-  const fullStats = await fetchKLeagueFullPlayerStats(limit);
-  return mergePlayerStats([...portalStats, ...fullStats]).slice(0, limit);
+  const [portalResult, fullResult, gangwonSquadResult] = await Promise.allSettled([
+    fetchKLeaguePortalPlayerStats(),
+    fetchKLeagueFullPlayerStats(limit),
+    fetchGangwonSquadPlayerStats()
+  ]);
+  const portalStats = portalResult.status === "fulfilled" ? portalResult.value : [];
+  const fullStats = fullResult.status === "fulfilled" ? fullResult.value : [];
+  const gangwonSquadStats = gangwonSquadResult.status === "fulfilled" ? gangwonSquadResult.value : [];
+  const fullStatsWithoutGangwon = fullStats.filter((row) => row.club !== "GANGWON");
+
+  return mergePlayerStats([...portalStats, ...fullStatsWithoutGangwon, ...gangwonSquadStats]).slice(0, limit + gangwonSquadStats.length);
+}
+
+async function fetchGangwonSquadPlayerStats(): Promise<LeaguePlayerStat[]> {
+  const html = await fetchText(gangwonSquadStatsUrl);
+  const $ = cheerio.load(html);
+  const lines = $("body")
+    .text()
+    .split("\n")
+    .map(normalize)
+    .filter(Boolean);
+  const header = "Pos. \ub4f1\ubc88\ud638 / \uc120\uc218\uba85 (\ub098\uc774) \ucd9c\uc804 \ub4dd\uc810 \ub3c4\uc6c0 \uacbd\uace0 \ud1f4\uc7a5 \uad6d\uc801 \ubd80\uc0c1";
+  const headerIndexes = lines.reduce<number[]>((indexes, line, index) => {
+    if (line === header) indexes.push(index);
+    return indexes;
+  }, []);
+  const start = headerIndexes[1] ?? headerIndexes[0];
+
+  if (start === undefined) return [];
+
+  const end = headerIndexes.find((index) => index > start) ?? lines.length;
+  const section = lines.slice(start + 1, end);
+  const stats: LeaguePlayerStat[] = [];
+  const positions = new Set(["GK", "DF", "MF", "FW"]);
+
+  for (let index = 0; index < section.length - 2; index += 1) {
+    if (!positions.has(section[index])) continue;
+
+    const playerInfo = section[index + 1];
+    const statLine = section[index + 2];
+    const player = parseZentotoPlayerInfo(playerInfo);
+    const numbers = statLine.split(" ").map(Number);
+
+    if (!player || numbers.length < 5 || numbers.some((value) => Number.isNaN(value))) continue;
+
+    const [played, goals, assists, yellowCards, redCards] = numbers;
+    stats.push({
+      rank: stats.length + 1,
+      name: player.name,
+      club: "GANGWON",
+      goals,
+      assists,
+      attackPoints: goals + assists,
+      yellowCards,
+      redCards,
+      played
+    });
+  }
+
+  return stats;
+}
+
+function parseZentotoPlayerInfo(value: string) {
+  const matched = value.match(/^(\d+)\s+(.+)$/);
+  if (!matched) return null;
+
+  const name = matched[2].replace(/\(\d+\)/g, "").trim();
+  if (!name || /^\(?20\d{2}\)?$/.test(name) || /^\d+$/.test(name)) return null;
+
+  return { number: Number(matched[1]), name };
 }
 
 async function fetchKLeagueFullPlayerStats(limit = 80): Promise<LeaguePlayerStat[]> {
