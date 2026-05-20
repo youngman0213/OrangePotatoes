@@ -6,6 +6,9 @@ import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { fetchKLeaguePlayerStats, fetchKLeagueStandings } from "@/lib/officialFeed";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const labels = {
   gangwon: "\uac15\uc6d0FC",
   title: "K\ub9ac\uadf81 \uc21c\uc704",
@@ -18,7 +21,8 @@ const labels = {
   concededSuffix: "\uc2e4\uc810",
   gamesBasis: "\uacbd\uae30 \uae30\uc900",
   goalDifference: "\ub4dd\uc2e4\ucc28",
-  playerStats: "\uac1c\uc778 \uae30\ub85d"
+  playerStats: "\uac1c\uc778 \uae30\ub85d",
+  source: "\ub370\uc774\ud130 \ucd9c\ucc98: K\ub9ac\uadf8 \ud3ec\ud138"
 };
 
 export default async function StandingsPage() {
@@ -33,6 +37,7 @@ export default async function StandingsPage() {
   return (
     <div className="grid gap-6">
       <SectionHeader title={labels.title} eyebrow="Table" />
+      <p className="text-sm font-bold text-slate-500">{labels.source}</p>
       {gangwon ? (
         <div className="grid gap-4 md:grid-cols-3">
           <SummaryCard icon={<Activity size={22} />} label={labels.currentRank} value={`${gangwon.rank}${labels.rankSuffix}`} meta={`${labels.points} ${gangwon.points}`} />
