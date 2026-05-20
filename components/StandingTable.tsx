@@ -40,7 +40,7 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
           <tbody className="divide-y divide-slate-100">
             {standings.length ? standings.map((row) => (
               <tr key={row.team} className={classNames(isGangwon(row.team) ? "bg-orange-50" : "bg-white")}>
-                <Td strong>{row.rank}</Td>
+                <Td strong>{row.rank || "-"}</Td>
                 <Td>
                   <span className={classNames("font-black", isGangwon(row.team) ? "text-gangwon-orange" : "text-gangwon-navy")}>{row.team}</span>
                 </Td>

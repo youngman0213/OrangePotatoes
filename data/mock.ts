@@ -1,4 +1,4 @@
-import type { ClubPost, Coach, Match, NewsItem, Player, Standing, Video } from "@/types";
+import type { ClubPost, Coach, LeaguePlayerStat, Match, NewsItem, Player, Standing, Video } from "@/types";
 
 export const gangwonTeamName = "\uac15\uc6d0FC";
 
@@ -72,7 +72,19 @@ export const videos: Video[] = [
   }
 ];
 
-export const standings: Standing[] = [];
+export const standings: Standing[] = [
+  { rank: 0, team: "\uac15\uc6d0FC", played: 15, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, recentForm: ["D", "D", "D", "D", "D"] }
+];
+
+export const playerStats: LeaguePlayerStat[] = [
+  { rank: 4, name: "ABDALLAH HLEIHIL", club: "GANGWON", goals: 6, assists: 0, attackPoints: 6, yellowCards: 2, redCards: 0, played: 15 },
+  { rank: 9, name: "DAEWON KIM", club: "GANGWON", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 15 },
+  { rank: 1, name: "STEFAN MUGOSA", club: "INCHEON", goals: 7, assists: 1, attackPoints: 8, yellowCards: 1, redCards: 0, played: 12 },
+  { rank: 2, name: "Hojae LEE", club: "POHANG", goals: 7, assists: 0, attackPoints: 7, yellowCards: 3, redCards: 0, played: 15 },
+  { rank: 3, name: "Yago CARIELLO RIBEIRO", club: "ULSAN", goals: 6, assists: 0, attackPoints: 6, yellowCards: 1, redCards: 0, played: 12 },
+  { rank: 8, name: "Donggyeong LEE", club: "ULSAN", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 14 },
+  { rank: 24, name: "Minkyu SONG", club: "SEOUL", goals: 3, assists: 3, attackPoints: 6, yellowCards: 0, redCards: 0, played: 15 }
+];
 
 export const players: Player[] = [
   { id: "fallback-player-1", name: "\uae40\ub300\uc6d0", number: 7, position: "FW", profileUrl: "https://www.gangwon-fc.com/squad/player" },

@@ -207,7 +207,11 @@ export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerS
 
     if (!rankMatch || !matchedClub) continue;
 
-    const numbers = lines[index + 1].split(" ").map(Number);
+    const numbers = lines
+      .slice(index + 1, index + 4)
+      .join(" ")
+      .split(" ")
+      .map(Number);
     if (numbers.length < 14 || numbers.some((value) => Number.isNaN(value))) continue;
 
     const rank = Number(rankMatch[1]);

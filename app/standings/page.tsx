@@ -3,7 +3,7 @@ import { Activity, Shield, Target } from "lucide-react";
 import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
-import { standings } from "@/data/mock";
+import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { fetchKLeaguePlayerStats } from "@/lib/officialFeed";
 
 const labels = {
@@ -25,7 +25,7 @@ const labels = {
 export default async function StandingsPage() {
   const gangwon = standings.find((standing) => standing.team === labels.gangwon);
   const statsResult = await Promise.allSettled([fetchKLeaguePlayerStats()]);
-  const playerStats = statsResult[0].status === "fulfilled" ? statsResult[0].value : [];
+  const playerStats = statsResult[0].status === "fulfilled" && statsResult[0].value.length ? statsResult[0].value : fallbackPlayerStats;
 
   return (
     <div className="grid gap-6">
