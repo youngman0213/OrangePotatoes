@@ -65,6 +65,15 @@ if (-not $status) {
   Invoke-Git commit -m $CommitMessage
 }
 
+Write-Step "Syncing latest GitHub changes"
+git fetch origin $Branch
+if ($LASTEXITCODE -eq 0) {
+  git rev-parse --verify "origin/$Branch" *> $null
+  if ($LASTEXITCODE -eq 0) {
+    Invoke-Git pull --rebase origin $Branch
+  }
+}
+
 Write-Step "Pushing to GitHub"
 Invoke-Git push -u origin $Branch
 
