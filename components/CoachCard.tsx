@@ -1,21 +1,24 @@
-import { ExternalLink } from "lucide-react";
 import type { Coach } from "@/types";
 
-const labels = {
-  officialProfile: "\uacf5\uc2dd \ud504\ub85c\ud544"
-};
-
 export function CoachCard({ coach }: { coach: Coach }) {
-  return (
-    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+  const content = (
+    <>
       <span className="rounded-full bg-gangwon-navy px-3 py-1 text-xs font-black text-white">{coach.role}</span>
       <h3 className="mt-4 text-lg font-black text-gangwon-navy">{coach.name}</h3>
-      {coach.profileUrl ? (
-        <a href={coach.profileUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-sm font-black text-slate-600 hover:text-gangwon-orange">
-          {labels.officialProfile}
-          <ExternalLink size={15} aria-hidden="true" />
-        </a>
-      ) : null}
+    </>
+  );
+
+  if (coach.profileUrl) {
+    return (
+      <a href={coach.profileUrl} target="_blank" rel="noreferrer" className="block rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:ring-gangwon-orange/30">
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+      {content}
     </article>
   );
 }
