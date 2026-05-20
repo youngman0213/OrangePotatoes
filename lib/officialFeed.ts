@@ -227,13 +227,13 @@ async function fetchGangwonSquadPlayerStats(): Promise<LeaguePlayerStat[]> {
   const stats: LeaguePlayerStat[] = [];
   const positions = new Set(["GK", "DF", "MF", "FW"]);
 
-  for (let index = 0; index < section.length - 2; index += 1) {
+  for (let index = 0; index < section.length - 1; index += 1) {
     if (!positions.has(section[index])) continue;
 
-    const playerInfo = section[index + 1];
-    const statLine = section[index + 2];
+    const playerInfo = findNextMeaningfulLine(section, index + 1, positions);
+    const statLine = playerInfo ? findNextStatLine(section, playerInfo.index + 1) : null;
     const player = parseZentotoPlayerInfo(playerInfo);
-    const numbers = statLine.split(" ").map(Number);
+    const numbers = statLine?.value.split(" ").map(Number) ?? [];
 
     if (!player || numbers.length < 5 || numbers.some((value) => Number.isNaN(value))) continue;
 
@@ -254,7 +254,28 @@ async function fetchGangwonSquadPlayerStats(): Promise<LeaguePlayerStat[]> {
   return stats;
 }
 
-function parseZentotoPlayerInfo(value: string) {
+function findNextMeaningfulLine(lines: string[], start: number, positions: Set<string>) {
+  for (let index = start; index < Math.min(lines.length, start + 6); index += 1) {
+    const value = lines[index];
+    if (!value || positions.has(value)) continue;
+    if (/^\d+\s+/.test(value) || /^-\s+/.test(value)) return { index, value };
+  }
+
+  return null;
+}
+
+function findNextStatLine(lines: string[], start: number) {
+  for (let index = start; index < Math.min(lines.length, start + 6); index += 1) {
+    const value = lines[index];
+    if (/^\d+\s+\d+\s+\d+\s+\d+\s+\d+$/.test(value)) return { index, value };
+  }
+
+  return null;
+}
+
+function parseZentotoPlayerInfo(item: { value: string } | null) {
+  if (!item) return null;
+  const value = item.value;
   const matched = value.match(/^(\d+)\s+(.+)$/);
   if (!matched) return null;
 
