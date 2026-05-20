@@ -7,25 +7,26 @@ interface PlayerStatsPanelProps {
 const labels = {
   title: "\uac1c\uc778 \uae30\ub85d",
   loadFailed: "K\ub9ac\uadf8 \uacf5\uc2dd \uac1c\uc778 \uae30\ub85d\uc744 \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.",
-  topScorer: "\ucd5c\ub2e4 \ub4dd\uc810\uc790",
-  gangwonTopScorer: "\uac15\uc6d0 \ub4dd\uc810 \uc0c1\uc704",
-  gangwonYellowCards: "\uac15\uc6d0 \uacbd\uace0",
+  topScorer: "\uac15\uc6d0 \ucd5c\ub2e4 \ub4dd\uc810",
+  topAssister: "\uac15\uc6d0 \ucd5c\ub2e4 \ub3c4\uc6c0",
+  topYellowCards: "\uac15\uc6d0 \uacbd\uace0 \uc0c1\uc704",
   officialBasis: "\uacf5\uc2dd \uae30\ub85d \uae30\uc900",
-  pageBasis: "\uac1c\uc778 \uae30\ub85d \ud398\uc774\uc9c0 \ub178\ucd9c \uc120\uc218 \uae30\uc900",
-  goalsRank: "\ub4dd\uc810 \uc21c\uc704",
-  assistsRank: "\ub3c4\uc6c0 \uc21c\uc704",
-  yellowRank: "\uacbd\uace0 \uc21c\uc704",
+  pageBasis: "\ud45c\uc2dc\ub41c \uac15\uc6d0 \uc120\uc218 \uae30\ub85d \uae30\uc900",
+  goalsRank: "\uac15\uc6d0 \ub4dd\uc810",
+  assistsRank: "\uac15\uc6d0 \ub3c4\uc6c0",
+  yellowRank: "\uac15\uc6d0 \uacbd\uace0",
   goal: "\uace8",
   assist: "\ub3c4\uc6c0",
   card: "\uc7a5"
 };
 
 export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
-  const topScorer = [...stats].sort((a, b) => b.goals - a.goals)[0];
   const gangwonStats = stats.filter((item) => item.club === "GANGWON");
-  const goals = [...stats].sort((a, b) => b.goals - a.goals).slice(0, 5);
-  const assists = [...stats].sort((a, b) => b.assists - a.assists).slice(0, 5);
-  const yellows = [...stats].sort((a, b) => b.yellowCards - a.yellowCards).slice(0, 5);
+  const topScorer = [...gangwonStats].sort((a, b) => b.goals - a.goals)[0];
+  const topAssister = [...gangwonStats].sort((a, b) => b.assists - a.assists)[0];
+  const goals = [...gangwonStats].filter((row) => row.goals > 0).sort((a, b) => b.goals - a.goals).slice(0, 5);
+  const assists = [...gangwonStats].filter((row) => row.assists > 0).sort((a, b) => b.assists - a.assists).slice(0, 5);
+  const yellows = [...gangwonStats].filter((row) => row.yellowCards > 0).sort((a, b) => b.yellowCards - a.yellowCards).slice(0, 5);
 
   if (!stats.length) {
     return (
@@ -39,15 +40,15 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   return (
     <section className="grid gap-4">
       <div className="grid gap-4 md:grid-cols-3">
-        <RecordSummary title={labels.topScorer} value={topScorer ? `${topScorer.name}` : "-"} meta={topScorer ? `${topScorer.club} / ${topScorer.goals}${labels.goal}` : "-"} />
-        <RecordSummary title={labels.gangwonTopScorer} value={gangwonStats[0]?.name ?? "-"} meta={gangwonStats[0] ? `${gangwonStats[0].goals}${labels.goal} ${gangwonStats[0].assists}${labels.assist}` : labels.officialBasis} />
-        <RecordSummary title={labels.gangwonYellowCards} value={`${gangwonStats.reduce((sum, item) => sum + item.yellowCards, 0)}${labels.card}`} meta={labels.pageBasis} />
+        <RecordSummary title={labels.topScorer} value={topScorer ? `${topScorer.name}` : "-"} meta={topScorer ? `${topScorer.goals}${labels.goal} ${topScorer.assists}${labels.assist}` : labels.officialBasis} />
+        <RecordSummary title={labels.topAssister} value={topAssister ? `${topAssister.name}` : "-"} meta={topAssister ? `${topAssister.goals}${labels.goal} ${topAssister.assists}${labels.assist}` : labels.officialBasis} />
+        <RecordSummary title={labels.topYellowCards} value={yellows[0]?.name ?? "-"} meta={yellows[0] ? `${yellows[0].yellowCards}${labels.card}` : labels.officialBasis} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <RankingList title={labels.goalsRank} rows={goals} valueKey="goals" suffix={labels.goal} />
-        <RankingList title={labels.assistsRank} rows={assists} valueKey="assists" suffix={labels.assist} />
-        <RankingList title={labels.yellowRank} rows={yellows} valueKey="yellowCards" suffix={labels.card} />
+        <RankingList title={labels.goalsRank} rows={goals} valueKey="goals" suffix={labels.goal} emptyText={labels.officialBasis} />
+        <RankingList title={labels.assistsRank} rows={assists} valueKey="assists" suffix={labels.assist} emptyText={labels.officialBasis} />
+        <RankingList title={labels.yellowRank} rows={yellows} valueKey="yellowCards" suffix={labels.card} emptyText={labels.officialBasis} />
       </div>
     </section>
   );
@@ -68,27 +69,30 @@ function RankingList({
   rows,
   valueKey,
   suffix
+  ,
+  emptyText
 }: {
   title: string;
   rows: LeaguePlayerStat[];
   valueKey: "goals" | "assists" | "yellowCards";
   suffix: string;
+  emptyText: string;
 }) {
   return (
     <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
       <h3 className="mb-4 text-lg font-black text-gangwon-navy">{title}</h3>
       <div className="grid gap-3">
-        {rows.map((row, index) => (
+        {rows.length ? rows.map((row, index) => (
           <div key={`${title}-${row.name}-${index}`} className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="truncate font-black text-slate-800">{index + 1}. {row.name}</p>
-              <p className="text-xs font-bold text-slate-400">{row.club}</p>
+              <p className="text-xs font-bold text-slate-400">GANGWON</p>
             </div>
             <span className="shrink-0 rounded-full bg-orange-50 px-3 py-1 text-sm font-black text-gangwon-orange">
               {row[valueKey]}{suffix}
             </span>
           </div>
-        ))}
+        )) : <p className="text-sm font-bold text-slate-500">{emptyText}</p>}
       </div>
     </article>
   );
