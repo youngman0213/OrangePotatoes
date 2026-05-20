@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useState } from "react";
 import { ImageOff } from "lucide-react";
 import { classNames } from "@/lib/utils";

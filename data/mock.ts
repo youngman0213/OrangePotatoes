@@ -73,17 +73,31 @@ export const videos: Video[] = [
 ];
 
 export const standings: Standing[] = [
-  { rank: 0, team: "\uac15\uc6d0FC", played: 15, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, recentForm: ["D", "D", "D", "D", "D"] }
+  { rank: 1, team: "FC\uc11c\uc6b8", played: 15, wins: 10, draws: 2, losses: 3, goalsFor: 27, goalsAgainst: 12, goalDifference: 15, points: 32, recentForm: ["W", "W", "W", "D", "W"] },
+  { rank: 2, team: "\uc6b8\uc0b0 HD", played: 15, wins: 8, draws: 2, losses: 5, goalsFor: 22, goalsAgainst: 20, goalDifference: 2, points: 26, recentForm: ["W", "L", "W", "W", "L"] },
+  { rank: 3, team: "\uc804\ubd81 \ud604\ub300", played: 15, wins: 7, draws: 5, losses: 3, goalsFor: 21, goalsAgainst: 12, goalDifference: 9, points: 26, recentForm: ["W", "W", "D", "W", "W"] },
+  { rank: 4, team: "\uac15\uc6d0FC", played: 15, wins: 6, draws: 6, losses: 3, goalsFor: 19, goalsAgainst: 10, goalDifference: 9, points: 24, recentForm: ["W", "W", "D", "D", "W"] },
+  { rank: 5, team: "\ud3ec\ud56d \uc2a4\ud2f8\ub7ec\uc2a4", played: 15, wins: 6, draws: 4, losses: 5, goalsFor: 12, goalsAgainst: 12, goalDifference: 0, points: 22, recentForm: ["L", "W", "D", "W", "L"] },
+  { rank: 6, team: "\uc778\ucc9c \uc720\ub098\uc774\ud2f0\ub4dc", played: 15, wins: 6, draws: 3, losses: 6, goalsFor: 21, goalsAgainst: 17, goalDifference: 4, points: 21, recentForm: ["W", "L", "W", "L", "W"] },
+  { rank: 7, team: "FC\uc548\uc591", played: 15, wins: 4, draws: 8, losses: 3, goalsFor: 19, goalsAgainst: 16, goalDifference: 3, points: 20, recentForm: ["D", "W", "D", "D", "L"] },
+  { rank: 8, team: "\uc81c\uc8fc SK", played: 15, wins: 5, draws: 3, losses: 7, goalsFor: 13, goalsAgainst: 16, goalDifference: -3, points: 18, recentForm: ["L", "L", "W", "D", "L"] },
+  { rank: 9, team: "\ubd80\ucc9cFC1995", played: 15, wins: 4, draws: 5, losses: 6, goalsFor: 11, goalsAgainst: 15, goalDifference: -4, points: 17, recentForm: ["W", "D", "L", "L", "W"] },
+  { rank: 10, team: "\ub300\uc804\ud558\ub098\uc2dc\ud2f0\uc98c", played: 15, wins: 4, draws: 4, losses: 7, goalsFor: 17, goalsAgainst: 16, goalDifference: 1, points: 16, recentForm: ["L", "D", "W", "L", "L"] },
+  { rank: 11, team: "\uae40\ucc9c \uc0c1\ubb34", played: 15, wins: 2, draws: 8, losses: 5, goalsFor: 15, goalsAgainst: 21, goalDifference: -6, points: 14, recentForm: ["D", "L", "D", "L", "D"] },
+  { rank: 12, team: "\uad11\uc8fcFC", played: 15, wins: 1, draws: 4, losses: 10, goalsFor: 7, goalsAgainst: 37, goalDifference: -30, points: 7, recentForm: ["L", "L", "L", "D", "L"] }
 ];
 
 export const playerStats: LeaguePlayerStat[] = [
-  { rank: 4, name: "ABDALLAH HLEIHIL", club: "GANGWON", goals: 6, assists: 0, attackPoints: 6, yellowCards: 2, redCards: 0, played: 15 },
-  { rank: 9, name: "DAEWON KIM", club: "GANGWON", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 15 },
-  { rank: 1, name: "STEFAN MUGOSA", club: "INCHEON", goals: 7, assists: 1, attackPoints: 8, yellowCards: 1, redCards: 0, played: 12 },
-  { rank: 2, name: "Hojae LEE", club: "POHANG", goals: 7, assists: 0, attackPoints: 7, yellowCards: 3, redCards: 0, played: 15 },
-  { rank: 3, name: "Yago CARIELLO RIBEIRO", club: "ULSAN", goals: 6, assists: 0, attackPoints: 6, yellowCards: 1, redCards: 0, played: 12 },
-  { rank: 8, name: "Donggyeong LEE", club: "ULSAN", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 14 },
-  { rank: 24, name: "Minkyu SONG", club: "SEOUL", goals: 3, assists: 3, attackPoints: 6, yellowCards: 0, redCards: 0, played: 15 }
+  { rank: 1, name: "\ubb34\uace0\uc0ac", club: "INCHEON", goals: 7, assists: 1, attackPoints: 8, yellowCards: 1, redCards: 0, played: 12 },
+  { rank: 2, name: "\uc774\ud638\uc7ac", club: "POHANG", goals: 7, assists: 0, attackPoints: 7, yellowCards: 3, redCards: 0, played: 15 },
+  { rank: 3, name: "\uc57c\uace0", club: "ULSAN", goals: 6, assists: 0, attackPoints: 6, yellowCards: 1, redCards: 0, played: 12 },
+  { rank: 4, name: "\uc544\ubd80\ub2ec\ub77c", club: "GANGWON", goals: 6, assists: 0, attackPoints: 6, yellowCards: 2, redCards: 0, played: 15 },
+  { rank: 5, name: "\ub9d0\ucef9", club: "ULSAN", goals: 5, assists: 2, attackPoints: 7, yellowCards: 0, redCards: 0, played: 9 },
+  { rank: 6, name: "\uae40\ub300\uc6d0", club: "GANGWON", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 15 },
+  { rank: 7, name: "\uc11c\uc9c4\uc218", club: "DAEJEON HANA", goals: 2, assists: 3, attackPoints: 5, yellowCards: 0, redCards: 0, played: 11 },
+  { rank: 8, name: "\ub9c8\ud14c\uc6b0\uc2a4", club: "ANYANG", goals: 4, assists: 3, attackPoints: 7, yellowCards: 0, redCards: 0, played: 13 },
+  { rank: 9, name: "\uc774\ub3d9\uacbd", club: "ULSAN", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 14 },
+  { rank: 10, name: "\uc1a1\ubbfc\uaddc", club: "SEOUL", goals: 3, assists: 3, attackPoints: 6, yellowCards: 0, redCards: 0, played: 15 }
 ];
 
 export const players: Player[] = [
