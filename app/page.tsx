@@ -5,10 +5,23 @@ import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { VideoCard } from "@/components/VideoCard";
-import { clubPosts, matches, news, standings, videos } from "@/data/mock";
+import { clubPosts as mockClubPosts, matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
+import { fetchGangwonNews } from "@/lib/newsFeed";
+import { fetchOfficialClubPosts, fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, formatTime, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
+import { fetchGangwonVideos } from "@/lib/videoFeed";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [matchesResult, newsResult, clubPostsResult, videosResult] = await Promise.allSettled([
+    fetchOfficialMatches(8),
+    fetchGangwonNews(8),
+    fetchOfficialClubPosts(8),
+    fetchGangwonVideos(8)
+  ]);
+  const matches = matchesResult.status === "fulfilled" && matchesResult.value.length ? matchesResult.value : mockMatches;
+  const news = newsResult.status === "fulfilled" && newsResult.value.length ? newsResult.value : mockNews;
+  const clubPosts = clubPostsResult.status === "fulfilled" && clubPostsResult.value.length ? clubPostsResult.value : mockClubPosts;
+  const videos = videosResult.status === "fulfilled" && videosResult.value.length ? videosResult.value : mockVideos;
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
   const gangwonStanding = standings.find((team) => team.team === "강원FC");

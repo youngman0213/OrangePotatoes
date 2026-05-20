@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClubPostCard } from "@/components/ClubPostCard";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterTabs } from "@/components/FilterTabs";
+import { LoadingState } from "@/components/LoadingState";
 import { SectionHeader } from "@/components/SectionHeader";
-import { clubPosts } from "@/data/mock";
+import { clubPosts as mockClubPosts } from "@/data/mock";
 import { sortByPublishedDesc } from "@/lib/utils";
+import type { ClubPost } from "@/types";
 
 const tabs = [
   { label: "전체", value: "all" },
@@ -21,16 +23,30 @@ const tabs = [
 
 export default function ClubPage() {
   const [platform, setPlatform] = useState("all");
+  const [items, setItems] = useState<ClubPost[]>(mockClubPosts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/club-posts")
+      .then((response) => response.json())
+      .then((data: { items?: ClubPost[] }) => {
+        if (data.items?.length) setItems(data.items);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const filteredPosts = useMemo(
-    () => sortByPublishedDesc(clubPosts).filter((post) => platform === "all" || post.platform === platform),
-    [platform]
+    () => sortByPublishedDesc(items).filter((post) => platform === "all" || post.platform === platform),
+    [platform, items]
   );
 
   return (
     <div className="grid gap-6">
       <SectionHeader title="구단 소식" eyebrow="Official Channels" />
       <FilterTabs tabs={tabs} active={platform} onChange={setPlatform} />
-      {filteredPosts.length ? (
+      {loading ? (
+        <LoadingState />
+      ) : filteredPosts.length ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredPosts.map((post) => <ClubPostCard key={post.id} post={post} />)}
         </div>

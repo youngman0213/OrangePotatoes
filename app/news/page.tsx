@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterTabs } from "@/components/FilterTabs";
+import { LoadingState } from "@/components/LoadingState";
 import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
-import { news } from "@/data/mock";
+import { news as mockNews } from "@/data/mock";
 import { sortByPublishedDesc } from "@/lib/utils";
+import type { NewsItem } from "@/types";
 
 const tabs = [
   { label: "전체", value: "all" },
@@ -20,16 +22,30 @@ const tabs = [
 
 export default function NewsPage() {
   const [category, setCategory] = useState("all");
+  const [items, setItems] = useState<NewsItem[]>(mockNews);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/news")
+      .then((response) => response.json())
+      .then((data: { items?: NewsItem[] }) => {
+        if (data.items?.length) setItems(data.items);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const filteredNews = useMemo(
-    () => sortByPublishedDesc(news).filter((item) => category === "all" || item.category === category),
-    [category]
+    () => sortByPublishedDesc(items).filter((item) => category === "all" || item.category === category),
+    [category, items]
   );
 
   return (
     <div className="grid gap-6">
       <SectionHeader title="뉴스" eyebrow="Linked Articles" />
       <FilterTabs tabs={tabs} active={category} onChange={setCategory} />
-      {filteredNews.length ? (
+      {loading ? (
+        <LoadingState />
+      ) : filteredNews.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}
         </div>
