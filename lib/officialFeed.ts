@@ -1,11 +1,12 @@
 import * as cheerio from "cheerio";
-import type { ClubPlatform, ClubPost, Coach, LeaguePlayerStat, Match, Player, PlayerPosition } from "@/types";
+import type { ClubPlatform, ClubPost, Coach, LeaguePlayerStat, Match, Player, PlayerPosition, Standing } from "@/types";
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
 const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
 const playerRankUrl = `${officialBaseUrl}/record/player.do`;
+const portalMainUrl = "https://portal.kleague.com/user/loginById.do?portalGuest=rstNE9zxjdkUC9kbUA08XQ%3D%3D";
 
 const ko = {
   gangwon: "\uac15\uc6d0FC",
@@ -234,6 +235,44 @@ export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerS
   return stats.slice(0, limit);
 }
 
+export async function fetchKLeagueStandings(): Promise<Standing[]> {
+  const html = await fetchText(portalMainUrl);
+  const $ = cheerio.load(html);
+  const lines = $("body")
+    .text()
+    .split("\n")
+    .map(normalize)
+    .filter(Boolean);
+  const standings: Standing[] = [];
+  const startIndex = lines.findIndex((line) => line.includes("\ud300\uc21c\uc704\ud45c"));
+
+  if (startIndex === -1) return [];
+
+  for (const line of lines.slice(startIndex)) {
+    if (line.includes("\ucd5c\uadfc 6\uacbd\uae30")) break;
+
+    const matched = line.match(/^(\d{1,2})\s+([\uac00-\ud7a3A-Za-z0-9 ]+?)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(-?\d+)$/);
+    if (!matched) continue;
+
+    const [, rank, team, played, points, wins, draws, losses, goalsFor, goalsAgainst, goalDifference] = matched;
+    standings.push({
+      rank: Number(rank),
+      team: normalizeStandingTeam(team),
+      played: Number(played),
+      wins: Number(wins),
+      draws: Number(draws),
+      losses: Number(losses),
+      goalsFor: Number(goalsFor),
+      goalsAgainst: Number(goalsAgainst),
+      goalDifference: Number(goalDifference),
+      points: Number(points),
+      recentForm: []
+    });
+  }
+
+  return standings;
+}
+
 async function fetchText(url: string) {
   const response = await fetch(url, {
     next: { revalidate: 60 * 30 },
@@ -301,6 +340,25 @@ function toIsoDate(year: number, dateText: string) {
 
 function normalizeTeam(team: string) {
   return team === ko.gangwonShort ? ko.gangwon : team;
+}
+
+function normalizeStandingTeam(team: string) {
+  const teamMap: Record<string, string> = {
+    "\uc11c\uc6b8": "FC\uc11c\uc6b8",
+    "\uc6b8\uc0b0": "\uc6b8\uc0b0 HD",
+    "\uc804\ubd81": "\uc804\ubd81 \ud604\ub300",
+    "\uac15\uc6d0": "\uac15\uc6d0FC",
+    "\ud3ec\ud56d": "\ud3ec\ud56d \uc2a4\ud2f8\ub7ec\uc2a4",
+    "\uc778\ucc9c": "\uc778\ucc9c \uc720\ub098\uc774\ud2f0\ub4dc",
+    "\uc548\uc591": "FC\uc548\uc591",
+    "\uc81c\uc8fc": "\uc81c\uc8fc SK",
+    "\ubd80\ucc9c": "\ubd80\ucc9cFC1995",
+    "\ub300\uc804": "\ub300\uc804\ud558\ub098\uc2dc\ud2f0\uc98c",
+    "\uae40\ucc9c": "\uae40\ucc9c \uc0c1\ubb34",
+    "\uad11\uc8fc": "\uad11\uc8fcFC"
+  };
+
+  return teamMap[team] ?? team;
 }
 
 function normalize(value: string) {
