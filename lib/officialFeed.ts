@@ -151,6 +151,18 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
   const rolePattern = /^(\uac10\ub3c5|\uc218\uc11d\ucf54\uce58|GK\ucf54\uce58|\ucf54\uce58|\ud53c\uc9c0\uceec\ucf54\uce58|\uc804\ub825\ubd84\uc11d\uad00|\uc758\ubb34\ud300\uc7a5|\uc758\ubb34\ud2b8\ub808\uc774\ub108|\ud1b5\uc5ed|\uc7a5\ube44\uad00\ub9ac\uc0ac)$/;
   const coaches: Coach[] = [];
   const seen = new Set<string>();
+  const headCoach = findHeadCoach(lines);
+
+  if (headCoach) {
+    const headCoachId = `official-coach-head-${headCoach}`;
+    seen.add(headCoachId);
+    coaches.push({
+      id: headCoachId,
+      role: "\uac10\ub3c5",
+      name: headCoach,
+      profileUrl: coachUrl
+    });
+  }
 
   for (let index = 0; index < lines.length - 1; index += 1) {
     const role = lines[index];
@@ -166,16 +178,6 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
       id,
       role,
       name,
-      profileUrl: coachUrl
-    });
-  }
-
-  const headCoachName = lines.find((line, index) => lines[index - 1] === "GANGWON FC HEAD COACH");
-  if (headCoachName && !coaches.some((coach) => coach.name === headCoachName)) {
-    coaches.unshift({
-      id: `official-coach-head-${headCoachName}`,
-      role: "\uac10\ub3c5",
-      name: headCoachName,
       profileUrl: coachUrl
     });
   }
@@ -226,6 +228,13 @@ function normalizeCompetition(competition: string) {
   if (competition.includes(ko.koreaCup)) return ko.koreaCup;
   if (competition.includes("AFC") || competition.includes("ACLE")) return "AFC";
   return ko.kLeague;
+}
+
+function findHeadCoach(lines: string[]) {
+  const headCoachIndex = lines.findIndex((line) => line === "GANGWON FC HEAD COACH");
+  if (headCoachIndex === -1) return null;
+
+  return lines.slice(headCoachIndex + 1).find((line) => /^[가-힣]{2,5}$/.test(line)) ?? null;
 }
 
 function findScheduleYear(lines: string[]) {
