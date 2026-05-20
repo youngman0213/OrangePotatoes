@@ -72,9 +72,7 @@ export const videos: Video[] = [
   }
 ];
 
-export const standings: Standing[] = [
-  { rank: 1, team: "\uac15\uc6d0FC", played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0, recentForm: ["D", "D", "D", "D", "D"] }
-];
+export const standings: Standing[] = [];
 
 export const players: Player[] = [
   { id: "fallback-player-1", name: "\uae40\ub300\uc6d0", number: 7, position: "FW", profileUrl: "https://www.gangwon-fc.com/squad/player" },

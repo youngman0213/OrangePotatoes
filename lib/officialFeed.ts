@@ -1,10 +1,11 @@
 import * as cheerio from "cheerio";
-import type { ClubPlatform, ClubPost, Coach, Match, Player, PlayerPosition } from "@/types";
+import type { ClubPlatform, ClubPost, Coach, LeaguePlayerStat, Match, Player, PlayerPosition } from "@/types";
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
 const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
+const playerRankUrl = `${officialBaseUrl}/record/player.do`;
 
 const ko = {
   gangwon: "\uac15\uc6d0FC",
@@ -186,6 +187,47 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
   }
 
   return coaches;
+}
+
+export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerStat[]> {
+  const html = await fetchText(playerRankUrl);
+  const $ = cheerio.load(html);
+  const lines = $("body")
+    .text()
+    .split("\n")
+    .map(normalize)
+    .filter(Boolean);
+  const clubs = ["SEOUL", "ULSAN", "JEONBUK", "GANGWON", "POHANG", "INCHEON", "ANYANG", "JEJU", "BUCHEON", "DAEJEON HANA", "GIMCHEON", "GWANGJU"];
+  const stats: LeaguePlayerStat[] = [];
+
+  for (let index = 0; index < lines.length - 1; index += 1) {
+    const line = lines[index];
+    const matchedClub = clubs.find((club) => line.endsWith(` ${club}`));
+    const rankMatch = line.match(/^(\d{1,2})\s+(.+)$/);
+
+    if (!rankMatch || !matchedClub) continue;
+
+    const numbers = lines[index + 1].split(" ").map(Number);
+    if (numbers.length < 14 || numbers.some((value) => Number.isNaN(value))) continue;
+
+    const rank = Number(rankMatch[1]);
+    const nameWithClub = rankMatch[2];
+    const name = nameWithClub.slice(0, -matchedClub.length).trim();
+
+    stats.push({
+      rank,
+      name,
+      club: matchedClub,
+      goals: numbers[0],
+      assists: numbers[1],
+      attackPoints: numbers[2],
+      yellowCards: numbers[8],
+      redCards: numbers[9],
+      played: numbers[11]
+    });
+  }
+
+  return stats.slice(0, limit);
 }
 
 async function fetchText(url: string) {

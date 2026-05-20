@@ -91,3 +91,15 @@ export interface Coach {
   imageUrl?: string;
   profileUrl?: string;
 }
+
+export interface LeaguePlayerStat {
+  rank: number;
+  name: string;
+  club: string;
+  goals: number;
+  assists: number;
+  attackPoints: number;
+  yellowCards: number;
+  redCards: number;
+  played: number;
+}
