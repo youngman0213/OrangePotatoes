@@ -93,11 +93,11 @@ export const playerStats: LeaguePlayerStat[] = [
   { rank: 3, name: "\uc57c\uace0", club: "ULSAN", goals: 6, assists: 0, attackPoints: 6, yellowCards: 1, redCards: 0, played: 12 },
   { rank: 4, name: "\uc544\ubd80\ub2ec\ub77c", club: "GANGWON", goals: 6, assists: 0, attackPoints: 6, yellowCards: 2, redCards: 0, played: 15 },
   { rank: 5, name: "\ub9d0\ucef9", club: "ULSAN", goals: 5, assists: 2, attackPoints: 7, yellowCards: 0, redCards: 0, played: 9 },
-  { rank: 6, name: "\uae40\ub300\uc6d0", club: "GANGWON", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 15 },
-  { rank: 7, name: "\uc11c\uc9c4\uc218", club: "DAEJEON HANA", goals: 2, assists: 3, attackPoints: 5, yellowCards: 0, redCards: 0, played: 11 },
-  { rank: 8, name: "\ub9c8\ud14c\uc6b0\uc2a4", club: "ANYANG", goals: 4, assists: 3, attackPoints: 7, yellowCards: 0, redCards: 0, played: 13 },
-  { rank: 9, name: "\uc774\ub3d9\uacbd", club: "ULSAN", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 14 },
-  { rank: 10, name: "\uc1a1\ubbfc\uaddc", club: "SEOUL", goals: 3, assists: 3, attackPoints: 6, yellowCards: 0, redCards: 0, played: 15 }
+  { rank: 1, name: "\uc11c\uc9c4\uc218", club: "DAEJEON HANA", goals: 2, assists: 3, attackPoints: 5, yellowCards: 0, redCards: 0, played: 11 },
+  { rank: 2, name: "\ub9c8\ud14c\uc6b0\uc2a4", club: "ANYANG", goals: 4, assists: 3, attackPoints: 7, yellowCards: 0, redCards: 0, played: 13 },
+  { rank: 3, name: "\uc774\ub3d9\uacbd", club: "ULSAN", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 14 },
+  { rank: 4, name: "\uc774\uc815\ud0dd", club: "GIMCHEON", goals: 0, assists: 3, attackPoints: 3, yellowCards: 0, redCards: 0, played: 14 },
+  { rank: 5, name: "\uc1a1\ubbfc\uaddc", club: "SEOUL", goals: 3, assists: 3, attackPoints: 6, yellowCards: 0, redCards: 0, played: 15 }
 ];
 
 export const players: Player[] = [
