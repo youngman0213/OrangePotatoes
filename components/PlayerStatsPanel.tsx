@@ -48,7 +48,7 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   const [activeGangwon, setActiveGangwon] = useState<StatKey>("goals");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
   const gangwonStats = useMemo(() => stats.filter((item) => item.club === "GANGWON"), [stats]);
-  const gangwonRows = useMemo(() => getTopRows(gangwonStats, activeGangwon), [activeGangwon, gangwonStats]);
+  const gangwonRows = useMemo(() => getTopRows(gangwonStats, activeGangwon, true), [activeGangwon, gangwonStats]);
   const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
 
   if (!stats.length) {
@@ -79,10 +79,10 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   );
 }
 
-function getTopRows(rows: LeaguePlayerStat[], key: StatKey) {
+function getTopRows(rows: LeaguePlayerStat[], key: StatKey, includeZero = false) {
   return [...rows]
-    .filter((row) => row[key] > 0)
-    .sort((a, b) => b[key] - a[key])
+    .filter((row) => includeZero || row[key] > 0)
+    .sort((a, b) => b[key] - a[key] || b.attackPoints - a.attackPoints || b.played - a.played)
     .slice(0, 5);
 }
 

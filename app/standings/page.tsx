@@ -3,6 +3,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { fetchKLeaguePlayerStats, fetchKLeagueStandings } from "@/lib/officialFeed";
+import type { LeaguePlayerStat } from "@/types";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,7 +20,8 @@ export default async function StandingsPage() {
     fetchKLeaguePlayerStats()
   ]);
   const tableStandings = standingsResult.status === "fulfilled" && standingsResult.value.length ? standingsResult.value : standings;
-  const playerStats = statsResult.status === "fulfilled" && statsResult.value.length ? statsResult.value : fallbackPlayerStats;
+  const fetchedPlayerStats = statsResult.status === "fulfilled" ? statsResult.value : [];
+  const playerStats = mergePlayerStats([...fallbackPlayerStats, ...fetchedPlayerStats]);
 
   return (
     <div className="grid gap-6">
@@ -31,4 +33,31 @@ export default async function StandingsPage() {
       <PlayerStatsPanel stats={playerStats} />
     </div>
   );
+}
+
+function mergePlayerStats(rows: LeaguePlayerStat[]) {
+  const merged = new Map<string, LeaguePlayerStat>();
+
+  for (const row of rows) {
+    const key = `${row.name}-${row.club}`;
+    const current = merged.get(key);
+
+    if (!current) {
+      merged.set(key, row);
+      continue;
+    }
+
+    merged.set(key, {
+      ...current,
+      rank: Math.min(current.rank, row.rank),
+      goals: Math.max(current.goals, row.goals),
+      assists: Math.max(current.assists, row.assists),
+      attackPoints: Math.max(current.attackPoints, row.attackPoints),
+      yellowCards: Math.max(current.yellowCards, row.yellowCards),
+      redCards: Math.max(current.redCards, row.redCards),
+      played: Math.max(current.played, row.played)
+    });
+  }
+
+  return Array.from(merged.values());
 }
