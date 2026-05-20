@@ -1,5 +1,4 @@
 import { ExternalLink } from "lucide-react";
-import { ExternalImage } from "@/components/ExternalImage";
 import type { NewsItem } from "@/types";
 import { formatShortDate } from "@/lib/utils";
 
@@ -14,22 +13,17 @@ const categoryLabels: Record<NewsItem["category"], string> = {
 
 export function NewsCard({ item }: { item: NewsItem }) {
   return (
-    <article className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
-      <div className="relative aspect-[16/9] bg-slate-100">
-        <ExternalImage src={item.thumbnailUrl} />
+    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-gangwon-orange">{categoryLabels[item.category]}</span>
+        <span className="text-xs font-bold text-slate-400">{formatShortDate(item.publishedAt)}</span>
       </div>
-      <div className="p-4">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-gangwon-orange">{categoryLabels[item.category]}</span>
-          <span className="text-xs font-bold text-slate-400">{formatShortDate(item.publishedAt)}</span>
-        </div>
-        <h3 className="line-clamp-2 text-base font-black text-gangwon-navy">{item.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500">{item.summary}</p>
-        <a href={item.url} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-sm font-black text-slate-700 hover:text-gangwon-orange">
-          {item.source}
-          <ExternalLink size={15} aria-hidden="true" />
-        </a>
-      </div>
+      <h3 className="line-clamp-3 text-base font-black leading-6 text-gangwon-navy">{item.title}</h3>
+      <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-500">{item.summary}</p>
+      <a href={item.url} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-1 text-sm font-black text-slate-700 hover:text-gangwon-orange">
+        {item.source}
+        <ExternalLink size={15} aria-hidden="true" />
+      </a>
     </article>
   );
 }
