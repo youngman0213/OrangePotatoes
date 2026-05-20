@@ -5,7 +5,7 @@ const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
 const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
-const playerRankUrl = `${officialBaseUrl}/record/player.do`;
+const playerRankUrl = "https://www.kleague.com/record/player.do";
 const portalMainUrl = "https://portal.kleague.com/user/loginById.do?portalGuest=rstNE9zxjdkUC9kbUA08XQ%3D%3D";
 
 const ko = {
@@ -192,8 +192,11 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
 
 export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerStat[]> {
   const portalStats = await fetchKLeaguePortalPlayerStats();
-  if (portalStats.length) return portalStats;
+  const fullStats = await fetchKLeagueFullPlayerStats(limit);
+  return mergePlayerStats([...portalStats, ...fullStats]).slice(0, limit);
+}
 
+async function fetchKLeagueFullPlayerStats(limit = 80): Promise<LeaguePlayerStat[]> {
   const html = await fetchText(playerRankUrl);
   const $ = cheerio.load(html);
   const lines = $("body")
@@ -220,12 +223,14 @@ export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerS
 
     const rank = Number(rankMatch[1]);
     const nameWithClub = rankMatch[2];
-    const name = nameWithClub.slice(0, -matchedClub.length).trim();
+    const englishName = nameWithClub.slice(0, -matchedClub.length).trim();
+    const normalizedClub = matchedClub === "DAEJEON HANA" ? "DAEJEON HANA" : matchedClub;
+    const name = translatePlayerName(englishName, normalizedClub);
 
     stats.push({
       rank,
       name,
-      club: matchedClub,
+      club: normalizedClub,
       goals: numbers[0],
       assists: numbers[1],
       attackPoints: numbers[2],
@@ -236,6 +241,33 @@ export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerS
   }
 
   return stats.slice(0, limit);
+}
+
+function mergePlayerStats(rows: LeaguePlayerStat[]) {
+  const merged = new Map<string, LeaguePlayerStat>();
+
+  for (const row of rows) {
+    const key = `${row.name}-${row.club}`;
+    const current = merged.get(key);
+
+    if (!current) {
+      merged.set(key, row);
+      continue;
+    }
+
+    merged.set(key, {
+      ...current,
+      rank: Math.min(current.rank, row.rank),
+      goals: Math.max(current.goals, row.goals),
+      assists: Math.max(current.assists, row.assists),
+      attackPoints: Math.max(current.attackPoints, row.attackPoints),
+      yellowCards: Math.max(current.yellowCards, row.yellowCards),
+      redCards: Math.max(current.redCards, row.redCards),
+      played: Math.max(current.played, row.played)
+    });
+  }
+
+  return Array.from(merged.values());
 }
 
 async function fetchKLeaguePortalPlayerStats(): Promise<LeaguePlayerStat[]> {
@@ -352,6 +384,43 @@ function normalizePortalClub(club: string) {
   };
 
   return clubMap[club] ?? club;
+}
+
+function translatePlayerName(name: string, club: string) {
+  if (club !== "GANGWON") return name;
+
+  const normalizedName = name.toUpperCase().replace(/\s+/g, " ").trim();
+  const gangwonNameMap: Record<string, string> = {
+    "ABDALLAH HLEIHIL": "\uc544\ubd80\ub2ec\ub77c",
+    "DAEWON KIM": "\uae40\ub300\uc6d0",
+    "KIM DAEWON": "\uae40\ub300\uc6d0",
+    "SEUNGWON LEE": "\uc774\uc2b9\uc6d0",
+    "LEE SEUNGWON": "\uc774\uc2b9\uc6d0",
+    "GEONHUI KIM": "\uae40\uac74\ud76c",
+    "GEONHEE KIM": "\uae40\uac74\ud76c",
+    "KIM GEONHUI": "\uae40\uac74\ud76c",
+    "JUNSEO JIN": "\uc9c4\uc900\uc11c",
+    "JIN JUNSEO": "\uc9c4\uc900\uc11c",
+    "YUNGU KANG": "\uac15\uc724\uad6c",
+    "KANG YUNGU": "\uac15\uc724\uad6c",
+    "MINWOO SEO": "\uc11c\ubbfc\uc6b0",
+    "SEO MINWOO": "\uc11c\ubbfc\uc6b0",
+    "DONGHYEON KIM": "\uae40\ub3d9\ud604",
+    "DONGHYUN KIM": "\uae40\ub3d9\ud604",
+    "KIM DONGHYEON": "\uae40\ub3d9\ud604",
+    "CHEONGHYO PARK": "\ubc15\uccad\ud6a8",
+    "PARK CHEONGHYO": "\ubc15\uccad\ud6a8",
+    "SEUNGBIN JEONG": "\uc815\uc2b9\ube48",
+    "JEONG SEUNGBIN": "\uc815\uc2b9\ube48",
+    "GIHYEOK LEE": "\uc774\uae30\ud601",
+    "LEE GIHYEOK": "\uc774\uae30\ud601",
+    "JAEHYEON MO": "\ubaa8\uc7ac\ud604",
+    "MO JAEHYEON": "\ubaa8\uc7ac\ud604",
+    "YOUNGJUN GO": "\uace0\uc601\uc900",
+    "GO YOUNGJUN": "\uace0\uc601\uc900"
+  };
+
+  return gangwonNameMap[normalizedName] ?? name;
 }
 
 export async function fetchKLeagueStandings(): Promise<Standing[]> {

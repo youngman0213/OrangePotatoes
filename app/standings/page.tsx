@@ -1,7 +1,6 @@
 import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
-import { TeamRankTabs } from "@/components/TeamRankTabs";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { fetchKLeaguePlayerStats, fetchKLeagueStandings } from "@/lib/officialFeed";
 
@@ -26,7 +25,6 @@ export default async function StandingsPage() {
     <div className="grid gap-6">
       <SectionHeader title={labels.title} eyebrow="Table" />
       <p className="text-sm font-bold text-slate-500">{labels.source}</p>
-      <TeamRankTabs standings={tableStandings} />
       <StandingTable standings={tableStandings} />
 
       <SectionHeader title={labels.playerStats} eyebrow="Player Stats" />
