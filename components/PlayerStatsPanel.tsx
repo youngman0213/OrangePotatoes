@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { FilterTabs } from "@/components/FilterTabs";
-import { classNames } from "@/lib/utils";
+import { classNames, isGangwon } from "@/lib/utils";
 import type { LeaguePlayerStat } from "@/types";
 
 interface PlayerStatsPanelProps {
@@ -55,7 +55,7 @@ const statLabelMap: Record<StatKey, string> = {
 export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   const [activeGangwon, setActiveGangwon] = useState<StatKey>("goals");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
-  const gangwonStats = useMemo(() => stats.filter((item) => item.club === "GANGWON"), [stats]);
+  const gangwonStats = useMemo(() => stats.filter((item) => isGangwon(item.club)), [stats]);
   const gangwonRows = useMemo(() => getTopRows(gangwonStats, activeGangwon, true), [activeGangwon, gangwonStats]);
   const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
 
@@ -71,14 +71,14 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   return (
     <section className="grid gap-5">
       <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow="Gangwon Player Stats" title={labels.gangwonTitle}>
+        <StatsHeader eyebrow="\uac15\uc6d0 \uae30\ub85d" title={labels.gangwonTitle}>
           <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as StatKey)} />
         </StatsHeader>
         <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
       </article>
 
       <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow="League Player Rank" title={labels.leagueTitle}>
+        <StatsHeader eyebrow="\ub9ac\uadf8 \uc21c\uc704" title={labels.leagueTitle}>
           <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
         </StatsHeader>
         <StatsList rows={leagueRows} valueKey={activeLeague} showClub />
@@ -124,8 +124,8 @@ function StatsList({
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
       {rows.map((row, index) => {
-        const isGangwon = row.club === "GANGWON" || row.club.includes("\uac15\uc6d0");
-        const rowHighlighted = highlighted || (showClub && isGangwon);
+        const gangwonClub = isGangwon(row.club);
+        const rowHighlighted = highlighted || (showClub && gangwonClub);
 
         return (
           <div
@@ -145,7 +145,7 @@ function StatsList({
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
                   <p className="truncate font-black text-slate-900">{row.name}</p>
-                  {showClub && isGangwon ? <span className="shrink-0 rounded-full bg-gangwon-orange px-2 py-0.5 text-[10px] font-black text-white">{labels.gangwonBadge}</span> : null}
+                  {showClub && gangwonClub ? <span className="shrink-0 rounded-full bg-gangwon-orange px-2 py-0.5 text-[10px] font-black text-white">{labels.gangwonBadge}</span> : null}
                 </div>
                 <p className="mt-1 truncate text-xs font-bold text-slate-400">
                   {showClub ? row.club : `${labels.played} ${row.played || "-"}${labels.games}`}

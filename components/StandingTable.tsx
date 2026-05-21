@@ -5,8 +5,10 @@ import { classNames, isGangwon } from "@/lib/utils";
 const labels = {
   summaryTitle: "\uac15\uc6d0FC \ud604\uc7ac \uc21c\uc704",
   leagueListTitle: "\ub9ac\uadf8 \uc804\uccb4 \uc21c\uc704",
-  leagueListHint: "\uc811\uae30 / \ud3bc\uce58\uae30",
+  collapse: "\uc811\uae30",
+  expand: "\ud3bc\uce58\uae30",
   rank: "\uc21c\uc704",
+  place: "\uc704",
   team: "\ud300",
   played: "\uacbd\uae30",
   wins: "\uc2b9",
@@ -102,60 +104,62 @@ function MobileLeagueList({ standings }: { standings: Standing[] }) {
     <details className="group overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 md:hidden">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4">
         <div>
-          <p className="text-xs font-black uppercase text-gangwon-orange">Table</p>
+          <p className="text-xs font-black text-gangwon-orange">\uc21c\uc704\ud45c</p>
           <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500 group-open:bg-orange-50 group-open:text-gangwon-orange">
-          {labels.leagueListHint}
+          <span className="group-open:hidden">{labels.expand}</span>
+          <span className="hidden group-open:inline">{labels.collapse}</span>
         </span>
       </summary>
 
-      <div className="border-t border-slate-100">
-        {standings.length ? standings.map((row) => (
-          <MobileStandingRow key={row.team} standing={row} />
-        )) : (
-          <div className="px-4 py-8 text-center text-sm font-bold text-slate-500">
-            {labels.empty}
-          </div>
-        )}
+      <div className="overflow-x-auto border-t border-slate-100">
+        <table className="w-full min-w-[720px] text-left text-xs">
+          <thead className="bg-gangwon-navy text-white">
+            <tr>
+              <Th>{labels.rank}</Th>
+              <Th>{labels.team}</Th>
+              <Th>{labels.played}</Th>
+              <Th>{labels.wins}</Th>
+              <Th>{labels.draws}</Th>
+              <Th>{labels.losses}</Th>
+              <Th>{labels.goalsFor}</Th>
+              <Th>{labels.goalsAgainst}</Th>
+              <Th>{labels.goalDifference}</Th>
+              <Th>{labels.points}</Th>
+              <Th>{labels.form}</Th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {standings.length ? standings.map((row) => (
+              <tr key={row.team} className={classNames(isGangwon(row.team) ? "bg-orange-50" : "bg-white")}>
+                <Td strong>{row.rank || "-"}</Td>
+                <Td>
+                  <span className={classNames("font-black", isGangwon(row.team) ? "text-gangwon-orange" : "text-gangwon-navy")}>{row.team}</span>
+                </Td>
+                <Td>{row.played}</Td>
+                <Td>{row.wins}</Td>
+                <Td>{row.draws}</Td>
+                <Td>{row.losses}</Td>
+                <Td>{row.goalsFor}</Td>
+                <Td>{row.goalsAgainst}</Td>
+                <Td>{formatGoalDifference(row.goalDifference)}</Td>
+                <Td strong>{row.points}</Td>
+                <Td>
+                  <FormDots team={row.team} form={row.recentForm.slice(0, 5)} compact />
+                </Td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan={11} className="px-4 py-8 text-center text-sm font-bold text-slate-500">
+                  {labels.empty}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </details>
-  );
-}
-
-function MobileStandingRow({ standing }: { standing: Standing }) {
-  const highlighted = isGangwon(standing.team);
-
-  return (
-    <div className={classNames(
-      "grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-slate-100 px-4 py-3 last:border-b-0",
-      highlighted && "bg-orange-50"
-    )}>
-      <span className={classNames(
-        "flex h-9 w-9 items-center justify-center rounded-full text-sm font-black",
-        highlighted ? "bg-gangwon-orange text-white" : "bg-slate-100 text-slate-600"
-      )}>
-        {standing.rank || "-"}
-      </span>
-      <div className="min-w-0">
-        <div className="flex min-w-0 items-center gap-2">
-          <p className={classNames("truncate font-black", highlighted ? "text-gangwon-orange" : "text-gangwon-navy")}>
-            {standing.team}
-          </p>
-          {highlighted ? <span className="shrink-0 rounded-full bg-gangwon-orange px-2 py-0.5 text-[10px] font-black text-white">GW</span> : null}
-        </div>
-        <p className="mt-1 truncate text-xs font-bold text-slate-400">
-          {standing.played}{labels.played} / {standing.wins}{labels.wins} {standing.draws}{labels.draws} {standing.losses}{labels.losses} / {labels.goalDifference} {formatGoalDifference(standing.goalDifference)}
-        </p>
-      </div>
-      <div className="shrink-0 text-right">
-        <p className="text-[11px] font-bold text-slate-400">{labels.points}</p>
-        <p className="text-xl font-black text-gangwon-navy">{standing.points}</p>
-        <div className="mt-1 flex justify-end">
-          <FormDots team={standing.team} form={standing.recentForm.slice(0, 5)} compact />
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -164,11 +168,11 @@ function GangwonSummaryCard({ standing }: { standing: Standing }) {
     <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-5 text-white shadow-card">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black uppercase text-white/75">Gangwon Focus</p>
+          <p className="text-xs font-black text-white/75">\uac15\uc6d0 \uc694\uc57d</p>
           <h2 className="mt-1 text-xl font-black">{labels.summaryTitle}</h2>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange">
-          {standing.rank}{labels.rank}
+          {standing.rank}{labels.place}
         </span>
       </div>
       <div className="mt-5 grid grid-cols-2 gap-2">

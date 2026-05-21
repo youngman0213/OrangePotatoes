@@ -35,7 +35,7 @@ export default async function StandingsPage() {
   const fetchedPlayerStats = statsResult.status === "fulfilled" ? statsResult.value.data.map((row) => ({
     rank: row.rank,
     name: row.playerName,
-    club: row.teamCode === "21" ? "GANGWON" : row.teamName,
+    club: row.teamCode === "21" ? "\uac15\uc6d0FC" : row.teamName,
     goals: row.goals,
     assists: row.assists,
     attackPoints: row.attackPoints,
@@ -48,10 +48,10 @@ export default async function StandingsPage() {
 
   return (
     <div className="grid gap-8">
-      <SectionHeader title={labels.title} eyebrow="Table" />
+      <SectionHeader title={labels.title} eyebrow="\uc21c\uc704\ud45c" />
       <StandingTable standings={tableStandings} />
 
-      <SectionHeader title={labels.playerStats} eyebrow="Player Stats" />
+      <SectionHeader title={labels.playerStats} eyebrow="\uc120\uc218 \uae30\ub85d" />
       <PlayerStatsPanel stats={playerStats} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
