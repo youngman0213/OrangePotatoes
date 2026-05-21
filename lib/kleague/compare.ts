@@ -27,7 +27,7 @@ export function compareStandings(officialRows: SourceStanding[], naverRows: Sour
   const checkedAt = new Date().toISOString();
   const officialMap = new Map(officialRows.map((row) => [makeTeamKey(row.teamCode, row.teamName), row]));
   const naverMap = new Map(naverRows.map((row) => [makeTeamKey(row.teamCode, row.teamName), row]));
-  const keys = naverMap.size ? new Set(naverMap.keys()) : new Set(officialMap.keys());
+  const keys = Array.from(naverMap.size ? naverMap.keys() : officialMap.keys());
   const data: VerifiedStanding[] = [];
   const mismatches: KLeagueMismatch[] = [];
 
@@ -62,7 +62,7 @@ export function comparePlayerRecords(officialRows: SourcePlayerRecord[], naverRo
   const checkedAt = new Date().toISOString();
   const officialMap = new Map(officialRows.map((row) => [makePlayerKey(row.playerId, row.playerName, row.teamCode, row.teamName), row]));
   const naverMap = new Map(naverRows.map((row) => [makePlayerKey(row.playerId, row.playerName, row.teamCode, row.teamName), row]));
-  const keys = naverMap.size ? new Set(naverMap.keys()) : new Set(officialMap.keys());
+  const keys = Array.from(naverMap.size ? naverMap.keys() : officialMap.keys());
   const data: VerifiedPlayerRecord[] = [];
   const mismatches: KLeagueMismatch[] = [];
 
