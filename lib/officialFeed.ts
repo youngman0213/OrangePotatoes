@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { getCombinedPlayerRecords, getKLeagueStandings as getNaverKLeagueStandings } from "@/lib/naverKleague";
+import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
 import type { ClubPlatform, ClubPost, Coach, LeaguePlayerStat, Match, Player, PlayerPosition, Standing } from "@/types";
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
@@ -193,7 +193,7 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
 }
 
 export async function fetchKLeaguePlayerStats(limit = 120): Promise<LeaguePlayerStat[]> {
-  const naverStats = await getCombinedPlayerRecords();
+  const naverStats = await getVerifiedCombinedPlayerRecords();
 
   if (naverStats.data.length) {
     return naverStats.data.map((row) => ({
@@ -573,7 +573,7 @@ function translatePlayerName(name: string, club: string) {
 }
 
 export async function fetchKLeagueStandings(): Promise<Standing[]> {
-  const naverStandings = await getNaverKLeagueStandings();
+  const naverStandings = await getVerifiedStandings();
 
   if (naverStandings.data.length) {
     return naverStandings.data.map((row) => ({

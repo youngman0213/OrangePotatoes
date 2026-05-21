@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { getKLeagueStandings } from "@/lib/naverKleague";
+import { getCacheControlHeader } from "@/lib/kleague/cache";
+import { getVerifiedStandings } from "@/lib/kleague";
 
-export const revalidate = 60 * 60 * 6;
+export const revalidate = 21600;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const seasonCode = searchParams.get("seasonCode") ?? "2026";
-  const result = await getKLeagueStandings(seasonCode);
+  const result = await getVerifiedStandings(seasonCode);
 
   return NextResponse.json(result, {
     status: 200,
     headers: {
-      "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=21600, stale-if-error=86400"
+      "Cache-Control": getCacheControlHeader()
     }
   });
 }

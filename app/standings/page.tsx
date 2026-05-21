@@ -2,21 +2,22 @@ import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
-import { getCombinedPlayerRecords, getKLeagueStandings } from "@/lib/naverKleague";
+import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
 import type { LeaguePlayerStat } from "@/types";
 
-export const revalidate = 60 * 60 * 6;
+export const revalidate = 21600;
 
 const labels = {
   title: "K\ub9ac\uadf81 \uc21c\uc704",
   playerStats: "\uac1c\uc778 \uae30\ub85d",
-  source: "\ub370\uc774\ud130 \ucd9c\ucc98: \ub124\uc774\ubc84 \uc2a4\ud3ec\uce20"
+  source: "\ub370\uc774\ud130 \ucd9c\ucc98: K\ub9ac\uadf8 \uacf5\uc2dd \uae30\ub85d / \uac80\uc99d: \ub124\uc774\ubc84 \uc2a4\ud3ec\uce20",
+  checkedAt: "\uae30\uc900 \uc2dc\uac01"
 };
 
 export default async function StandingsPage() {
   const [standingsResult, statsResult] = await Promise.allSettled([
-    getKLeagueStandings(),
-    getCombinedPlayerRecords()
+    getVerifiedStandings(),
+    getVerifiedCombinedPlayerRecords()
   ]);
   const tableStandings = standingsResult.status === "fulfilled" && standingsResult.value.data.length ? standingsResult.value.data.map((row) => ({
     rank: row.rank,
@@ -43,16 +44,16 @@ export default async function StandingsPage() {
     played: row.matches
   })) : [];
   const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : fallbackPlayerStats;
+  const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
 
   return (
     <div className="grid gap-6">
       <SectionHeader title={labels.title} eyebrow="Table" />
-      <p className="text-sm font-bold text-slate-500">{labels.source}</p>
       <StandingTable standings={tableStandings} />
 
       <SectionHeader title={labels.playerStats} eyebrow="Player Stats" />
       <PlayerStatsPanel stats={playerStats} />
-      <p className="text-xs font-bold text-slate-400">{labels.source}</p>
+      <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
   );
 }

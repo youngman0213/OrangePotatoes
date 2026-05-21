@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getKLeaguePlayerRecords } from "@/lib/naverKleague";
+import { getCacheControlHeader } from "@/lib/kleague/cache";
+import { getVerifiedPlayerRecords } from "@/lib/kleague";
 
-export const revalidate = 60 * 60 * 6;
+export const revalidate = 21600;
 
 const allowedSortFields = new Set(["goals", "assists", "offencePoints", "yellowCards"]);
 
@@ -11,13 +12,13 @@ export async function GET(request: Request) {
   const teamCode = searchParams.get("teamCode") ?? undefined;
   const sortFieldParam = searchParams.get("sortField") ?? "goals";
   const sortField = allowedSortFields.has(sortFieldParam) ? (sortFieldParam as "goals" | "assists" | "offencePoints" | "yellowCards") : "goals";
-  const pageSize = Math.min(Number(searchParams.get("pageSize")) || 100, 200);
-  const result = await getKLeaguePlayerRecords({ seasonCode, teamCode, sortField, pageSize });
+  const pageSize = Math.max(1, Math.min(Number(searchParams.get("pageSize")) || 100, 200));
+  const result = await getVerifiedPlayerRecords({ seasonCode, teamCode, sortField, pageSize });
 
   return NextResponse.json(result, {
     status: 200,
     headers: {
-      "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=21600, stale-if-error=86400"
+      "Cache-Control": getCacheControlHeader()
     }
   });
 }

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { KLeaguePlayerRecord, KLeagueStanding } from "@/lib/naverKleague";
+import type { VerifiedPlayerRecord, VerifiedStanding } from "@/lib/kleague/types";
 
 const labels = {
   standings: "K\ub9ac\uadf81 \uc21c\uc704",
@@ -26,8 +26,8 @@ export function KLeagueRecordTables({
   standings,
   playerRecords
 }: {
-  standings: KLeagueStanding[];
-  playerRecords: KLeaguePlayerRecord[];
+  standings: VerifiedStanding[];
+  playerRecords: VerifiedPlayerRecord[];
 }) {
   return (
     <section className="grid gap-4">
