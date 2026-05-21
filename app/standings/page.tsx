@@ -47,7 +47,7 @@ export default async function StandingsPage() {
   const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-8">
       <SectionHeader title={labels.title} eyebrow="Table" />
       <StandingTable standings={tableStandings} />
 

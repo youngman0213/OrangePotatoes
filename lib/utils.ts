@@ -26,9 +26,9 @@ export const formatShortDate = (date: string) =>
   }).format(new Date(date));
 
 export const statusLabel: Record<MatchStatus, string> = {
-  scheduled: "예정",
-  live: "진행중",
-  finished: "종료"
+  scheduled: "\uc608\uc815",
+  live: "\uc9c4\ud589\uc911",
+  finished: "\uc885\ub8cc"
 };
 
 export const statusTone: Record<MatchStatus, string> = {
@@ -37,7 +37,7 @@ export const statusTone: Record<MatchStatus, string> = {
   finished: "bg-gangwon-navy text-white"
 };
 
-export const getMatchMonth = (date: string) => `${new Date(date).getMonth() + 1}월`;
+export const getMatchMonth = (date: string) => `${new Date(date).getMonth() + 1}\uc6d4`;
 
 export const sortByDateAsc = <T extends { date: string }>(items: T[]) =>
   [...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -53,4 +53,5 @@ export const getRecentMatch = (matches: Match[]) =>
     .filter((match) => match.status === "finished")
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-export const isGangwon = (team: string) => team === "강원FC";
+export const isGangwon = (team: string) =>
+  team === "\uac15\uc6d0FC" || team === "GANGWON" || team.includes("\uac15\uc6d0");

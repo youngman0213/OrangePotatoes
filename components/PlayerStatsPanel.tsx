@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { FilterTabs } from "@/components/FilterTabs";
+import { classNames } from "@/lib/utils";
 import type { LeaguePlayerStat } from "@/types";
 
 interface PlayerStatsPanelProps {
@@ -68,15 +69,15 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   }
 
   return (
-    <section className="grid gap-4">
-      <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
+    <section className="grid gap-5">
+      <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 sm:p-5">
         <StatsHeader eyebrow="Gangwon Player Stats" title={labels.gangwonTitle}>
           <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as StatKey)} />
         </StatsHeader>
         <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
       </article>
 
-      <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
+      <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 sm:p-5">
         <StatsHeader eyebrow="League Player Rank" title={labels.leagueTitle}>
           <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
         </StatsHeader>
@@ -95,7 +96,7 @@ function getTopRows(rows: LeaguePlayerStat[], key: StatKey, includeZero = false)
 
 function StatsHeader({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
   return (
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="text-xs font-black uppercase text-gangwon-orange">{eyebrow}</p>
         <h2 className="text-xl font-black text-gangwon-navy">{title}</h2>
@@ -121,30 +122,40 @@ function StatsList({
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
       {rows.map((row, index) => {
-        const isGangwon = row.club === "GANGWON";
+        const isGangwon = row.club === "GANGWON" || row.club.includes("\uac15\uc6d0");
         const rowHighlighted = highlighted || (showClub && isGangwon);
 
         return (
-          <div key={`${valueKey}-${row.name}-${index}`} className={`flex items-center justify-between gap-3 rounded-lg px-4 py-3 ${rowHighlighted ? "bg-orange-50 ring-1 ring-orange-100" : "bg-slate-50"}`}>
+          <div
+            key={`${valueKey}-${row.name}-${index}`}
+            className={classNames(
+              "flex min-w-0 items-center justify-between gap-3 rounded-lg px-4 py-4 ring-1",
+              rowHighlighted ? "bg-orange-50 ring-orange-100" : "bg-slate-50 ring-transparent"
+            )}
+          >
             <div className="flex min-w-0 items-center gap-3">
-              <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-black ${rowHighlighted ? "bg-gangwon-orange text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"}`}>
+              <span className={classNames(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black",
+                rowHighlighted ? "bg-gangwon-orange text-white" : "bg-white text-slate-600 ring-1 ring-slate-200"
+              )}>
                 {index + 1}
               </span>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                   <p className="truncate font-black text-slate-900">{row.name}</p>
                   {showClub && isGangwon ? <span className="shrink-0 rounded-full bg-gangwon-orange px-2 py-0.5 text-[10px] font-black text-white">{labels.gangwonBadge}</span> : null}
                 </div>
-                <p className="text-xs font-bold text-slate-400">
+                <p className="mt-1 truncate text-xs font-bold text-slate-400">
                   {showClub ? row.club : `${labels.played} ${row.played || "-"}${labels.games}`}
                 </p>
               </div>
             </div>
-            <span className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange ring-1 ring-orange-100">
-              {statLabelMap[valueKey]} {Number(row[valueKey] ?? 0)}{suffixMap[valueKey]}
-            </span>
+            <div className="shrink-0 text-right">
+              <p className="text-[11px] font-black text-slate-400">{statLabelMap[valueKey]}</p>
+              <p className="text-xl font-black text-gangwon-orange">{Number(row[valueKey] ?? 0)}<span className="text-sm">{suffixMap[valueKey]}</span></p>
+            </div>
           </div>
         );
       })}
