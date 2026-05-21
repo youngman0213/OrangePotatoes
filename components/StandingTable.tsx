@@ -4,6 +4,8 @@ import { classNames, isGangwon } from "@/lib/utils";
 
 const labels = {
   summaryTitle: "\uac15\uc6d0FC \ud604\uc7ac \uc21c\uc704",
+  leagueListTitle: "\ub9ac\uadf8 \uc804\uccb4 \uc21c\uc704",
+  leagueListHint: "\uc811\uae30 / \ud3bc\uce58\uae30",
   rank: "\uc21c\uc704",
   team: "\ud300",
   played: "\uacbd\uae30",
@@ -11,6 +13,7 @@ const labels = {
   draws: "\ubb34",
   losses: "\ud328",
   record: "\uc804\uc801",
+  wdl: "\uc2b9/\ubb34/\ud328",
   goalsFor: "\ub4dd\uc810",
   goalsAgainst: "\uc2e4\uc810",
   goalDifference: "\ub4dd\uc2e4",
@@ -26,15 +29,7 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
     <section className="grid gap-4">
       {gangwon ? <GangwonSummaryCard standing={gangwon} /> : null}
 
-      <div className="grid gap-3 md:hidden">
-        {standings.length ? standings.map((row) => (
-          <StandingCard key={row.team} standing={row} />
-        )) : (
-          <div className="rounded-lg bg-white px-4 py-8 text-center text-sm font-bold text-slate-500 shadow-card ring-1 ring-slate-100">
-            {labels.empty}
-          </div>
-        )}
-      </div>
+      <MobileLeagueList standings={standings} />
 
       <div className="hidden overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 md:block">
         <div className="overflow-x-auto">
@@ -102,6 +97,68 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
   );
 }
 
+function MobileLeagueList({ standings }: { standings: Standing[] }) {
+  return (
+    <details className="group overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 md:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4">
+        <div>
+          <p className="text-xs font-black uppercase text-gangwon-orange">Table</p>
+          <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
+        </div>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500 group-open:bg-orange-50 group-open:text-gangwon-orange">
+          {labels.leagueListHint}
+        </span>
+      </summary>
+
+      <div className="border-t border-slate-100">
+        {standings.length ? standings.map((row) => (
+          <MobileStandingRow key={row.team} standing={row} />
+        )) : (
+          <div className="px-4 py-8 text-center text-sm font-bold text-slate-500">
+            {labels.empty}
+          </div>
+        )}
+      </div>
+    </details>
+  );
+}
+
+function MobileStandingRow({ standing }: { standing: Standing }) {
+  const highlighted = isGangwon(standing.team);
+
+  return (
+    <div className={classNames(
+      "grid grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-slate-100 px-4 py-3 last:border-b-0",
+      highlighted && "bg-orange-50"
+    )}>
+      <span className={classNames(
+        "flex h-9 w-9 items-center justify-center rounded-full text-sm font-black",
+        highlighted ? "bg-gangwon-orange text-white" : "bg-slate-100 text-slate-600"
+      )}>
+        {standing.rank || "-"}
+      </span>
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
+          <p className={classNames("truncate font-black", highlighted ? "text-gangwon-orange" : "text-gangwon-navy")}>
+            {standing.team}
+          </p>
+          {highlighted ? <span className="shrink-0 rounded-full bg-gangwon-orange px-2 py-0.5 text-[10px] font-black text-white">GW</span> : null}
+        </div>
+        <p className="mt-1 truncate text-xs font-bold text-slate-400">
+          {standing.played}{labels.played} / {standing.wins}{labels.wins} {standing.draws}{labels.draws} {standing.losses}{labels.losses} / {labels.goalDifference} {formatGoalDifference(standing.goalDifference)}
+        </p>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-[11px] font-bold text-slate-400">{labels.points}</p>
+        <p className="text-xl font-black text-gangwon-navy">{standing.points}</p>
+        <div className="mt-1 flex justify-end">
+          <FormDots team={standing.team} form={standing.recentForm.slice(0, 5)} compact />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function GangwonSummaryCard({ standing }: { standing: Standing }) {
   return (
     <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-5 text-white shadow-card">
@@ -114,9 +171,10 @@ function GangwonSummaryCard({ standing }: { standing: Standing }) {
           {standing.rank}{labels.rank}
         </span>
       </div>
-      <div className="mt-5 grid grid-cols-3 gap-2">
-        <SummaryMetric label={labels.points} value={standing.points} />
+      <div className="mt-5 grid grid-cols-2 gap-2">
         <SummaryMetric label={labels.played} value={standing.played} />
+        <SummaryMetric label={labels.wdl} value={`${standing.wins}/${standing.draws}/${standing.losses}`} />
+        <SummaryMetric label={labels.points} value={standing.points} />
         <SummaryMetric label={labels.goalDifference} value={formatGoalDifference(standing.goalDifference)} />
       </div>
       <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-3">
@@ -136,59 +194,7 @@ function SummaryMetric({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-function StandingCard({ standing }: { standing: Standing }) {
-  const highlighted = isGangwon(standing.team);
-
-  return (
-    <article className={classNames(
-      "rounded-lg bg-white p-4 shadow-card ring-1",
-      highlighted ? "ring-orange-200 bg-orange-50/70" : "ring-slate-100"
-    )}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className={classNames(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-black",
-            highlighted ? "bg-gangwon-orange text-white" : "bg-slate-100 text-slate-700"
-          )}>
-            {standing.rank || "-"}
-          </span>
-          <div className="min-w-0">
-            <h3 className={classNames("truncate text-lg font-black", highlighted ? "text-gangwon-orange" : "text-gangwon-navy")}>
-              {standing.team}
-            </h3>
-            <p className="mt-1 text-xs font-bold text-slate-500">
-              {standing.played}{labels.played} / {standing.wins}{labels.wins} {standing.draws}{labels.draws} {standing.losses}{labels.losses}
-            </p>
-          </div>
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="text-xs font-bold text-slate-400">{labels.points}</p>
-          <p className="text-2xl font-black text-gangwon-navy">{standing.points}</p>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <CardMetric label={labels.goalDifference} value={formatGoalDifference(standing.goalDifference)} highlighted={highlighted} />
-        <CardMetric label={labels.record} value={`${standing.goalsFor}:${standing.goalsAgainst}`} highlighted={highlighted} />
-      </div>
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-3 ring-1 ring-slate-100">
-        <span className="text-xs font-black text-slate-500">{labels.form}</span>
-        <FormDots team={standing.team} form={standing.recentForm} />
-      </div>
-    </article>
-  );
-}
-
-function CardMetric({ label, value, highlighted }: { label: string; value: ReactNode; highlighted: boolean }) {
-  return (
-    <div className={classNames("rounded-lg px-3 py-3", highlighted ? "bg-white" : "bg-slate-50")}>
-      <p className="text-xs font-bold text-slate-400">{label}</p>
-      <p className="mt-1 text-lg font-black text-gangwon-navy">{value}</p>
-    </div>
-  );
-}
-
-function FormDots({ team, form, light = false }: { team: string; form: Standing["recentForm"]; light?: boolean }) {
+function FormDots({ team, form, light = false, compact = false }: { team: string; form: Standing["recentForm"]; light?: boolean; compact?: boolean }) {
   if (!form.length) {
     return <span className={classNames("text-xs font-bold", light ? "text-white/75" : "text-slate-400")}>-</span>;
   }
@@ -199,7 +205,8 @@ function FormDots({ team, form, light = false }: { team: string; form: Standing[
         <span
           key={`${team}-${index}-${result}`}
           className={classNames(
-            "flex h-6 w-6 items-center justify-center rounded-full text-xs font-black text-white",
+            "flex items-center justify-center rounded-full text-xs font-black text-white",
+            compact ? "h-4 w-4 text-[9px]" : "h-6 w-6",
             result === "W" && "bg-emerald-500",
             result === "D" && "bg-slate-400",
             result === "L" && "bg-red-500"
