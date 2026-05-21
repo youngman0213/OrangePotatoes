@@ -41,7 +41,7 @@ export default function NewsPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="뉴스" eyebrow="Linked Articles" />
+      <SectionHeader title="뉴스" eyebrow="기사 모음" />
       <FilterTabs tabs={tabs} active={category} onChange={setCategory} />
       {loading ? (
         <LoadingState />

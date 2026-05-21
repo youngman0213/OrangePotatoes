@@ -38,7 +38,7 @@ export default function MatchesPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="경기 일정/결과" eyebrow="Fixtures & Results" />
+      <SectionHeader title="경기 일정/결과" eyebrow="경기 정보" />
       <div className="grid gap-3">
         <FilterTabs tabs={[{ label: "전체", value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={month} onChange={setMonth} />
         <FilterTabs tabs={[{ label: "전체", value: "all" }, { label: "홈", value: "home" }, { label: "원정", value: "away" }]} active={venue} onChange={setVenue} />

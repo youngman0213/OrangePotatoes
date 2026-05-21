@@ -4,9 +4,9 @@ import { formatShortDate } from "@/lib/utils";
 
 const platformLabels: Record<ClubPost["platform"], string> = {
   official: "공식 홈페이지",
-  instagram: "Instagram",
-  youtube: "YouTube",
-  facebook: "Facebook",
+  instagram: "인스타그램",
+  youtube: "유튜브",
+  facebook: "페이스북",
   ticket: "티켓",
   md: "MD",
   event: "이벤트"

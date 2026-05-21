@@ -42,7 +42,7 @@ export default function ClubPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="구단 소식" eyebrow="Official Channels" />
+      <SectionHeader title="구단 소식" eyebrow="공식 채널" />
       <FilterTabs tabs={tabs} active={platform} onChange={setPlatform} />
       {loading ? (
         <LoadingState />

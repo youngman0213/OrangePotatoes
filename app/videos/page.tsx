@@ -40,7 +40,7 @@ export default function VideosPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="영상" eyebrow="YouTube" />
+      <SectionHeader title="영상" eyebrow="영상 모음" />
       <FilterTabs tabs={tabs} active={category} onChange={setCategory} />
       {loading ? (
         <LoadingState />

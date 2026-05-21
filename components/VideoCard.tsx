@@ -25,7 +25,7 @@ export function VideoCard({ video }: { video: Video }) {
         <p className="mb-2 text-xs font-bold text-slate-400">{formatShortDate(video.publishedAt)}</p>
         <h3 className="line-clamp-2 text-base font-black text-gangwon-navy">{video.title}</h3>
         <a href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-sm font-black text-slate-700 hover:text-gangwon-orange">
-          YouTube
+          영상 보기
           <ExternalLink size={15} aria-hidden="true" />
         </a>
       </div>

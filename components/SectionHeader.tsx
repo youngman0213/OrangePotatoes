@@ -12,7 +12,7 @@ export function SectionHeader({ title, eyebrow, href, actionLabel = "전체 보�
   return (
     <div className="mb-4 flex items-end justify-between gap-4">
       <div>
-        {eyebrow ? <p className="text-xs font-bold uppercase tracking-wide text-gangwon-orange">{eyebrow}</p> : null}
+        {eyebrow ? <p className="text-xs font-bold tracking-wide text-gangwon-orange">{eyebrow}</p> : null}
         <h2 className="text-xl font-black text-gangwon-navy">{title}</h2>
       </div>
       {href ? (

@@ -3,25 +3,25 @@ import type { Standing } from "@/types";
 import { classNames, isGangwon } from "@/lib/utils";
 
 const labels = {
-  summaryTitle: "\uac15\uc6d0FC \ud604\uc7ac \uc21c\uc704",
-  leagueListTitle: "\ub9ac\uadf8 \uc804\uccb4 \uc21c\uc704",
-  collapse: "\uc811\uae30",
-  expand: "\ud3bc\uce58\uae30",
-  rank: "\uc21c\uc704",
-  place: "\uc704",
-  team: "\ud300",
-  played: "\uacbd\uae30",
-  wins: "\uc2b9",
-  draws: "\ubb34",
-  losses: "\ud328",
-  record: "\uc804\uc801",
-  wdl: "\uc2b9/\ubb34/\ud328",
-  goalsFor: "\ub4dd\uc810",
-  goalsAgainst: "\uc2e4\uc810",
-  goalDifference: "\ub4dd\uc2e4",
-  points: "\uc2b9\uc810",
-  form: "\ucd5c\uadfc 5\uacbd\uae30",
-  empty: "K\ub9ac\uadf8 \uacf5\uc2dd \ud300 \uc21c\uc704 \uc5f0\ub3d9\uc744 \uc900\ube44 \uc911\uc785\ub2c8\ub2e4."
+  summaryTitle: "강원FC 현재 순위",
+  leagueListTitle: "리그 전체 순위",
+  collapse: "접기",
+  expand: "펼치기",
+  rank: "순위",
+  place: "위",
+  team: "팀",
+  played: "경기",
+  wins: "승",
+  draws: "무",
+  losses: "패",
+  record: "전적",
+  wdl: "승/무/패",
+  goalsFor: "득점",
+  goalsAgainst: "실점",
+  goalDifference: "득실",
+  points: "승점",
+  form: "최근 5경기",
+  empty: "K리그 공식 팀 순위 연동을 준비 중입니다."
 };
 
 export function StandingTable({ standings }: { standings: Standing[] }) {
@@ -104,7 +104,7 @@ function MobileLeagueList({ standings }: { standings: Standing[] }) {
     <details className="group overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 md:hidden">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4">
         <div>
-          <p className="text-xs font-black text-gangwon-orange">\uc21c\uc704\ud45c</p>
+          <p className="text-xs font-black text-gangwon-orange">순위표</p>
           <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
         </div>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500 group-open:bg-orange-50 group-open:text-gangwon-orange">
@@ -168,7 +168,7 @@ function GangwonSummaryCard({ standing }: { standing: Standing }) {
     <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-5 text-white shadow-card">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black text-white/75">\uac15\uc6d0 \uc694\uc57d</p>
+          <p className="text-xs font-black text-white/75">강원 요약</p>
           <h2 className="mt-1 text-xl font-black">{labels.summaryTitle}</h2>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange">

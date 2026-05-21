@@ -13,20 +13,20 @@ interface PlayerStatsPanelProps {
 type StatKey = "goals" | "assists" | "yellowCards";
 
 const labels = {
-  gangwonTitle: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d",
-  leagueTitle: "\ub9ac\uadf8 \uac1c\uc778 \uc21c\uc704",
-  loadFailed: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d\uc744 \ud45c\uc2dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
-  goals: "\ub4dd\uc810",
-  assists: "\ub3c4\uc6c0",
-  yellowCards: "\uacbd\uace0",
-  goal: "\uace8",
-  assist: "\ub3c4\uc6c0",
-  card: "\uc7a5",
-  count: "\uac1c",
-  played: "\ucd9c\uc804",
-  games: "\uacbd\uae30",
-  empty: "\ud45c\uc2dc\ud560 \uae30\ub85d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
-  gangwonBadge: "\uac15\uc6d0"
+  gangwonTitle: "강원 선수 개인기록",
+  leagueTitle: "리그 개인 순위",
+  loadFailed: "강원 선수 개인기록을 표시할 수 없습니다.",
+  goals: "득점",
+  assists: "도움",
+  yellowCards: "경고",
+  goal: "골",
+  assist: "도움",
+  card: "장",
+  count: "개",
+  played: "출전",
+  games: "경기",
+  empty: "표시할 기록이 없습니다.",
+  gangwonBadge: "강원"
 };
 
 const gangwonTabs = [
@@ -71,14 +71,14 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   return (
     <section className="grid gap-5">
       <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow="\uac15\uc6d0 \uae30\ub85d" title={labels.gangwonTitle}>
+        <StatsHeader eyebrow="강원 기록" title={labels.gangwonTitle}>
           <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as StatKey)} />
         </StatsHeader>
         <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
       </article>
 
       <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow="\ub9ac\uadf8 \uc21c\uc704" title={labels.leagueTitle}>
+        <StatsHeader eyebrow="리그 순위" title={labels.leagueTitle}>
           <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
         </StatsHeader>
         <StatsList rows={leagueRows} valueKey={activeLeague} showClub />
