@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { getCombinedPlayerRecords, getKLeagueStandings as getNaverKLeagueStandings } from "@/lib/naverKleague";
 import type { ClubPlatform, ClubPost, Coach, LeaguePlayerStat, Match, Player, PlayerPosition, Standing } from "@/types";
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
@@ -192,6 +193,22 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
 }
 
 export async function fetchKLeaguePlayerStats(limit = 120): Promise<LeaguePlayerStat[]> {
+  const naverStats = await getCombinedPlayerRecords();
+
+  if (naverStats.data.length) {
+    return naverStats.data.map((row) => ({
+      rank: row.rank,
+      name: row.playerName,
+      club: row.teamCode === "21" ? "GANGWON" : row.teamName,
+      goals: row.goals,
+      assists: row.assists,
+      attackPoints: row.attackPoints,
+      yellowCards: row.yellowCards,
+      redCards: row.redCards,
+      played: row.matches
+    })).slice(0, limit);
+  }
+
   const [portalResult, fullResult, gangwonSquadResult] = await Promise.allSettled([
     fetchKLeaguePortalPlayerStats(),
     fetchKLeagueFullPlayerStats(limit),
@@ -556,6 +573,24 @@ function translatePlayerName(name: string, club: string) {
 }
 
 export async function fetchKLeagueStandings(): Promise<Standing[]> {
+  const naverStandings = await getNaverKLeagueStandings();
+
+  if (naverStandings.data.length) {
+    return naverStandings.data.map((row) => ({
+      rank: row.rank,
+      team: row.teamName,
+      played: row.played,
+      wins: row.wins,
+      draws: row.draws,
+      losses: row.losses,
+      goalsFor: row.goalsFor,
+      goalsAgainst: row.goalsAgainst,
+      goalDifference: row.goalDifference,
+      points: row.points,
+      recentForm: row.recentForm.filter((value): value is "W" | "D" | "L" => value === "W" || value === "D" || value === "L")
+    }));
+  }
+
   const html = await fetchText(portalMainUrl);
   const $ = cheerio.load(html);
   const lines = $("body")

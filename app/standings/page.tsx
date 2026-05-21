@@ -2,26 +2,47 @@ import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
 import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
-import { fetchKLeaguePlayerStats, fetchKLeagueStandings } from "@/lib/officialFeed";
+import { getCombinedPlayerRecords, getKLeagueStandings } from "@/lib/naverKleague";
 import type { LeaguePlayerStat } from "@/types";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60 * 60 * 6;
 
 const labels = {
   title: "K\ub9ac\uadf81 \uc21c\uc704",
   playerStats: "\uac1c\uc778 \uae30\ub85d",
-  source: "\ub370\uc774\ud130 \ucd9c\ucc98: K\ub9ac\uadf8 \ud3ec\ud138"
+  source: "\ub370\uc774\ud130 \ucd9c\ucc98: \ub124\uc774\ubc84 \uc2a4\ud3ec\uce20"
 };
 
 export default async function StandingsPage() {
   const [standingsResult, statsResult] = await Promise.allSettled([
-    fetchKLeagueStandings(),
-    fetchKLeaguePlayerStats()
+    getKLeagueStandings(),
+    getCombinedPlayerRecords()
   ]);
-  const tableStandings = standingsResult.status === "fulfilled" && standingsResult.value.length ? standingsResult.value : standings;
-  const fetchedPlayerStats = statsResult.status === "fulfilled" ? statsResult.value : [];
-  const playerStats = mergePlayerStats([...fallbackPlayerStats, ...fetchedPlayerStats]);
+  const tableStandings = standingsResult.status === "fulfilled" && standingsResult.value.data.length ? standingsResult.value.data.map((row) => ({
+    rank: row.rank,
+    team: row.teamName,
+    played: row.played,
+    wins: row.wins,
+    draws: row.draws,
+    losses: row.losses,
+    goalsFor: row.goalsFor,
+    goalsAgainst: row.goalsAgainst,
+    goalDifference: row.goalDifference,
+    points: row.points,
+    recentForm: row.recentForm.filter((value): value is "W" | "D" | "L" => value === "W" || value === "D" || value === "L")
+  })) : standings;
+  const fetchedPlayerStats = statsResult.status === "fulfilled" ? statsResult.value.data.map((row) => ({
+    rank: row.rank,
+    name: row.playerName,
+    club: row.teamCode === "21" ? "GANGWON" : row.teamName,
+    goals: row.goals,
+    assists: row.assists,
+    attackPoints: row.attackPoints,
+    yellowCards: row.yellowCards,
+    redCards: row.redCards,
+    played: row.matches
+  })) : [];
+  const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : fallbackPlayerStats;
 
   return (
     <div className="grid gap-6">
@@ -31,6 +52,7 @@ export default async function StandingsPage() {
 
       <SectionHeader title={labels.playerStats} eyebrow="Player Stats" />
       <PlayerStatsPanel stats={playerStats} />
+      <p className="text-xs font-bold text-slate-400">{labels.source}</p>
     </div>
   );
 }
