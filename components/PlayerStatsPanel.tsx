@@ -21,6 +21,7 @@ const labels = {
   goal: "\uace8",
   assist: "\ub3c4\uc6c0",
   card: "\uc7a5",
+  count: "\uac1c",
   played: "\ucd9c\uc804",
   games: "\uacbd\uae30",
   empty: "\ud45c\uc2dc\ud560 \uae30\ub85d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
@@ -40,8 +41,14 @@ const leagueTabs = [
 
 const suffixMap: Record<StatKey, string> = {
   goals: labels.goal,
-  assists: labels.assist,
+  assists: labels.count,
   yellowCards: labels.card
+};
+
+const statLabelMap: Record<StatKey, string> = {
+  goals: labels.goals,
+  assists: labels.assists,
+  yellowCards: labels.yellowCards
 };
 
 export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
@@ -136,7 +143,7 @@ function StatsList({
               </div>
             </div>
             <span className="shrink-0 rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange ring-1 ring-orange-100">
-              {row[valueKey]}{suffixMap[valueKey]}
+              {statLabelMap[valueKey]} {Number(row[valueKey] ?? 0)}{suffixMap[valueKey]}
             </span>
           </div>
         );

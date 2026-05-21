@@ -191,7 +191,7 @@ export async function fetchOfficialCoaches(): Promise<Coach[]> {
   return coaches;
 }
 
-export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerStat[]> {
+export async function fetchKLeaguePlayerStats(limit = 120): Promise<LeaguePlayerStat[]> {
   const [portalResult, fullResult, gangwonSquadResult] = await Promise.allSettled([
     fetchKLeaguePortalPlayerStats(),
     fetchKLeagueFullPlayerStats(limit),
@@ -200,9 +200,8 @@ export async function fetchKLeaguePlayerStats(limit = 30): Promise<LeaguePlayerS
   const portalStats = portalResult.status === "fulfilled" ? portalResult.value : [];
   const fullStats = fullResult.status === "fulfilled" ? fullResult.value : [];
   const gangwonSquadStats = gangwonSquadResult.status === "fulfilled" ? gangwonSquadResult.value : [];
-  const fullStatsWithoutGangwon = fullStats.filter((row) => row.club !== "GANGWON");
 
-  return mergePlayerStats([...portalStats, ...fullStatsWithoutGangwon, ...gangwonSquadStats]).slice(0, limit + gangwonSquadStats.length);
+  return mergePlayerStats([...portalStats, ...fullStats, ...gangwonSquadStats]).slice(0, limit + gangwonSquadStats.length);
 }
 
 async function fetchGangwonSquadPlayerStats(): Promise<LeaguePlayerStat[]> {
@@ -293,7 +292,32 @@ async function fetchKLeagueFullPlayerStats(limit = 80): Promise<LeaguePlayerStat
     .split("\n")
     .map(normalize)
     .filter(Boolean);
-  const clubs = ["SEOUL", "ULSAN", "JEONBUK", "GANGWON", "POHANG", "INCHEON", "ANYANG", "JEJU", "BUCHEON", "DAEJEON HANA", "GIMCHEON", "GWANGJU"];
+  const clubs = [
+    "DAEJEON HANA",
+    "SEOUL",
+    "ULSAN",
+    "JEONBUK",
+    "GANGWON",
+    "POHANG",
+    "INCHEON",
+    "ANYANG",
+    "JEJU",
+    "BUCHEON",
+    "GIMCHEON",
+    "GWANGJU",
+    "\ub300\uc804",
+    "\uc11c\uc6b8",
+    "\uc6b8\uc0b0",
+    "\uc804\ubd81",
+    "\uac15\uc6d0",
+    "\ud3ec\ud56d",
+    "\uc778\ucc9c",
+    "\uc548\uc591",
+    "\uc81c\uc8fc",
+    "\ubd80\ucc9c",
+    "\uae40\ucc9c",
+    "\uad11\uc8fc"
+  ];
   const stats: LeaguePlayerStat[] = [];
 
   for (let index = 0; index < lines.length - 1; index += 1) {
@@ -313,7 +337,7 @@ async function fetchKLeagueFullPlayerStats(limit = 80): Promise<LeaguePlayerStat
     const rank = Number(rankMatch[1]);
     const nameWithClub = rankMatch[2];
     const englishName = nameWithClub.slice(0, -matchedClub.length).trim();
-    const normalizedClub = matchedClub === "DAEJEON HANA" ? "DAEJEON HANA" : matchedClub;
+    const normalizedClub = normalizeRecordClub(matchedClub);
     const name = translatePlayerName(englishName, normalizedClub);
 
     stats.push({
@@ -470,6 +494,25 @@ function normalizePortalClub(club: string) {
     "\uc548\uc591": "ANYANG",
     "\uc11c\uc6b8": "SEOUL",
     "\uae40\ucc9c": "GIMCHEON"
+  };
+
+  return clubMap[club] ?? club;
+}
+
+function normalizeRecordClub(club: string) {
+  const clubMap: Record<string, string> = {
+    "\uac15\uc6d0": "GANGWON",
+    "\uc778\ucc9c": "INCHEON",
+    "\ud3ec\ud56d": "POHANG",
+    "\uc6b8\uc0b0": "ULSAN",
+    "\ub300\uc804": "DAEJEON HANA",
+    "\uc548\uc591": "ANYANG",
+    "\uc11c\uc6b8": "SEOUL",
+    "\uae40\ucc9c": "GIMCHEON",
+    "\uc804\ubd81": "JEONBUK",
+    "\uc81c\uc8fc": "JEJU",
+    "\ubd80\ucc9c": "BUCHEON",
+    "\uad11\uc8fc": "GWANGJU"
   };
 
   return clubMap[club] ?? club;
