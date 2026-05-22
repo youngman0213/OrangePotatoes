@@ -18,7 +18,7 @@ const newsUrl = "https://news.google.com/rss/search?q=%EA%B0%95%EC%9B%90FC&hl=ko
 const fallbackTitle = "\uac15\uc6d0FC \ub274\uc2a4";
 const fallbackSummary = "\uc6d0\ubb38 \ub9c1\ud06c\uc5d0\uc11c \uae30\uc0ac \ub0b4\uc6a9\uc744 \ud655\uc778\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.";
 
-export async function fetchGangwonNews(limit = 20): Promise<NewsItem[]> {
+export async function fetchGangwonNews(limit = 30): Promise<NewsItem[]> {
   const response = await fetch(newsUrl, {
     next: { revalidate: 60 * 20 },
     headers: {
@@ -57,7 +57,7 @@ export async function fetchGangwonNews(limit = 20): Promise<NewsItem[]> {
 
 function dedupeNews(items: NewsItem[]) {
   const seenUrls = new Set<string>();
-  const seenTitles: string[] = [];
+  const seenTitles = new Set<string>();
   const unique: NewsItem[] = [];
 
   for (const item of items) {
@@ -65,10 +65,10 @@ function dedupeNews(items: NewsItem[]) {
     const titleKey = normalizeNewsTitle(item.title);
 
     if (urlKey && seenUrls.has(urlKey)) continue;
-    if (seenTitles.some((seenTitle) => areSimilarTitles(seenTitle, titleKey))) continue;
+    if (titleKey && seenTitles.has(titleKey)) continue;
 
     if (urlKey) seenUrls.add(urlKey);
-    seenTitles.push(titleKey);
+    if (titleKey) seenTitles.add(titleKey);
     unique.push(item);
   }
 
@@ -92,31 +92,19 @@ function normalizeNewsUrl(url: string) {
 function normalizeNewsTitle(title: string) {
   return title
     .replace(/\[[^\]]+\]/g, " ")
-    .replace(/[“”"'‘’]/g, "")
+    .replace(/["']/g, "")
     .replace(/[^0-9A-Za-z\uac00-\ud7a3]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
 }
 
-function areSimilarTitles(a: string, b: string) {
-  if (!a || !b) return false;
-  if (a === b) return true;
-  if (a.includes(b) || b.includes(a)) return Math.min(a.length, b.length) >= 18;
-
-  const aTokens = new Set(a.split(" ").filter((token) => token.length > 1));
-  const bTokens = new Set(b.split(" ").filter((token) => token.length > 1));
-  const intersection = Array.from(aTokens).filter((token) => bTokens.has(token)).length;
-  const base = Math.min(aTokens.size, bTokens.size);
-
-  return base >= 5 && intersection / base >= 0.8;
-}
-
 function categorizeNews(title: string, summary: string): NewsCategory {
   const text = `${title} ${summary}`;
 
+  if (/(\uc774\uc801|\uc601\uc785|\ubd80\uc0c1|\ubcf5\uadc0|\uacc4\uc57d|\uacb0\uc7a5|\uc784\ub300|\ubc29\ucd9c|\uc7ac\uacc4\uc57d)/.test(text)) return "transfer";
   if (/(K\ub9ac\uadf8|\uacbd\uae30|\ud504\ub9ac\ubdf0|\ub9ac\ubdf0|\uc2b9\ub9ac|\ud328\ubc30|\ubb34\uc2b9\ubd80|\uacb0\uacfc|\ub4dd\uc810|\uc2e4\uc810|\ud558\uc774\ub77c\uc774\ud2b8|\ub300\uacb0|\ucd9c\uaca9)/i.test(text)) return "match";
-  if (/(\uc120\uc218|\uc774\uc801|\uc601\uc785|\ubd80\uc0c1|\ubcf5\uadc0|\uacc4\uc57d|\ucd9c\uc804|\uc778\ud130\ubdf0|\uc18c\uac10|\uac10\ub3c5|\ucf54\uce58)/.test(text)) return "player";
+  if (/(\uc120\uc218|\ucd9c\uc804|\uc778\ud130\ubdf0|\uc18c\uac10|\ub9d0\ud588\ub2e4|\ubc1d\ud614\ub2e4|\uac10\ub3c5|\ucf54\uce58|\ud65c\uc57d|\uc120\ubc29|\uacf5\uaca9\uc218|\ubbf8\ub4dc\ud544\ub354|\uc218\ube44\uc218|\uace8\ud0a4\ud37c)/.test(text)) return "player";
   if (/(\uad6c\ub2e8|\uacf5\uc9c0|\uc6b4\uc601|\ud589\uc815|\uc9d5\uacc4|\ud2f0\ucf13|\uc608\ub9e4|MD|\uc774\ubca4\ud2b8|\uc720\ub2c8\ud3fc)/i.test(text)) return "club";
 
   return "other";

@@ -10,11 +10,23 @@ import { news as mockNews } from "@/data/mock";
 import { sortByPublishedDesc } from "@/lib/utils";
 import type { NewsCategory, NewsItem } from "@/types";
 
+const labels = {
+  title: "\ub274\uc2a4",
+  eyebrow: "\uae30\uc0ac \ubaa8\uc74c",
+  empty: "\uc870\uac74\uc5d0 \ub9de\ub294 \ub274\uc2a4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  all: "\uc804\uccb4",
+  match: "\uacbd\uae30",
+  player: "\uc120\uc218",
+  transfer: "\uc774\uc801/\ubd80\uc0c1",
+  club: "\uad6c\ub2e8"
+};
+
 const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
-  { label: "전체", value: "all" },
-  { label: "경기", value: "match" },
-  { label: "선수/이적", value: "player" },
-  { label: "구단", value: "club" }
+  { label: labels.all, value: "all" },
+  { label: labels.match, value: "match" },
+  { label: labels.player, value: "player" },
+  { label: labels.transfer, value: "transfer" },
+  { label: labels.club, value: "club" }
 ];
 
 export default function NewsPage() {
@@ -38,7 +50,7 @@ export default function NewsPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="뉴스" eyebrow="기사 모음" />
+      <SectionHeader title={labels.title} eyebrow={labels.eyebrow} />
       <FilterTabs tabs={tabs} active={category} onChange={(value) => setCategory(value as NewsCategory | "all")} />
       {loading ? (
         <LoadingState />
@@ -47,7 +59,7 @@ export default function NewsPage() {
           {filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}
         </div>
       ) : (
-        <EmptyState title="조건에 맞는 뉴스가 없습니다." />
+        <EmptyState title={labels.empty} />
       )}
     </div>
   );

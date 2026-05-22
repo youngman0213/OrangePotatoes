@@ -2,6 +2,7 @@ export type MatchStatus = "scheduled" | "live" | "finished";
 export type NewsCategory =
   | "match"
   | "player"
+  | "transfer"
   | "club"
   | "other";
 export type ClubPlatform = "official" | "instagram" | "youtube" | "facebook" | "ticket" | "md" | "event";
