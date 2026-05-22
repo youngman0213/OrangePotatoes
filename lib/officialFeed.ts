@@ -6,6 +6,9 @@ const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
 const scheduleSeasonYear = 2026;
 const scheduleSeasonStartMonth = 2;
 const scheduleSeasonEndMonth = 12;
+const kLeagueBaseUrl = "https://www.kleague.com";
+const kLeagueScheduleUrl = `${kLeagueBaseUrl}/getScheduleList.do`;
+const gangwonTeamId = "K21";
 const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
 
@@ -27,6 +30,36 @@ const ko = {
   koreaCup: "\ucf54\ub9ac\uc544\ucef5",
   hanaBank: "\ud558\ub098\uc740\ud589 "
 };
+
+interface KLeagueScheduleItem {
+  year: number;
+  leagueId: number;
+  roundId: number;
+  gameId: number;
+  gameDate: string;
+  gameTime: string;
+  endYn: "Y" | "N";
+  meetName: string;
+  homeTeam: string;
+  homeTeamName: string;
+  awayTeam: string;
+  awayTeamName: string;
+  fieldName?: string | null;
+  fieldNameFull?: string | null;
+  homeGoal: number | null;
+  awayGoal: number | null;
+  broadcastName?: string | null;
+  meetSeq: number;
+  company?: string | null;
+  goodsCode?: string | null;
+}
+
+interface KLeagueScheduleResponse {
+  resultCode?: string;
+  data?: {
+    scheduleList?: KLeagueScheduleItem[];
+  };
+}
 
 export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
   const html = await fetchText(officialBaseUrl);
@@ -67,8 +100,7 @@ export async function fetchOfficialMatches(limit?: number): Promise<Match[]> {
     { length: scheduleSeasonEndMonth - scheduleSeasonStartMonth + 1 },
     (_, index) => scheduleSeasonStartMonth + index
   );
-  const urls = months.map((month) => createScheduleUrl(scheduleSeasonYear, month));
-  const results = await Promise.allSettled(urls.map((url) => fetchOfficialMatchesByUrl(url)));
+  const results = await Promise.allSettled(months.map((month) => fetchKLeagueScheduleMonth(scheduleSeasonYear, month)));
   const matches = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
 
   if (!matches.length) {
@@ -78,6 +110,54 @@ export async function fetchOfficialMatches(limit?: number): Promise<Match[]> {
 
   const uniqueMatches = dedupeMatches(matches);
   return typeof limit === "number" ? uniqueMatches.slice(0, limit) : uniqueMatches;
+}
+
+async function fetchKLeagueScheduleMonth(year: number, month: number): Promise<Match[]> {
+  const response = await fetch(kLeagueScheduleUrl, {
+    method: "POST",
+    next: { revalidate: 60 * 60 },
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+      "User-Agent": "OrangePotatoesFanHub/1.0"
+    },
+    body: JSON.stringify({
+      leagueId: "1",
+      year: String(year),
+      month: String(month).padStart(2, "0"),
+      teamId: gangwonTeamId
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`K League schedule request failed: ${response.status}`);
+  }
+
+  const payload = (await response.json()) as KLeagueScheduleResponse;
+  const scheduleList = payload.data?.scheduleList ?? [];
+
+  return scheduleList.map(normalizeKLeagueMatch);
+}
+
+function normalizeKLeagueMatch(item: KLeagueScheduleItem): Match {
+  const isFinished = item.endYn === "Y";
+
+  return {
+    id: `kleague-match-${item.year}-${item.leagueId}-${item.gameId}-${item.meetSeq}`,
+    competition: normalizeCompetition(item.meetName),
+    round: item.roundId ? `${item.roundId}R` : item.meetName,
+    date: toIsoDateFromKLeague(item.gameDate, item.gameTime),
+    homeTeam: normalizeTeam(item.homeTeamName),
+    awayTeam: normalizeTeam(item.awayTeamName),
+    venue: item.fieldNameFull || item.fieldName || "",
+    isHome: item.homeTeam === gangwonTeamId,
+    status: isFinished ? "finished" : "scheduled",
+    homeScore: isFinished ? item.homeGoal : null,
+    awayScore: isFinished ? item.awayGoal : null,
+    ticketUrl: isFinished ? null : createTicketUrl(),
+    broadcastUrl: "https://www.coupangplay.com",
+    highlightUrl: isFinished ? createKLeagueMatchUrl(item, 4) : null,
+    detailUrl: isFinished ? createKLeagueMatchUrl(item, 0) : null
+  };
 }
 
 async function fetchOfficialMatchesByUrl(url: string): Promise<Match[]> {
@@ -130,7 +210,7 @@ async function fetchOfficialMatchesByUrl(url: string): Promise<Match[]> {
       ticketUrl: score === "VS" ? "https://ticket.interpark.com" : null,
       broadcastUrl: "https://www.coupangplay.com",
       highlightUrl: score === "VS" ? null : "https://www.youtube.com/user/gangwonfc",
-      detailUrl: score === "VS" ? null : createKLeagueMatchDetailUrl(year, dateText)
+      detailUrl: score === "VS" ? null : createKLeagueScheduleUrl(year, dateText)
     });
   }
 
@@ -295,11 +375,24 @@ function toIsoDate(year: number, dateText: string) {
   return `${year}-${month}-${day}T${hour}:${minute}:00+09:00`;
 }
 
-function createKLeagueMatchDetailUrl(year: number, dateText: string) {
+function toIsoDateFromKLeague(date: string, time: string) {
+  const [year, month, day] = date.split(".");
+  return `${year}-${month}-${day}T${time}:00+09:00`;
+}
+
+function createKLeagueMatchUrl(item: KLeagueScheduleItem, tab: number) {
+  return `${kLeagueBaseUrl}/match.do?year=${item.year}&leagueId=${item.leagueId}&gameId=${item.gameId}&meetSeq=${item.meetSeq}&startTabNum=${tab}`;
+}
+
+function createKLeagueScheduleUrl(year: number, dateText: string) {
   const matched = dateText.match(/^(\d{2})\/(\d{2})/);
   const month = matched ? matched[1] : "01";
 
   return `https://www.kleague.com/schedule.do?leagueId=1&year=${year}&month=${month}`;
+}
+
+function createTicketUrl() {
+  return "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014";
 }
 
 function normalizeTeam(team: string) {
