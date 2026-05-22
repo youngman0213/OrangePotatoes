@@ -5,7 +5,6 @@ import { ExternalLink, Instagram, Megaphone, ShoppingBag, Ticket, Youtube } from
 import type { LucideIcon } from "lucide-react";
 import { ClubPostCard } from "@/components/ClubPostCard";
 import { EmptyState } from "@/components/EmptyState";
-import { FilterTabs } from "@/components/FilterTabs";
 import { LoadingState } from "@/components/LoadingState";
 import { SectionHeader } from "@/components/SectionHeader";
 import { clubPosts as mockClubPosts } from "@/data/mock";
@@ -14,57 +13,56 @@ import type { ClubPost } from "@/types";
 
 const ticketUrl = "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014";
 
-const tabs = [
-  { label: "전체", value: "all" },
-  { label: "공지", value: "official" },
-  { label: "티켓", value: "ticket" },
-  { label: "MD", value: "md" },
-  { label: "이벤트", value: "event" },
-  { label: "유튜브", value: "youtube" },
-  { label: "인스타그램", value: "instagram" }
-];
+const labels = {
+  pageTitle: "\uad6c\ub2e8 \uc18c\uc2dd",
+  channels: "\uacf5\uc2dd \ucc44\ub110",
+  noticeTitle: "\uacf5\uc9c0",
+  noticeEyebrow: "\uad6c\ub2e8 \uc54c\ub9bc",
+  noNotice: "\ud45c\uc2dc\ud560 \uacf5\uc9c0\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  ticket: "\ud2f0\ucf13 \uc608\ub9e4",
+  official: "\uacf5\uc2dd \ud648\ud398\uc774\uc9c0",
+  instagram: "\uc778\uc2a4\ud0c0\uadf8\ub7a8",
+  youtube: "\uc720\ud29c\ube0c",
+  store: "MD \uc2a4\ud1a0\uc5b4",
+  reserve: "\uc608\ub9e4",
+  go: "\uc774\ub3d9"
+};
 
 const quickLinks = [
   {
-    title: "티켓 예매",
-    description: "강원FC 홈경기 예매 페이지로 이동합니다.",
+    title: labels.ticket,
     href: ticketUrl,
-    label: "예매하기",
+    label: labels.reserve,
     icon: Ticket,
     featured: true
   },
   {
-    title: "공식 홈페이지",
-    description: "구단 공지, 일정, 선수단 정보를 확인합니다.",
+    title: labels.official,
     href: "https://www.gangwon-fc.com/",
-    label: "바로가기",
+    label: labels.go,
     icon: Megaphone
   },
   {
-    title: "공식 인스타그램",
-    description: "사진과 현장 소식을 공식 채널에서 확인합니다.",
+    title: labels.instagram,
     href: "https://www.instagram.com/gangwon_fc/",
-    label: "보러가기",
+    label: labels.go,
     icon: Instagram
   },
   {
-    title: "공식 유튜브",
-    description: "구단 영상과 현장 콘텐츠를 확인합니다.",
+    title: labels.youtube,
     href: "https://www.youtube.com/@gangwonfc2008/videos",
-    label: "보러가기",
+    label: labels.go,
     icon: Youtube
   },
   {
-    title: "MD 스토어",
-    description: "유니폼과 구단 상품을 확인합니다.",
+    title: labels.store,
     href: "https://gangwon-fc.imweb.me/",
-    label: "쇼핑하기",
+    label: labels.go,
     icon: ShoppingBag
   }
 ];
 
 export default function ClubPage() {
-  const [platform, setPlatform] = useState("all");
   const [items, setItems] = useState<ClubPost[]>(mockClubPosts);
   const [loading, setLoading] = useState(true);
 
@@ -77,34 +75,31 @@ export default function ClubPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredPosts = useMemo(
-    () => sortByPublishedDesc(items).filter((post) => platform === "all" || post.platform === platform),
-    [platform, items]
+  const officialPosts = useMemo(
+    () => sortByPublishedDesc(items).filter((post) => post.platform === "official"),
+    [items]
   );
 
   return (
     <div className="grid gap-8">
       <section>
-        <SectionHeader title="구단 소식" eyebrow="공식 채널" />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <SectionHeader title={labels.pageTitle} eyebrow={labels.channels} />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
           {quickLinks.map((link) => <QuickLinkCard key={link.title} {...link} />)}
         </div>
       </section>
 
       <section>
-        <SectionHeader title="공지와 이벤트" eyebrow="구단 알림" />
-        <FilterTabs tabs={tabs} active={platform} onChange={setPlatform} />
-        <div className="mt-4">
-          {loading ? (
-            <LoadingState />
-          ) : filteredPosts.length ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.map((post) => <ClubPostCard key={post.id} post={post} />)}
-            </div>
-          ) : (
-            <EmptyState title="조건에 맞는 구단 소식이 없습니다." />
-          )}
-        </div>
+        <SectionHeader title={labels.noticeTitle} eyebrow={labels.noticeEyebrow} />
+        {loading ? (
+          <LoadingState />
+        ) : officialPosts.length ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {officialPosts.map((post) => <ClubPostCard key={post.id} post={post} />)}
+          </div>
+        ) : (
+          <EmptyState title={labels.noNotice} />
+        )}
       </section>
     </div>
   );
@@ -112,14 +107,12 @@ export default function ClubPage() {
 
 function QuickLinkCard({
   title,
-  description,
   href,
   label,
   icon: Icon,
   featured = false
 }: {
   title: string;
-  description: string;
   href: string;
   label: string;
   icon: LucideIcon;
@@ -130,17 +123,20 @@ function QuickLinkCard({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className={`rounded-lg p-4 shadow-card ring-1 transition hover:-translate-y-0.5 ${featured ? "bg-gangwon-orange text-white ring-orange-200" : "bg-white text-gangwon-navy ring-slate-100 hover:ring-orange-100"}`}
+      className={`rounded-lg px-3 py-4 shadow-card ring-1 transition hover:-translate-y-0.5 ${featured ? "bg-gangwon-orange text-white ring-orange-200" : "bg-white text-gangwon-navy ring-slate-100 hover:ring-orange-100"}`}
     >
-      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${featured ? "bg-white/15 text-white" : "bg-orange-50 text-gangwon-orange"}`}>
-        <Icon size={22} aria-hidden="true" />
+      <div className="flex items-center gap-3">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${featured ? "bg-white/15 text-white" : "bg-orange-50 text-gangwon-orange"}`}>
+          <Icon size={19} aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-black">{title}</h3>
+          <span className={`mt-1 inline-flex items-center gap-1 text-xs font-black ${featured ? "text-white" : "text-gangwon-orange"}`}>
+            {label}
+            <ExternalLink size={13} aria-hidden="true" />
+          </span>
+        </div>
       </div>
-      <h3 className="text-base font-black">{title}</h3>
-      <p className={`mt-2 min-h-10 text-sm font-bold ${featured ? "text-white/80" : "text-slate-500"}`}>{description}</p>
-      <span className={`mt-4 inline-flex items-center gap-1 text-sm font-black ${featured ? "text-white" : "text-gangwon-orange"}`}>
-        {label}
-        <ExternalLink size={15} aria-hidden="true" />
-      </span>
     </a>
   );
 }
