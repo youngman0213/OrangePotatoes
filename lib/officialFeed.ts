@@ -61,7 +61,7 @@ export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
   return [...posts, ...channelPosts].slice(0, limit);
 }
 
-export async function fetchOfficialMatches(): Promise<Match[]> {
+export async function fetchOfficialMatches(limit?: number): Promise<Match[]> {
   const currentMonth = getKstMonth();
   const months = Array.from(
     { length: Math.max(currentMonth - scheduleSeasonStartMonth + 1, 1) },
@@ -72,10 +72,12 @@ export async function fetchOfficialMatches(): Promise<Match[]> {
   const matches = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
 
   if (!matches.length) {
-    return fetchOfficialMatchesByUrl(scheduleUrl);
+    const fallbackMatches = await fetchOfficialMatchesByUrl(scheduleUrl);
+    return typeof limit === "number" ? fallbackMatches.slice(0, limit) : fallbackMatches;
   }
 
-  return dedupeMatches(matches);
+  const uniqueMatches = dedupeMatches(matches);
+  return typeof limit === "number" ? uniqueMatches.slice(0, limit) : uniqueMatches;
 }
 
 async function fetchOfficialMatchesByUrl(url: string): Promise<Match[]> {
