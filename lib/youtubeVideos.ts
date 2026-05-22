@@ -6,7 +6,7 @@ const gangwonFcChannelId = "UCuLjoid8kKTKITvkUP94kJA";
 const cacheSeconds = 60 * 60 * 6;
 
 const gangwonKeywords = ["강원", "강원FC", "Gangwon", "Gangwon FC"];
-const highlightKeywords = ["하이라이트", "Highlights", "2-Minute", "5-Min", "H/L"];
+const highlightKeywords = ["하이라이트", "Highlights", "Highlight", "2-Minute", "2 Minute", "5-Min", "5 Minute", "H/L"];
 
 interface YouTubeSearchResponse {
   items?: YouTubeSearchItem[];
@@ -33,13 +33,18 @@ interface YouTubeSearchItem {
 }
 
 export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]> {
-  const results = await Promise.all(gangwonKeywords.map((keyword) => searchYouTubeVideos({
+  const latestChannelVideos = searchYouTubeVideos({
+    channelId: coupangPlaySportsChannelId,
+    maxResults: 50
+  });
+  const keywordVideos = Promise.all(gangwonKeywords.map((keyword) => searchYouTubeVideos({
     channelId: coupangPlaySportsChannelId,
     query: keyword,
     maxResults: 10
   })));
+  const [latest, keywordResults] = await Promise.all([latestChannelVideos, keywordVideos]);
 
-  return uniqueVideos(results.flat())
+  return uniqueVideos([...latest, ...keywordResults.flat()])
     .filter(isGangwonVideo)
     .filter(isHighlightVideo)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
@@ -58,13 +63,13 @@ export async function fetchGangwonOfficialVideos(limit = 12): Promise<Video[]> {
 }
 
 export function isGangwonVideo(video: Pick<Video, "title" | "description">) {
-  const text = `${video.title} ${video.description ?? ""}`;
-  return gangwonKeywords.some((keyword) => text.toLowerCase().includes(keyword.toLowerCase()));
+  const text = `${video.title} ${video.description ?? ""}`.toLowerCase();
+  return gangwonKeywords.some((keyword) => text.includes(keyword.toLowerCase()));
 }
 
 export function isHighlightVideo(video: Pick<Video, "title" | "description">) {
-  const text = `${video.title} ${video.description ?? ""}`;
-  return highlightKeywords.some((keyword) => text.toLowerCase().includes(keyword.toLowerCase()));
+  const text = `${video.title} ${video.description ?? ""}`.toLowerCase();
+  return highlightKeywords.some((keyword) => text.includes(keyword.toLowerCase()));
 }
 
 async function searchYouTubeVideos({
@@ -95,7 +100,6 @@ async function searchYouTubeVideos({
   const response = await fetch(`${youtubeApiBaseUrl}?${params.toString()}`, {
     next: { revalidate: cacheSeconds }
   });
-
   const payload = await response.json() as YouTubeSearchResponse;
 
   if (!response.ok) {
