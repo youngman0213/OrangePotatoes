@@ -3,7 +3,7 @@ import type { ClubPost } from "@/types";
 import { formatShortDate } from "@/lib/utils";
 
 const platformLabels: Record<ClubPost["platform"], string> = {
-  official: "공식 홈페이지",
+  official: "공지",
   instagram: "인스타그램",
   youtube: "유튜브",
   facebook: "페이스북",
