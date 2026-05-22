@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { ComponentType } from "react";
 import { ExternalLink, Instagram, Megaphone, ShoppingBag, Ticket, Youtube } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ClubPostCard } from "@/components/ClubPostCard";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterTabs } from "@/components/FilterTabs";
@@ -122,7 +122,7 @@ function QuickLinkCard({
   description: string;
   href: string;
   label: string;
-  icon: ComponentType<{ size?: number; "aria-hidden"?: boolean }>;
+  icon: LucideIcon;
   featured?: boolean;
 }) {
   return (
