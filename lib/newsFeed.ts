@@ -93,7 +93,7 @@ function normalizeNewsTitle(title: string) {
   return title
     .replace(/\[[^\]]+\]/g, " ")
     .replace(/[“”"'‘’]/g, "")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/[^0-9A-Za-z가-힣]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
