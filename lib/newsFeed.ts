@@ -35,7 +35,7 @@ export async function fetchGangwonNews(limit = 20): Promise<NewsItem[]> {
   const rawItems = parsed?.rss?.channel?.item;
   const items: GoogleNewsItem[] = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
 
-  return items.slice(0, limit).map((item, index) => {
+  const normalizedItems = items.map((item, index) => {
     const title = cleanText(item.title ?? fallbackTitle);
     const summary = cleanText(stripHtml(item.description ?? ""));
     const source = typeof item.source === "string" ? item.source : item.source?.["#text"] ?? "Google News";
@@ -51,6 +51,65 @@ export async function fetchGangwonNews(limit = 20): Promise<NewsItem[]> {
       thumbnailUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=900&q=80"
     };
   });
+
+  return dedupeNews(normalizedItems).slice(0, limit);
+}
+
+function dedupeNews(items: NewsItem[]) {
+  const seenUrls = new Set<string>();
+  const seenTitles: string[] = [];
+  const unique: NewsItem[] = [];
+
+  for (const item of items) {
+    const urlKey = normalizeNewsUrl(item.url);
+    const titleKey = normalizeNewsTitle(item.title);
+
+    if (urlKey && seenUrls.has(urlKey)) continue;
+    if (seenTitles.some((seenTitle) => areSimilarTitles(seenTitle, titleKey))) continue;
+
+    if (urlKey) seenUrls.add(urlKey);
+    seenTitles.push(titleKey);
+    unique.push(item);
+  }
+
+  return unique;
+}
+
+function normalizeNewsUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.delete("utm_source");
+    parsed.searchParams.delete("utm_medium");
+    parsed.searchParams.delete("utm_campaign");
+    parsed.searchParams.delete("utm_content");
+    parsed.searchParams.delete("utm_term");
+    return `${parsed.hostname}${parsed.pathname}`.replace(/\/$/, "").toLowerCase();
+  } catch {
+    return url.toLowerCase();
+  }
+}
+
+function normalizeNewsTitle(title: string) {
+  return title
+    .replace(/\[[^\]]+\]/g, " ")
+    .replace(/[“”"'‘’]/g, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function areSimilarTitles(a: string, b: string) {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return Math.min(a.length, b.length) >= 18;
+
+  const aTokens = new Set(a.split(" ").filter((token) => token.length > 1));
+  const bTokens = new Set(b.split(" ").filter((token) => token.length > 1));
+  const intersection = Array.from(aTokens).filter((token) => bTokens.has(token)).length;
+  const base = Math.min(aTokens.size, bTokens.size);
+
+  return base >= 5 && intersection / base >= 0.8;
 }
 
 function categorizeNews(title: string, summary: string): NewsCategory {
