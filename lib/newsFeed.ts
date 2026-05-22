@@ -78,6 +78,7 @@ function createGoogleNewsRssUrl(query: string) {
 function dedupeNews(items: NewsItem[]) {
   const seenUrls = new Set<string>();
   const seenTitles = new Set<string>();
+  const seenTitleKeys: string[] = [];
   const unique: NewsItem[] = [];
 
   for (const item of items) {
@@ -86,9 +87,13 @@ function dedupeNews(items: NewsItem[]) {
 
     if (urlKey && seenUrls.has(urlKey)) continue;
     if (titleKey && seenTitles.has(titleKey)) continue;
+    if (seenTitleKeys.some((seenTitle) => areSameStoryTitle(seenTitle, titleKey))) continue;
 
     if (urlKey) seenUrls.add(urlKey);
-    if (titleKey) seenTitles.add(titleKey);
+    if (titleKey) {
+      seenTitles.add(titleKey);
+      seenTitleKeys.push(titleKey);
+    }
     unique.push(item);
   }
 
@@ -111,12 +116,29 @@ function normalizeNewsUrl(url: string) {
 
 function normalizeNewsTitle(title: string) {
   return title
+    .replace(/\s-\s[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/g, " ")
     .replace(/\[[^\]]+\]/g, " ")
     .replace(/["']/g, "")
     .replace(/[^0-9A-Za-z\uac00-\ud7a3]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
+}
+
+function areSameStoryTitle(a: string, b: string) {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return Math.min(a.length, b.length) >= 18;
+
+  const aTokens = a.split(" ").filter((token) => token.length > 1);
+  const bTokens = b.split(" ").filter((token) => token.length > 1);
+  const shorter = aTokens.length <= bTokens.length ? aTokens : bTokens;
+  const longer = aTokens.length <= bTokens.length ? bTokens : aTokens;
+
+  if (shorter.length < 6) return false;
+
+  const overlap = shorter.filter((token) => longer.indexOf(token) >= 0).length;
+  return overlap / shorter.length >= 0.9;
 }
 
 function categorizeNews(title: string, summary: string): NewsCategory {
