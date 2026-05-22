@@ -8,20 +8,17 @@ import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { news as mockNews } from "@/data/mock";
 import { sortByPublishedDesc } from "@/lib/utils";
-import type { NewsItem } from "@/types";
+import type { NewsCategory, NewsItem } from "@/types";
 
-const tabs = [
+const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
   { label: "전체", value: "all" },
-  { label: "경기 프리뷰", value: "match-preview" },
-  { label: "경기 리뷰", value: "match-review" },
-  { label: "이적/부상", value: "transfer-injury" },
-  { label: "인터뷰", value: "interview" },
-  { label: "구단 행정", value: "club-admin" },
-  { label: "기타", value: "other" }
+  { label: "경기", value: "match" },
+  { label: "선수/이적", value: "player" },
+  { label: "구단", value: "club" }
 ];
 
 export default function NewsPage() {
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState<NewsCategory | "all">("all");
   const [items, setItems] = useState<NewsItem[]>(mockNews);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +39,7 @@ export default function NewsPage() {
   return (
     <div className="grid gap-6">
       <SectionHeader title="뉴스" eyebrow="기사 모음" />
-      <FilterTabs tabs={tabs} active={category} onChange={setCategory} />
+      <FilterTabs tabs={tabs} active={category} onChange={(value) => setCategory(value as NewsCategory | "all")} />
       {loading ? (
         <LoadingState />
       ) : filteredNews.length ? (

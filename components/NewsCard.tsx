@@ -3,11 +3,9 @@ import type { NewsItem } from "@/types";
 import { formatShortDate } from "@/lib/utils";
 
 const categoryLabels: Record<NewsItem["category"], string> = {
-  "match-preview": "경기 프리뷰",
-  "match-review": "경기 리뷰",
-  "transfer-injury": "이적/부상",
-  interview: "인터뷰",
-  "club-admin": "구단 행정",
+  match: "경기",
+  player: "선수/이적",
+  club: "구단",
   other: "기타"
 };
 

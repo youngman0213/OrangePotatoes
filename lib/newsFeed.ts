@@ -48,7 +48,7 @@ export async function fetchGangwonNews(limit = 20): Promise<NewsItem[]> {
       summary: summary || fallbackSummary,
       publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
       category: categorizeNews(title, summary),
-      thumbnailUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=900&q=80"
+      thumbnailUrl: ""
     };
   });
 
@@ -93,7 +93,7 @@ function normalizeNewsTitle(title: string) {
   return title
     .replace(/\[[^\]]+\]/g, " ")
     .replace(/[“”"'‘’]/g, "")
-    .replace(/[^0-9A-Za-z가-힣]+/g, " ")
+    .replace(/[^0-9A-Za-z\uac00-\ud7a3]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
@@ -115,11 +115,9 @@ function areSimilarTitles(a: string, b: string) {
 function categorizeNews(title: string, summary: string): NewsCategory {
   const text = `${title} ${summary}`;
 
-  if (/(preview|\ud504\ub9ac\ubdf0|\uc804\ub9dd|\uc55e\ub450\uace0|\uc0c1\ub300|\ucd9c\uaca9|\ub300\uacb0)/i.test(text)) return "match-preview";
-  if (/(review|\ub9ac\ubdf0|\uc2b9\ub9ac|\ud328\ubc30|\ubb34\uc2b9\ubd80|\uacb0\uacfc|\ud558\uc774\ub77c\uc774\ud2b8|\ub4dd\uc810)/i.test(text)) return "match-review";
-  if (/(\uc774\uc801|\uc601\uc785|\ubd80\uc0c1|\ubcf5\uadc0|\uacb0\uc7a5|\uacc4\uc57d)/.test(text)) return "transfer-injury";
-  if (/(\uc778\ud130\ubdf0|\ub9d0\ud588\ub2e4|\ubc1d\ud614\ub2e4|\uc18c\uac10)/.test(text)) return "interview";
-  if (/(\uacf5\uc9c0|\uc6b4\uc601|\uc9d5\uacc4|\uad6c\ub2e8|\ud589\uc815|\ud2f0\ucf13|\uc774\ubca4\ud2b8)/.test(text)) return "club-admin";
+  if (/(K\ub9ac\uadf8|\uacbd\uae30|\ud504\ub9ac\ubdf0|\ub9ac\ubdf0|\uc2b9\ub9ac|\ud328\ubc30|\ubb34\uc2b9\ubd80|\uacb0\uacfc|\ub4dd\uc810|\uc2e4\uc810|\ud558\uc774\ub77c\uc774\ud2b8|\ub300\uacb0|\ucd9c\uaca9)/i.test(text)) return "match";
+  if (/(\uc120\uc218|\uc774\uc801|\uc601\uc785|\ubd80\uc0c1|\ubcf5\uadc0|\uacc4\uc57d|\ucd9c\uc804|\uc778\ud130\ubdf0|\uc18c\uac10|\uac10\ub3c5|\ucf54\uce58)/.test(text)) return "player";
+  if (/(\uad6c\ub2e8|\uacf5\uc9c0|\uc6b4\uc601|\ud589\uc815|\uc9d5\uacc4|\ud2f0\ucf13|\uc608\ub9e4|MD|\uc774\ubca4\ud2b8|\uc720\ub2c8\ud3fc)/i.test(text)) return "club";
 
   return "other";
 }

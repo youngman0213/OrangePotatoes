@@ -1,10 +1,8 @@
 export type MatchStatus = "scheduled" | "live" | "finished";
 export type NewsCategory =
-  | "match-preview"
-  | "match-review"
-  | "transfer-injury"
-  | "interview"
-  | "club-admin"
+  | "match"
+  | "player"
+  | "club"
   | "other";
 export type ClubPlatform = "official" | "instagram" | "youtube" | "facebook" | "ticket" | "md" | "event";
 export type VideoCategory = "highlight" | "interview" | "training" | "behind" | "other";
