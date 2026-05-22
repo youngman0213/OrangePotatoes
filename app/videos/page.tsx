@@ -1,56 +1,72 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
-import { FilterTabs } from "@/components/FilterTabs";
 import { LoadingState } from "@/components/LoadingState";
 import { SectionHeader } from "@/components/SectionHeader";
 import { VideoCard } from "@/components/VideoCard";
-import { videos as mockVideos } from "@/data/mock";
-import { sortByPublishedDesc } from "@/lib/utils";
 import type { Video } from "@/types";
 
-const tabs = [
-  { label: "전체", value: "all" },
-  { label: "하이라이트", value: "highlight" },
-  { label: "인터뷰", value: "interview" },
-  { label: "훈련", value: "training" },
-  { label: "비하인드", value: "behind" },
-  { label: "기타", value: "other" }
-];
+interface VideosResponse {
+  highlights?: Video[];
+  clubVideos?: Video[];
+  error?: string;
+}
 
 export default function VideosPage() {
-  const [category, setCategory] = useState("all");
-  const [items, setItems] = useState<Video[]>(mockVideos);
+  const [highlights, setHighlights] = useState<Video[]>([]);
+  const [clubVideos, setClubVideos] = useState<Video[]>([]);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/videos")
       .then((response) => response.json())
-      .then((data: { items?: Video[] }) => {
-        if (data.items?.length) setItems(data.items);
+      .then((data: VideosResponse) => {
+        setHighlights(data.highlights ?? []);
+        setClubVideos(data.clubVideos ?? []);
+        setError(data.error ?? "");
       })
+      .catch(() => setError("영상을 불러오지 못했습니다."))
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredVideos = useMemo(
-    () => sortByPublishedDesc(items).filter((video) => category === "all" || video.category === category),
-    [category, items]
-  );
+  if (loading) {
+    return (
+      <div className="grid gap-6">
+        <SectionHeader title="영상" eyebrow="영상 모음" />
+        <LoadingState />
+      </div>
+    );
+  }
 
   return (
-    <div className="grid gap-6">
-      <SectionHeader title="영상" eyebrow="영상 모음" />
-      <FilterTabs tabs={tabs} active={category} onChange={setCategory} />
-      {loading ? (
-        <LoadingState />
-      ) : filteredVideos.length ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredVideos.map((video) => <VideoCard key={video.id} video={video} />)}
-        </div>
-      ) : (
-        <EmptyState title="조건에 맞는 영상이 없습니다." />
-      )}
+    <div className="grid gap-8">
+      <section>
+        <SectionHeader title="하이라이트" eyebrow="쿠팡플레이 스포츠" />
+        {highlights.length ? (
+          <VideoGrid videos={highlights} />
+        ) : (
+          <EmptyState title={error || "표시할 하이라이트 영상이 없습니다."} />
+        )}
+      </section>
+
+      <section>
+        <SectionHeader title="구단 유튜브" eyebrow="강원FC 공식 채널" />
+        {clubVideos.length ? (
+          <VideoGrid videos={clubVideos} />
+        ) : (
+          <EmptyState title={error || "표시할 구단 영상이 없습니다."} />
+        )}
+      </section>
+    </div>
+  );
+}
+
+function VideoGrid({ videos }: { videos: Video[] }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {videos.map((video) => <VideoCard key={video.id} video={video} />)}
     </div>
   );
 }

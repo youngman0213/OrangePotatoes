@@ -54,6 +54,8 @@ export interface Video {
   thumbnailUrl: string;
   publishedAt: string;
   category: VideoCategory;
+  channelTitle?: string;
+  description?: string;
 }
 
 export interface Standing {
