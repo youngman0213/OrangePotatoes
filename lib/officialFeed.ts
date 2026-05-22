@@ -3,6 +3,8 @@ import type { ClubPlatform, ClubPost, Coach, Match, Player, PlayerPosition } fro
 
 const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
+const scheduleSeasonYear = 2026;
+const scheduleSeasonStartMonth = 2;
 const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
 
@@ -59,8 +61,25 @@ export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
   return [...posts, ...channelPosts].slice(0, limit);
 }
 
-export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
-  const html = await fetchText(scheduleUrl);
+export async function fetchOfficialMatches(): Promise<Match[]> {
+  const currentMonth = getKstMonth();
+  const months = Array.from(
+    { length: Math.max(currentMonth - scheduleSeasonStartMonth + 1, 1) },
+    (_, index) => scheduleSeasonStartMonth + index
+  );
+  const urls = months.map((month) => createScheduleUrl(scheduleSeasonYear, month));
+  const results = await Promise.allSettled(urls.map((url) => fetchOfficialMatchesByUrl(url)));
+  const matches = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+
+  if (!matches.length) {
+    return fetchOfficialMatchesByUrl(scheduleUrl);
+  }
+
+  return dedupeMatches(matches);
+}
+
+async function fetchOfficialMatchesByUrl(url: string): Promise<Match[]> {
+  const html = await fetchText(url);
   const $ = cheerio.load(html);
   const lines = $("body")
     .text()
@@ -95,7 +114,7 @@ export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
     const [homeScore, awayScore] = score.includes(":") ? score.split(":").map(Number) : [null, null];
 
     matches.push({
-      id: `official-match-${matches.length}`,
+      id: `official-match-${year}-${dateText}-${homeTeam}-${awayTeam}`,
       competition: normalizeCompetition(competition),
       round: competition.replace(ko.hanaBank, "").trim(),
       date: toIsoDate(year, dateText),
@@ -112,7 +131,7 @@ export async function fetchOfficialMatches(limit = 24): Promise<Match[]> {
     });
   }
 
-  return matches.slice(0, limit);
+  return matches;
 }
 
 export async function fetchOfficialPlayers(): Promise<Player[]> {
@@ -243,6 +262,35 @@ function findHeadCoach(lines: string[]) {
 function findScheduleYear(lines: string[]) {
   const yearMonth = lines.find((line) => /^20\d{2}\s+\d{2}$/.test(line));
   return yearMonth ? Number(yearMonth.slice(0, 4)) : new Date().getFullYear();
+}
+
+function createScheduleUrl(year: number, month: number) {
+  const paddedMonth = String(month).padStart(2, "0");
+  return `${scheduleUrl}&year=${year}&month=${paddedMonth}`;
+}
+
+function getKstMonth() {
+  return Number(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul",
+      month: "numeric"
+    }).format(new Date())
+  );
+}
+
+function dedupeMatches(matches: Match[]) {
+  const seen = new Set<string>();
+  const unique: Match[] = [];
+
+  for (const match of matches) {
+    const key = `${match.date}-${match.homeTeam}-${match.awayTeam}`;
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    unique.push(match);
+  }
+
+  return unique;
 }
 
 function toIsoDate(year: number, dateText: string) {

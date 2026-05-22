@@ -42,6 +42,9 @@ export const getMatchMonth = (date: string) => `${new Date(date).getMonth() + 1}
 export const sortByDateAsc = <T extends { date: string }>(items: T[]) =>
   [...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+export const sortByDateDesc = <T extends { date: string }>(items: T[]) =>
+  [...items].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 export const sortByPublishedDesc = <T extends { publishedAt: string }>(items: T[]) =>
   [...items].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 

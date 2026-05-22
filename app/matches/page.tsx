@@ -7,15 +7,28 @@ import { LoadingState } from "@/components/LoadingState";
 import { MatchCard } from "@/components/MatchCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { matches as mockMatches } from "@/data/mock";
-import { getMatchMonth, sortByDateAsc } from "@/lib/utils";
+import { getMatchMonth, sortByDateDesc } from "@/lib/utils";
 import type { Match } from "@/types";
+
+const labels = {
+  title: "\uacbd\uae30 \uc77c\uc815/\uacb0\uacfc",
+  eyebrow: "\uacbd\uae30 \uc815\ubcf4",
+  empty: "\uc870\uac74\uc5d0 \ub9de\ub294 \uacbd\uae30\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  all: "\uc804\uccb4",
+  home: "\ud648",
+  away: "\uc6d0\uc815"
+};
 
 export default function MatchesPage() {
   const [items, setItems] = useState<Match[]>(mockMatches);
   const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState("all");
   const [venue, setVenue] = useState("all");
-  const months = Array.from(new Set(items.map((match) => getMatchMonth(match.date))));
+
+  const months = useMemo(
+    () => Array.from(new Set(sortByDateDesc(items).map((match) => getMatchMonth(match.date)))),
+    [items]
+  );
 
   useEffect(() => {
     fetch("/api/matches")
@@ -28,7 +41,7 @@ export default function MatchesPage() {
 
   const filteredMatches = useMemo(
     () =>
-      sortByDateAsc(items).filter((match) => {
+      sortMatchesForResults(items).filter((match) => {
         const monthMatch = month === "all" || getMatchMonth(match.date) === month;
         const venueMatch = venue === "all" || (venue === "home" ? match.isHome : !match.isHome);
         return monthMatch && venueMatch;
@@ -38,10 +51,10 @@ export default function MatchesPage() {
 
   return (
     <div className="grid gap-6">
-      <SectionHeader title="경기 일정/결과" eyebrow="경기 정보" />
+      <SectionHeader title={labels.title} eyebrow={labels.eyebrow} />
       <div className="grid gap-3">
-        <FilterTabs tabs={[{ label: "전체", value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={month} onChange={setMonth} />
-        <FilterTabs tabs={[{ label: "전체", value: "all" }, { label: "홈", value: "home" }, { label: "원정", value: "away" }]} active={venue} onChange={setVenue} />
+        <FilterTabs tabs={[{ label: labels.all, value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={month} onChange={setMonth} />
+        <FilterTabs tabs={[{ label: labels.all, value: "all" }, { label: labels.home, value: "home" }, { label: labels.away, value: "away" }]} active={venue} onChange={setVenue} />
       </div>
       {loading ? (
         <LoadingState />
@@ -50,8 +63,24 @@ export default function MatchesPage() {
           {filteredMatches.map((match) => <MatchCard key={match.id} match={match} />)}
         </div>
       ) : (
-        <EmptyState title="조건에 맞는 경기가 없습니다." />
+        <EmptyState title={labels.empty} />
       )}
     </div>
   );
+}
+
+function sortMatchesForResults(items: Match[]) {
+  return [...items].sort((a, b) => {
+    if (a.status === "scheduled" && b.status !== "scheduled") return 1;
+    if (a.status !== "scheduled" && b.status === "scheduled") return -1;
+
+    const aTime = new Date(a.date).getTime();
+    const bTime = new Date(b.date).getTime();
+
+    if (a.status === "scheduled" && b.status === "scheduled") {
+      return aTime - bTime;
+    }
+
+    return bTime - aTime;
+  });
 }

@@ -7,6 +7,14 @@ interface MatchCardProps {
   featured?: boolean;
 }
 
+const labels = {
+  home: "\ud648",
+  away: "\uc6d0\uc815",
+  ticket: "\ud2f0\ucf13",
+  broadcast: "\uc911\uacc4",
+  highlight: "\ud558\uc774\ub77c\uc774\ud2b8"
+};
+
 export function MatchCard({ match, featured = false }: MatchCardProps) {
   const showScore = match.status !== "scheduled";
 
@@ -18,14 +26,16 @@ export function MatchCard({ match, featured = false }: MatchCardProps) {
           <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{match.round}</span>
           <span className={classNames("rounded-full px-3 py-1 text-xs font-black", statusTone[match.status])}>{statusLabel[match.status]}</span>
         </div>
-        <span className="text-sm font-bold text-slate-500">{match.isHome ? "HOME" : "AWAY"}</span>
+        <span className="text-sm font-bold text-slate-500">{match.isHome ? labels.home : labels.away}</span>
       </div>
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
         <TeamName name={match.homeTeam} align="right" />
         <div className="min-w-20 rounded-lg bg-slate-50 px-3 py-2 text-center">
           {showScore ? (
-            <p className="text-2xl font-black text-gangwon-navy">{match.homeScore} : {match.awayScore}</p>
+            <p className="text-2xl font-black text-gangwon-navy">
+              {match.homeScore} : {match.awayScore}
+            </p>
           ) : (
             <p className="text-sm font-black text-gangwon-navy">{formatTime(match.date)}</p>
           )}
@@ -34,14 +44,19 @@ export function MatchCard({ match, featured = false }: MatchCardProps) {
       </div>
 
       <div className="mt-4 grid gap-2 text-sm text-slate-500">
-        <p className="font-bold text-slate-700">{formatDate(match.date, { year: "numeric" })} {formatTime(match.date)}</p>
-        <p className="flex items-center gap-2"><MapPin size={16} aria-hidden="true" />{match.venue}</p>
+        <p className="font-bold text-slate-700">
+          {formatDate(match.date, { year: "numeric" })} {formatTime(match.date)}
+        </p>
+        <p className="flex items-center gap-2">
+          <MapPin size={16} aria-hidden="true" />
+          {match.venue}
+        </p>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <ActionLink href={match.ticketUrl} label="티켓" icon="ticket" />
-        <ActionLink href={match.broadcastUrl} label="중계" icon="radio" />
-        <ActionLink href={match.highlightUrl} label="하이라이트" icon="external" />
+        <ActionLink href={match.ticketUrl} label={labels.ticket} icon="ticket" />
+        <ActionLink href={match.broadcastUrl} label={labels.broadcast} icon="radio" />
+        <ActionLink href={match.highlightUrl} label={labels.highlight} icon="external" />
       </div>
     </article>
   );
