@@ -130,7 +130,7 @@ async function fetchOfficialMatchesByUrl(url: string): Promise<Match[]> {
       ticketUrl: score === "VS" ? "https://ticket.interpark.com" : null,
       broadcastUrl: "https://www.coupangplay.com",
       highlightUrl: score === "VS" ? null : "https://www.youtube.com/user/gangwonfc",
-      detailUrl: score === "VS" ? null : createNaverMatchDetailUrl(year, dateText, homeTeam, awayTeam)
+      detailUrl: score === "VS" ? null : createKLeagueMatchDetailUrl(year, dateText)
     });
   }
 
@@ -295,11 +295,11 @@ function toIsoDate(year: number, dateText: string) {
   return `${year}-${month}-${day}T${hour}:${minute}:00+09:00`;
 }
 
-function createNaverMatchDetailUrl(year: number, dateText: string, homeTeam: string, awayTeam: string) {
+function createKLeagueMatchDetailUrl(year: number, dateText: string) {
   const matched = dateText.match(/^(\d{2})\/(\d{2})/);
-  const date = matched ? `${year}-${matched[1]}-${matched[2]}` : `${year}-01-01`;
+  const month = matched ? matched[1] : "01";
 
-  return `https://m.sports.naver.com/kfootball/schedule/index?category=kleague&date=${date}&teamCode=21`;
+  return `https://www.kleague.com/schedule.do?leagueId=1&year=${year}&month=${month}`;
 }
 
 function normalizeTeam(team: string) {
