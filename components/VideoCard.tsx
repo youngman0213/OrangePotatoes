@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ExternalLink, Play } from "lucide-react";
 import { ExternalImage } from "@/components/ExternalImage";
 import type { Video } from "@/types";
-import { formatShortDate } from "@/lib/utils";
 
 const videoCategoryLabels: Record<Video["category"], string> = {
   highlight: "하이라이트",
@@ -40,9 +39,6 @@ export function VideoCard({ video }: { video: Video }) {
         )}
       </div>
       <div className="p-4">
-        <p className="mb-2 text-xs font-bold text-slate-400">
-          {formatShortDate(video.publishedAt)}{video.channelTitle ? ` / ${video.channelTitle}` : ""}
-        </p>
         <h3 className="line-clamp-2 text-base font-black text-gangwon-navy">{video.title}</h3>
         <div className="mt-4 flex flex-wrap gap-3">
           <button type="button" onClick={() => setIsPlaying(true)} className="inline-flex items-center gap-1 text-sm font-black text-gangwon-orange">
