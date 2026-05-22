@@ -7,7 +7,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { MatchCard } from "@/components/MatchCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { matches as mockMatches } from "@/data/mock";
-import { getMatchMonth, sortByDateDesc } from "@/lib/utils";
+import { getMatchMonth } from "@/lib/utils";
 import type { Match } from "@/types";
 
 const labels = {
@@ -26,7 +26,10 @@ export default function MatchesPage() {
   const [venue, setVenue] = useState("all");
 
   const months = useMemo(
-    () => Array.from(new Set(sortByDateDesc(items).map((match) => getMatchMonth(match.date)))),
+    () =>
+      Array.from(new Set(items.map((match) => getMatchMonth(match.date)))).sort(
+        (a, b) => Number(a.replace(/\D/g, "")) - Number(b.replace(/\D/g, ""))
+      ),
     [items]
   );
 
