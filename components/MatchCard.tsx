@@ -12,7 +12,8 @@ const labels = {
   away: "\uc6d0\uc815",
   ticket: "\ud2f0\ucf13",
   broadcast: "\uc911\uacc4",
-  highlight: "\ud558\uc774\ub77c\uc774\ud2b8"
+  highlight: "\ud558\uc774\ub77c\uc774\ud2b8",
+  detail: "\uc0c1\uc138 \uacb0\uacfc"
 };
 
 export function MatchCard({ match, featured = false }: MatchCardProps) {
@@ -54,7 +55,11 @@ export function MatchCard({ match, featured = false }: MatchCardProps) {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <ActionLink href={match.ticketUrl} label={labels.ticket} icon="ticket" />
+        {match.status === "scheduled" ? (
+          <ActionLink href={match.ticketUrl} label={labels.ticket} icon="ticket" />
+        ) : (
+          <ActionLink href={match.detailUrl ?? null} label={labels.detail} icon="external" />
+        )}
         <ActionLink href={match.broadcastUrl} label={labels.broadcast} icon="radio" />
         <ActionLink href={match.highlightUrl} label={labels.highlight} icon="external" />
       </div>

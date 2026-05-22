@@ -5,6 +5,7 @@ const officialBaseUrl = "https://www.gangwon-fc.com";
 const scheduleUrl = `${officialBaseUrl}/match/schedule?league=all`;
 const scheduleSeasonYear = 2026;
 const scheduleSeasonStartMonth = 2;
+const scheduleSeasonEndMonth = 12;
 const playerUrl = `${officialBaseUrl}/squad/player`;
 const coachUrl = `${officialBaseUrl}/squad/coach`;
 
@@ -62,9 +63,8 @@ export async function fetchOfficialClubPosts(limit = 12): Promise<ClubPost[]> {
 }
 
 export async function fetchOfficialMatches(limit?: number): Promise<Match[]> {
-  const currentMonth = getKstMonth();
   const months = Array.from(
-    { length: Math.max(currentMonth - scheduleSeasonStartMonth + 1, 1) },
+    { length: scheduleSeasonEndMonth - scheduleSeasonStartMonth + 1 },
     (_, index) => scheduleSeasonStartMonth + index
   );
   const urls = months.map((month) => createScheduleUrl(scheduleSeasonYear, month));
@@ -127,9 +127,10 @@ async function fetchOfficialMatchesByUrl(url: string): Promise<Match[]> {
       status: score === "VS" ? "scheduled" : "finished",
       homeScore,
       awayScore,
-      ticketUrl: "https://ticket.interpark.com",
+      ticketUrl: score === "VS" ? "https://ticket.interpark.com" : null,
       broadcastUrl: "https://www.coupangplay.com",
-      highlightUrl: score === "VS" ? null : "https://www.youtube.com/user/gangwonfc"
+      highlightUrl: score === "VS" ? null : "https://www.youtube.com/user/gangwonfc",
+      detailUrl: score === "VS" ? null : createNaverMatchDetailUrl(year, dateText, homeTeam, awayTeam)
     });
   }
 
@@ -271,15 +272,6 @@ function createScheduleUrl(year: number, month: number) {
   return `${scheduleUrl}&year=${year}&month=${paddedMonth}`;
 }
 
-function getKstMonth() {
-  return Number(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Seoul",
-      month: "numeric"
-    }).format(new Date())
-  );
-}
-
 function dedupeMatches(matches: Match[]) {
   const seen = new Set<string>();
   const unique: Match[] = [];
@@ -301,6 +293,13 @@ function toIsoDate(year: number, dateText: string) {
 
   const [, month, day, hour, minute] = matched;
   return `${year}-${month}-${day}T${hour}:${minute}:00+09:00`;
+}
+
+function createNaverMatchDetailUrl(year: number, dateText: string, homeTeam: string, awayTeam: string) {
+  const matched = dateText.match(/^(\d{2})\/(\d{2})/);
+  const date = matched ? `${year}-${matched[1]}-${matched[2]}` : `${year}-01-01`;
+
+  return `https://m.sports.naver.com/kfootball/schedule/index?category=kleague&date=${date}&teamCode=21`;
 }
 
 function normalizeTeam(team: string) {

@@ -24,6 +24,7 @@ export interface Match {
   ticketUrl: string | null;
   broadcastUrl: string | null;
   highlightUrl: string | null;
+  detailUrl?: string | null;
 }
 
 export interface NewsItem {
