@@ -18,7 +18,8 @@ const labels = {
   match: "\uacbd\uae30",
   player: "\uc120\uc218",
   transfer: "\uc774\uc801/\ubd80\uc0c1",
-  club: "\uad6c\ub2e8"
+  club: "\uad6c\ub2e8",
+  other: "\uae30\ud0c0"
 };
 
 const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
@@ -26,7 +27,8 @@ const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
   { label: labels.match, value: "match" },
   { label: labels.player, value: "player" },
   { label: labels.transfer, value: "transfer" },
-  { label: labels.club, value: "club" }
+  { label: labels.club, value: "club" },
+  { label: labels.other, value: "other" }
 ];
 
 export default function NewsPage() {
