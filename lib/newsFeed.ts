@@ -65,13 +65,14 @@ async function fetchNewsSource(source: { label: string; url: string; sourceName?
   return items.map((item, index) => {
     const rawTitle = cleanText(item.title ?? fallbackTitle);
     const title = cleanNewsTitle(rawTitle);
-    const summary = cleanText(stripHtml(item.description ?? ""));
     const itemSource = typeof item.source === "string" ? item.source : item.source?.["#text"] ?? "Google News";
+    const displaySource = source.sourceName ?? itemSource;
+    const summary = cleanNewsSummary(cleanText(stripHtml(item.description ?? "")), displaySource);
 
     return {
       id: `google-news-${sourceIndex}-${index}-${item.pubDate ?? title}`,
       title,
-      source: source.sourceName ?? itemSource,
+      source: displaySource,
       url: item.link ?? source.url,
       summary: summary || fallbackSummary,
       publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
@@ -144,6 +145,19 @@ function cleanNewsTitle(title: string) {
     .replace(/\s-\s[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/g, "")
     .replace(/\s-\s[^-]{2,30}$/g, "")
     .trim();
+}
+
+function cleanNewsSummary(summary: string, source: string) {
+  const escapedSource = escapeRegExp(source);
+
+  return summary
+    .replace(new RegExp(`\\s${escapedSource}$`, "i"), "")
+    .replace(/\s[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/g, "")
+    .trim();
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function areSameStoryTitle(a: string, b: string) {
