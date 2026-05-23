@@ -1,10 +1,8 @@
 import type { Video, VideoCategory } from "@/types";
 
-const youtubeSearchUrl = "https://www.googleapis.com/youtube/v3/search";
 const youtubePlaylistItemsUrl = "https://www.googleapis.com/youtube/v3/playlistItems";
-const coupangPlaySportsChannelId = "UCnBht7BrOx-A328KFXgysqQ";
 const coupangKLeaguePlaylistId = "PLWTZYHe9YKAKlowFKOlQDtcrfE-ldfMVq";
-const gangwonFcChannelId = "UCuLjoid8kKTKITvkUP94kJA";
+const gangwonFcUploadsPlaylistId = "UUuLjoid8kKTKITvkUP94kJA";
 const cacheSeconds = 60 * 60 * 6;
 
 const gangwonKeywords = ["\uac15\uc6d0", "\uac15\uc6d0FC", "Gangwon", "Gangwon FC"];
@@ -15,13 +13,6 @@ interface YouTubeApiResponse<T> {
   error?: {
     message?: string;
   };
-}
-
-interface YouTubeSearchItem {
-  id?: {
-    videoId?: string;
-  };
-  snippet?: YouTubeSnippet;
 }
 
 interface YouTubePlaylistItem {
@@ -45,17 +36,9 @@ interface YouTubeSnippet {
 }
 
 export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]> {
-  const [playlistVideos, latestChannelVideos, keywordResults] = await Promise.all([
-    fetchPlaylistVideos(coupangKLeaguePlaylistId, 50),
-    searchYouTubeVideos({ channelId: coupangPlaySportsChannelId, maxResults: 25 }),
-    Promise.all(gangwonKeywords.map((keyword) => searchYouTubeVideos({
-      channelId: coupangPlaySportsChannelId,
-      query: keyword,
-      maxResults: 10
-    })))
-  ]);
+  const playlistVideos = await fetchPlaylistVideos(coupangKLeaguePlaylistId, 50);
 
-  return uniqueVideos([...playlistVideos, ...latestChannelVideos, ...keywordResults.flat()])
+  return uniqueVideos(playlistVideos)
     .filter(isGangwonVideo)
     .filter(isHighlightVideo)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
@@ -63,10 +46,7 @@ export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]
 }
 
 export async function fetchGangwonOfficialVideos(limit = 12): Promise<Video[]> {
-  const videos = await searchYouTubeVideos({
-    channelId: gangwonFcChannelId,
-    maxResults: limit
-  });
+  const videos = await fetchPlaylistVideos(gangwonFcUploadsPlaylistId, Math.min(Math.max(limit, 12), 50));
 
   return uniqueVideos(videos)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
@@ -104,39 +84,6 @@ async function fetchPlaylistVideos(playlistId: string, maxResults: number) {
   return (payload.items ?? []).map(toPlaylistVideo).filter((video): video is Video => Boolean(video));
 }
 
-async function searchYouTubeVideos({
-  channelId,
-  query,
-  maxResults
-}: {
-  channelId: string;
-  query?: string;
-  maxResults: number;
-}) {
-  const apiKey = getYouTubeApiKey();
-  const params = new URLSearchParams({
-    part: "snippet",
-    channelId,
-    type: "video",
-    order: "date",
-    maxResults: String(maxResults),
-    key: apiKey
-  });
-
-  if (query) params.set("q", query);
-
-  const response = await fetch(`${youtubeSearchUrl}?${params.toString()}`, {
-    next: { revalidate: cacheSeconds }
-  });
-  const payload = await response.json() as YouTubeApiResponse<YouTubeSearchItem>;
-
-  if (!response.ok) {
-    throw new Error(payload.error?.message ?? `YouTube search request failed: ${response.status}`);
-  }
-
-  return (payload.items ?? []).map(toSearchVideo).filter((video): video is Video => Boolean(video));
-}
-
 function getYouTubeApiKey() {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
@@ -144,10 +91,6 @@ function getYouTubeApiKey() {
   }
 
   return apiKey;
-}
-
-function toSearchVideo(item: YouTubeSearchItem): Video | null {
-  return toVideo(item.id?.videoId, item.snippet);
 }
 
 function toPlaylistVideo(item: YouTubePlaylistItem): Video | null {

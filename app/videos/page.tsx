@@ -24,9 +24,11 @@ const tabs = [
 const labels = {
   title: "영상",
   eyebrow: "영상 모음",
-  loadFailed: "영상을 불러오지 못했습니다.",
+  loading: "영상을 불러오는 중입니다.",
+  loadFailed: "영상을 불러오지 못했습니다. 공식 채널에서 확인해주세요.",
   noHighlights: "표시할 하이라이트 영상이 없습니다.",
-  noClubVideos: "표시할 구단 영상이 없습니다."
+  noClubVideos: "표시할 구단 영상이 없습니다.",
+  officialYoutube: "공식 유튜브에서 보기"
 };
 
 export default function VideosPage() {
@@ -60,14 +62,14 @@ export default function VideosPage() {
       <FilterTabs tabs={tabs} active={activeTab} onChange={(value) => setActiveTab(value as VideoTab)} />
 
       {loading ? (
-        <LoadingState message="영상을 불러오는 중입니다." />
+        <LoadingState message={labels.loading} />
       ) : activeVideos.length ? (
         <VideoGrid videos={activeVideos} />
       ) : (
         <EmptyState
           title={emptyText}
           action={{
-            label: "공식 유튜브에서 보기",
+            label: labels.officialYoutube,
             href: activeTab === "highlights"
               ? "https://www.youtube.com/@CoupangPlaySports"
               : "https://www.youtube.com/@gangwonfc2008/videos"
