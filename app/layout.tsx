@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "강원FC HUB",
+  title: "Orange Potatoes",
   description: "강원FC 팬을 위한 비공식 정보 허브"
 };
 
