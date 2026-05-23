@@ -48,51 +48,53 @@ export default async function HomePage() {
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
-      <div className="grid gap-6">
-        <section>
-          <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" />
-          {nextMatch ? (
-            <MatchCard match={nextMatch} featured />
-          ) : (
-            <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta="경기 페이지에서 전체 일정을 확인해주세요." />
-          )}
-        </section>
+    <div className="grid gap-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
+        <div className="grid gap-6">
+          <section>
+            <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" />
+            {nextMatch ? (
+              <MatchCard match={nextMatch} featured />
+            ) : (
+              <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta="경기 페이지에서 전체 일정을 확인해주세요." />
+            )}
+          </section>
 
-        <div className="lg:hidden">
-          <RankCard standing={gangwonStanding} />
+          <div className="lg:hidden">
+            <RankCard standing={gangwonStanding} />
+          </div>
+
+          <section>
+            <InfoCard
+              icon={<Goal size={22} />}
+              label={text.recentMatch}
+              title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
+              meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
+            />
+          </section>
+
+          <section>
+            <SectionHeader title={text.recentNews} eyebrow="기사 모음" href="/news" />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {sortByPublishedDesc(news).slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+            </div>
+          </section>
         </div>
 
-        <section>
-          <InfoCard
-            icon={<Goal size={22} />}
-            label={text.recentMatch}
-            title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
-            meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
-          />
-        </section>
-
-        <section>
-          <SectionHeader title={text.recentNews} eyebrow="기사 모음" href="/news" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {sortByPublishedDesc(news).slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+        <aside className="grid gap-4 lg:sticky lg:top-24">
+          <div className="hidden lg:block">
+            <RankCard standing={gangwonStanding} />
           </div>
-        </section>
-
-        <OfficialLinks />
+          <section>
+            <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              {sortByPublishedDesc(videos).slice(0, 2).map((video) => <VideoCard key={video.id} video={video} compact />)}
+            </div>
+          </section>
+        </aside>
       </div>
 
-      <aside className="grid gap-4 lg:sticky lg:top-24">
-        <div className="hidden lg:block">
-          <RankCard standing={gangwonStanding} />
-        </div>
-        <section>
-          <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            {sortByPublishedDesc(videos).slice(0, 2).map((video) => <VideoCard key={video.id} video={video} compact />)}
-          </div>
-        </section>
-      </aside>
+      <OfficialLinks />
     </div>
   );
 }
