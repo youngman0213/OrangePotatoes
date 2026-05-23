@@ -23,10 +23,12 @@ const labels = {
 
 export function StandingTable({ standings }: { standings: Standing[] }) {
   const gangwon = standings.find((row) => isGangwon(row.team));
+  const goalsForRank = gangwon ? getMetricRank(standings, "goalsFor", "desc", gangwon.team) : null;
+  const goalsAgainstRank = gangwon ? getMetricRank(standings, "goalsAgainst", "asc", gangwon.team) : null;
 
   return (
     <section className="grid gap-4">
-      {gangwon ? <GangwonSummaryCard standing={gangwon} /> : null}
+      {gangwon ? <GangwonSummaryCard standing={gangwon} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} /> : null}
       <LeagueTable standings={standings} />
     </section>
   );
@@ -92,7 +94,15 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
   );
 }
 
-function GangwonSummaryCard({ standing }: { standing: Standing }) {
+function GangwonSummaryCard({
+  standing,
+  goalsForRank,
+  goalsAgainstRank
+}: {
+  standing: Standing;
+  goalsForRank: number | null;
+  goalsAgainstRank: number | null;
+}) {
   return (
     <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-5 text-white shadow-card">
       <div className="flex items-start justify-between gap-4">
@@ -109,6 +119,8 @@ function GangwonSummaryCard({ standing }: { standing: Standing }) {
         <SummaryMetric label={labels.wdl} value={`${standing.wins}/${standing.draws}/${standing.losses}`} />
         <SummaryMetric label={labels.points} value={standing.points} />
         <SummaryMetric label={labels.goalDifference} value={formatGoalDifference(standing.goalDifference)} />
+        <SummaryMetric label={labels.goalsFor} value={`${standing.goalsFor}${formatRankSuffix(goalsForRank)}`} />
+        <SummaryMetric label={labels.goalsAgainst} value={`${standing.goalsAgainst}${formatRankSuffix(goalsAgainstRank)}`} />
       </div>
       <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-3">
         <span className="text-xs font-black text-white/75">{labels.form}</span>
@@ -154,6 +166,20 @@ function FormDots({ team, form, light = false, compact = false }: { team: string
 
 function formatGoalDifference(value: number) {
   return value > 0 ? `+${value}` : value;
+}
+
+function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direction: "asc" | "desc", team: string) {
+  const sorted = [...rows].sort((a, b) => {
+    const diff = direction === "asc" ? a[key] - b[key] : b[key] - a[key];
+    return diff || a.rank - b.rank;
+  });
+  const index = sorted.findIndex((row) => row.team === team);
+
+  return index >= 0 ? index + 1 : null;
+}
+
+function formatRankSuffix(rank: number | null) {
+  return rank ? `(${rank}위)` : "";
 }
 
 function Th({ children }: { children: ReactNode }) {
