@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="ko">
       <body>
         <Header />
-        <main className="mx-auto min-h-screen max-w-6xl px-4 py-6 md:py-8">{children}</main>
+        <main className="mx-auto min-h-screen max-w-6xl px-4 pb-28 pt-6 md:py-8">{children}</main>
         <Footer />
         <MobileNav />
       </body>

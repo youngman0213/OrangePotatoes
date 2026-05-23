@@ -11,15 +11,23 @@ import { sortByPublishedDesc } from "@/lib/utils";
 import type { NewsCategory, NewsItem } from "@/types";
 
 const labels = {
-  title: "\ub274\uc2a4",
-  eyebrow: "\uae30\uc0ac \ubaa8\uc74c",
-  empty: "\uc870\uac74\uc5d0 \ub9de\ub294 \ub274\uc2a4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
-  all: "\uc804\uccb4",
-  match: "\uacbd\uae30",
-  player: "\uc120\uc218",
-  transfer: "\uc774\uc801/\ubd80\uc0c1",
-  club: "\uad6c\ub2e8",
-  other: "\uae30\ud0c0"
+  title: "뉴스",
+  eyebrow: "기사 모음",
+  loading: "뉴스를 불러오는 중입니다.",
+  empty: "조건에 맞는 뉴스가 없습니다.",
+  error: "뉴스를 불러오지 못했습니다. 잠시 후 다시 확인해주세요.",
+  all: "전체",
+  match: "경기",
+  player: "선수",
+  transfer: "이적",
+  injury: "부상",
+  interview: "인터뷰",
+  preview: "프리뷰",
+  review: "리뷰",
+  club: "구단",
+  ticket: "티켓",
+  event: "이벤트",
+  other: "기타"
 };
 
 const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
@@ -27,7 +35,13 @@ const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
   { label: labels.match, value: "match" },
   { label: labels.player, value: "player" },
   { label: labels.transfer, value: "transfer" },
+  { label: labels.injury, value: "injury" },
+  { label: labels.interview, value: "interview" },
+  { label: labels.preview, value: "preview" },
+  { label: labels.review, value: "review" },
   { label: labels.club, value: "club" },
+  { label: labels.ticket, value: "ticket" },
+  { label: labels.event, value: "event" },
   { label: labels.other, value: "other" }
 ];
 
@@ -35,12 +49,21 @@ export default function NewsPage() {
   const [category, setCategory] = useState<NewsCategory | "all">("all");
   const [items, setItems] = useState<NewsItem[]>(mockNews);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     fetch("/api/news")
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error("news request failed");
+        return response.json();
+      })
       .then((data: { items?: NewsItem[] }) => {
         if (data.items?.length) setItems(data.items);
+        setHasError(false);
+      })
+      .catch(() => {
+        setItems(mockNews);
+        setHasError(true);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -55,13 +78,13 @@ export default function NewsPage() {
       <SectionHeader title={labels.title} eyebrow={labels.eyebrow} />
       <FilterTabs tabs={tabs} active={category} onChange={(value) => setCategory(value as NewsCategory | "all")} />
       {loading ? (
-        <LoadingState />
+        <LoadingState message={labels.loading} />
       ) : filteredNews.length ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredNews.map((item) => <NewsCard key={item.id} item={item} />)}
         </div>
       ) : (
-        <EmptyState title={labels.empty} />
+        <EmptyState title={hasError ? labels.error : labels.empty} />
       )}
     </div>
   );

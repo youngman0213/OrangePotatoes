@@ -11,19 +11,52 @@ import { getMatchMonth } from "@/lib/utils";
 import type { Match } from "@/types";
 
 const labels = {
-  title: "\uacbd\uae30 \uc77c\uc815/\uacb0\uacfc",
-  eyebrow: "\uacbd\uae30 \uc815\ubcf4",
-  empty: "\uc870\uac74\uc5d0 \ub9de\ub294 \uacbd\uae30\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
-  all: "\uc804\uccb4",
-  home: "\ud648",
-  away: "\uc6d0\uc815"
+  title: "경기 일정/결과",
+  eyebrow: "경기 정보",
+  all: "전체",
+  home: "홈",
+  away: "원정",
+  loading: "경기 정보를 불러오는 중입니다.",
+  empty: "표시할 경기 정보가 없습니다.",
+  error: "경기 정보를 불러오지 못했습니다. 잠시 후 다시 확인해주세요.",
+  official: "K리그 공식 일정 보기"
 };
 
 export default function MatchesPage() {
   const [items, setItems] = useState<Match[]>(mockMatches);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [month, setMonth] = useState("all");
   const [venue, setVenue] = useState("all");
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetch("/api/matches")
+      .then((response) => {
+        if (!response.ok) throw new Error("matches request failed");
+        return response.json();
+      })
+      .then((data: { items?: Match[] }) => {
+        if (!mounted) return;
+        if (Array.isArray(data.items) && data.items.length) {
+          setItems(data.items);
+        }
+        setHasError(false);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setHasError(true);
+        setItems(mockMatches);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const months = useMemo(
     () =>
@@ -32,15 +65,6 @@ export default function MatchesPage() {
       ),
     [items]
   );
-
-  useEffect(() => {
-    fetch("/api/matches")
-      .then((response) => response.json())
-      .then((data: { items?: Match[] }) => {
-        if (data.items?.length) setItems(data.items);
-      })
-      .finally(() => setLoading(false));
-  }, []);
 
   const filteredMatches = useMemo(
     () =>
@@ -59,14 +83,18 @@ export default function MatchesPage() {
         <FilterTabs tabs={[{ label: labels.all, value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={month} onChange={setMonth} />
         <FilterTabs tabs={[{ label: labels.all, value: "all" }, { label: labels.home, value: "home" }, { label: labels.away, value: "away" }]} active={venue} onChange={setVenue} />
       </div>
+
       {loading ? (
-        <LoadingState />
+        <LoadingState message={labels.loading} />
       ) : filteredMatches.length ? (
         <div className="grid gap-4 lg:grid-cols-2">
           {filteredMatches.map((match) => <MatchCard key={match.id} match={match} />)}
         </div>
       ) : (
-        <EmptyState title={labels.empty} />
+        <EmptyState
+          title={hasError ? labels.error : labels.empty}
+          action={{ label: labels.official, href: "https://www.kleague.com/schedule.do?leagueId=1" }}
+        />
       )}
     </div>
   );

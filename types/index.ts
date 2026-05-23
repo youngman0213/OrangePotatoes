@@ -3,7 +3,13 @@ export type NewsCategory =
   | "match"
   | "player"
   | "transfer"
+  | "injury"
+  | "interview"
+  | "preview"
+  | "review"
   | "club"
+  | "ticket"
+  | "event"
   | "other";
 export type ClubPlatform = "official" | "instagram" | "youtube" | "facebook" | "ticket" | "md" | "event";
 export type VideoCategory = "highlight" | "interview" | "training" | "behind" | "other";

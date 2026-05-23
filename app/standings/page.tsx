@@ -9,7 +9,9 @@ export const revalidate = 21600;
 
 const labels = {
   title: "K리그1 순위",
+  eyebrow: "순위표",
   playerStats: "개인 기록",
+  playerEyebrow: "선수 기록",
   source: "데이터 출처: K리그 공식 기록 / 검증: 네이버 스포츠",
   checkedAt: "기준 시각"
 };
@@ -48,10 +50,10 @@ export default async function StandingsPage() {
 
   return (
     <div className="grid gap-8">
-      <SectionHeader title={labels.title} eyebrow="순위표" />
+      <SectionHeader title={labels.title} eyebrow={labels.eyebrow} />
       <StandingTable standings={tableStandings} />
 
-      <SectionHeader title={labels.playerStats} eyebrow="선수 기록" />
+      <SectionHeader title={labels.playerStats} eyebrow={labels.playerEyebrow} />
       <PlayerStatsPanel stats={playerStats} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>

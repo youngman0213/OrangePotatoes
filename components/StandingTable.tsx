@@ -5,8 +5,6 @@ import { classNames, isGangwon } from "@/lib/utils";
 const labels = {
   summaryTitle: "강원FC 현재 순위",
   leagueListTitle: "리그 전체 순위",
-  collapse: "접기",
-  expand: "펼치기",
   rank: "순위",
   place: "위",
   team: "팀",
@@ -14,14 +12,13 @@ const labels = {
   wins: "승",
   draws: "무",
   losses: "패",
-  record: "전적",
   wdl: "승/무/패",
   goalsFor: "득점",
   goalsAgainst: "실점",
   goalDifference: "득실",
   points: "승점",
   form: "최근 5경기",
-  empty: "K리그 공식 팀 순위 연동을 준비 중입니다."
+  empty: "표시할 순위 정보가 없습니다."
 };
 
 export function StandingTable({ standings }: { standings: Standing[] }) {
@@ -30,91 +27,23 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
   return (
     <section className="grid gap-4">
       {gangwon ? <GangwonSummaryCard standing={gangwon} /> : null}
-
-      <MobileLeagueList standings={standings} />
-
-      <div className="hidden overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 md:block">
-        <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="bg-gangwon-navy text-xs uppercase text-white">
-            <tr>
-              <Th>{labels.rank}</Th>
-              <Th>{labels.team}</Th>
-              <Th>{labels.played}</Th>
-              <Th>{labels.wins}</Th>
-              <Th>{labels.draws}</Th>
-              <Th>{labels.losses}</Th>
-              <Th>{labels.goalsFor}</Th>
-              <Th>{labels.goalsAgainst}</Th>
-              <Th>{labels.goalDifference}</Th>
-              <Th>{labels.points}</Th>
-              <Th>{labels.form}</Th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {standings.length ? standings.map((row) => (
-              <tr key={row.team} className={classNames(isGangwon(row.team) ? "bg-orange-50" : "bg-white")}>
-                <Td strong>{row.rank || "-"}</Td>
-                <Td>
-                  <span className={classNames("font-black", isGangwon(row.team) ? "text-gangwon-orange" : "text-gangwon-navy")}>{row.team}</span>
-                </Td>
-                <Td>{row.played}</Td>
-                <Td>{row.wins}</Td>
-                <Td>{row.draws}</Td>
-                <Td>{row.losses}</Td>
-                <Td>{row.goalsFor}</Td>
-                <Td>{row.goalsAgainst}</Td>
-                <Td>{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</Td>
-                <Td strong>{row.points}</Td>
-                <Td>
-                  <div className="flex gap-1">
-                    {row.recentForm.map((form, index) => (
-                      <span
-                        key={`${row.team}-${index}`}
-                        className={classNames(
-                          "flex h-6 w-6 items-center justify-center rounded-full text-xs font-black text-white",
-                          form === "W" && "bg-emerald-500",
-                          form === "D" && "bg-slate-400",
-                          form === "L" && "bg-red-500"
-                        )}
-                      >
-                        {form}
-                      </span>
-                    ))}
-                  </div>
-                </Td>
-              </tr>
-            )) : (
-              <tr>
-                <td colSpan={11} className="px-4 py-8 text-center text-sm font-bold text-slate-500">
-                  {labels.empty}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        </div>
-      </div>
+      <LeagueTable standings={standings} />
     </section>
   );
 }
 
-function MobileLeagueList({ standings }: { standings: Standing[] }) {
+function LeagueTable({ standings }: { standings: Standing[] }) {
   return (
-    <details className="group overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 md:hidden">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4">
+    <div className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
+      <div className="flex items-center justify-between gap-3 px-4 py-4">
         <div>
           <p className="text-xs font-black text-gangwon-orange">순위표</p>
           <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500 group-open:bg-orange-50 group-open:text-gangwon-orange">
-          <span className="group-open:hidden">{labels.expand}</span>
-          <span className="hidden group-open:inline">{labels.collapse}</span>
-        </span>
-      </summary>
+      </div>
 
       <div className="overflow-x-auto border-t border-slate-100">
-        <table className="w-full min-w-[720px] text-left text-xs">
+        <table className="w-full min-w-[680px] text-left text-xs sm:text-sm">
           <thead className="bg-gangwon-navy text-white">
             <tr>
               <Th>{labels.rank}</Th>
@@ -159,7 +88,7 @@ function MobileLeagueList({ standings }: { standings: Standing[] }) {
           </tbody>
         </table>
       </div>
-    </details>
+    </div>
   );
 }
 

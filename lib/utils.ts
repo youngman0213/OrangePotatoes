@@ -49,7 +49,7 @@ export const sortByPublishedDesc = <T extends { publishedAt: string }>(items: T[
   [...items].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
 export const getNextMatch = (matches: Match[]) =>
-  sortByDateAsc(matches).find((match) => match.status !== "finished");
+  sortByDateAsc(matches).find((match) => match.status !== "finished" && new Date(match.date).getTime() >= Date.now());
 
 export const getRecentMatch = (matches: Match[]) =>
   [...matches]

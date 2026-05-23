@@ -10,18 +10,20 @@ import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialClubPosts, fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, formatTime, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
+import type { Match } from "@/types";
 
 const text = {
   gangwon: "강원FC",
   nextMatch: "다음 경기",
+  nextMatchLoading: "다음 경기 정보를 불러오는 중입니다.",
+  noNextMatch: "예정된 경기 정보가 없습니다.",
   recentMatch: "최근 경기",
   noResult: "결과 없음",
   afterFinished: "경기 종료 후 업데이트",
   currentRank: "현재 순위",
   noStanding: "순위 정보 없음",
-  todaySchedule: "오늘 주요 일정",
-  noSchedule: "오늘 등록된 일정 없음",
-  scheduleFallback: "새 일정이 생기면 표시됩니다",
+  homeDday: "다음 홈경기",
+  noHomeMatch: "예정된 홈경기가 없습니다.",
   recentNews: "최근 뉴스",
   clubPosts: "구단 공식 소식",
   latestVideos: "최신 영상",
@@ -30,13 +32,12 @@ const text = {
   draws: "무",
   losses: "패",
   points: "승점",
-  rankSuffix: "위",
-  countSuffix: "개 일정"
+  rankSuffix: "위"
 };
 
 export default async function HomePage() {
   const [matchesResult, newsResult, clubPostsResult, videosResult] = await Promise.allSettled([
-    fetchOfficialMatches(8),
+    fetchOfficialMatches(),
     fetchGangwonNews(8),
     fetchOfficialClubPosts(8),
     fetchGangwonVideos(8)
@@ -48,15 +49,19 @@ export default async function HomePage() {
   const videos = videosResult.status === "fulfilled" && videosResult.value.length ? videosResult.value : mockVideos;
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
+  const nextHomeMatch = getNextHomeMatch(matches);
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
-  const todaySchedule = matches.filter((match) => formatDate(match.date) === formatDate(new Date().toISOString()));
 
   return (
     <div className="grid gap-8">
       <section className="grid gap-4 lg:grid-cols-[1.45fr_0.9fr]">
         <div>
           <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" />
-          {nextMatch ? <MatchCard match={nextMatch} featured /> : null}
+          {nextMatch ? (
+            <MatchCard match={nextMatch} featured />
+          ) : (
+            <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta={text.nextMatchLoading} />
+          )}
         </div>
         <div className="grid gap-4">
           <InfoCard
@@ -73,9 +78,9 @@ export default async function HomePage() {
           />
           <InfoCard
             icon={<CalendarDays size={22} />}
-            label={text.todaySchedule}
-            title={todaySchedule.length ? `${todaySchedule.length}${text.countSuffix}` : text.noSchedule}
-            meta={todaySchedule[0] ? `${formatTime(todaySchedule[0].date)} ${todaySchedule[0].venue}` : text.scheduleFallback}
+            label={text.homeDday}
+            title={nextHomeMatch ? getHomeMatchDday(nextHomeMatch) : text.noHomeMatch}
+            meta={nextHomeMatch ? `${getOpponent(nextHomeMatch)} / ${formatDate(nextHomeMatch.date)} ${formatTime(nextHomeMatch.date)} / ${nextHomeMatch.venue}` : text.noHomeMatch}
           />
         </div>
       </section>
@@ -113,4 +118,26 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
       <p className="mt-2 text-sm font-bold text-slate-500">{meta}</p>
     </article>
   );
+}
+
+function getNextHomeMatch(matches: Match[]) {
+  const now = Date.now();
+
+  return [...matches]
+    .filter((match) => match.isHome && match.status !== "finished" && new Date(match.date).getTime() >= now)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
+}
+
+function getHomeMatchDday(match: Match) {
+  const now = new Date();
+  const matchDate = new Date(match.date);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const target = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
+  const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+
+  return diff <= 0 ? "오늘 홈경기" : `다음 홈경기까지 D-${diff}`;
+}
+
+function getOpponent(match: Match) {
+  return match.isHome ? match.awayTeam : match.homeTeam;
 }
