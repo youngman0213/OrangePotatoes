@@ -31,6 +31,37 @@ const ko = {
   hanaBank: "\ud558\ub098\uc740\ud589 "
 };
 
+const kLeagueTeamNames: Record<string, string> = {
+  K01: "\uc6b8\uc0b0 HD",
+  K03: "\ud3ec\ud56d",
+  K04: "\uc81c\uc8fc",
+  K05: "\uc804\ubd81",
+  K09: "FC\uc11c\uc6b8",
+  K10: "\ub300\uc804",
+  K18: "\uc778\ucc9c",
+  K21: "\uac15\uc6d0FC",
+  K22: "\uad11\uc8fc",
+  K26: "\ubd80\ucc9c",
+  K27: "\uc548\uc591",
+  K35: "\uae40\ucc9c"
+};
+
+const stadiumNames: Record<string, string> = {
+  "\uac15\ub989\ud558\uc774\uc6d0\uc544\ub808\ub098": "\uac15\ub989\ud558\uc774\uc6d0\uc544\ub808\ub098",
+  "\uac15\ub989\ud558\uc774\uc6d0": "\uac15\ub989\ud558\uc774\uc6d0\uc544\ub808\ub098",
+  "\uc778\ucc9c \uc804\uc6a9": "\uc778\ucc9c \ucd95\uad6c\uc804\uc6a9\uacbd\uae30\uc7a5",
+  "\uc778\ucc9c \ucd95\uad6c \uc804\uc6a9\uacbd\uae30\uc7a5": "\uc778\ucc9c \ucd95\uad6c\uc804\uc6a9\uacbd\uae30\uc7a5",
+  "\uad11\uc8fc \uc6d4\ub4dc\ucef5": "\uad11\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  "\ub300\uc804W": "\ub300\uc804\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  "\uae40\ucc9c": "\uae40\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  "\ud3ec\ud56d\uc2a4\ud2f8\uc57c\ub4dc": "\ud3ec\ud56d\uc2a4\ud2f8\uc57c\ub4dc",
+  "\uc804\uc8fcW": "\uc804\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  "\uc11c\uc6b8W": "\uc11c\uc6b8\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  "\uc6b8\uc0b0\ubb38\uc218": "\uc6b8\uc0b0\ubb38\uc218\ucd95\uad6c\uacbd\uae30\uc7a5",
+  "\uc81c\uc8fcW": "\uc81c\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  "\uc548\uc591\uc885\ud569": "\uc548\uc591\uc885\ud569\uc6b4\ub3d9\uc7a5"
+};
+
 interface KLeagueScheduleItem {
   year: number;
   leagueId: number;
@@ -146,9 +177,9 @@ function normalizeKLeagueMatch(item: KLeagueScheduleItem): Match {
     competition: normalizeCompetition(item.meetName),
     round: item.roundId ? `${item.roundId}R` : item.meetName,
     date: toIsoDateFromKLeague(item.gameDate, item.gameTime),
-    homeTeam: normalizeTeam(item.homeTeamName),
-    awayTeam: normalizeTeam(item.awayTeamName),
-    venue: item.fieldNameFull || item.fieldName || "",
+    homeTeam: normalizeTeam(item.homeTeamName, item.homeTeam),
+    awayTeam: normalizeTeam(item.awayTeamName, item.awayTeam),
+    venue: normalizeStadium(item.fieldNameFull || item.fieldName || ""),
     isHome: item.homeTeam === gangwonTeamId,
     status: isFinished ? "finished" : "scheduled",
     homeScore: isFinished ? item.homeGoal : null,
@@ -395,8 +426,18 @@ function createTicketUrl() {
   return "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014";
 }
 
-function normalizeTeam(team: string) {
-  return team === ko.gangwonShort ? ko.gangwon : team;
+function normalizeTeam(team: string, teamId?: string) {
+  if (teamId && kLeagueTeamNames[teamId]) return kLeagueTeamNames[teamId];
+  if (kLeagueTeamNames[team]) return kLeagueTeamNames[team];
+  if (team === ko.gangwonShort || team === "Gangwon" || team === "Gangwon FC") return ko.gangwon;
+  if (team === "\uc11c\uc6b8") return "FC\uc11c\uc6b8";
+  if (team === "\uc6b8\uc0b0") return "\uc6b8\uc0b0 HD";
+
+  return team;
+}
+
+function normalizeStadium(stadium: string) {
+  return stadiumNames[stadium] ?? stadium;
 }
 
 function normalize(value: string) {
