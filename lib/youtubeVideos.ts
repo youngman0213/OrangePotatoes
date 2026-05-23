@@ -30,6 +30,20 @@ interface YouTubeFeedEntry {
   };
 }
 
+export async function fetchGangwonHighlights(limit = 12): Promise<Video[]> {
+  const [coupangResult, kLeagueResult] = await Promise.allSettled([
+    fetchCoupangGangwonHighlights(limit),
+    fetchKLeagueGangwonHighlights(limit)
+  ]);
+
+  const coupangVideos = coupangResult.status === "fulfilled" ? coupangResult.value : [];
+  const kLeagueVideos = kLeagueResult.status === "fulfilled" ? kLeagueResult.value : [];
+
+  return uniqueVideos([...coupangVideos, ...kLeagueVideos])
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, limit);
+}
+
 export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]> {
   const playlistUrl = `${youtubeFeedBaseUrl}?playlist_id=${coupangKLeaguePlaylistId}`;
   const playlistVideos = await fetchFeedVideos(playlistUrl, 50);
@@ -41,15 +55,6 @@ export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]
     .slice(0, limit);
 }
 
-export async function fetchGangwonOfficialVideos(limit = 12): Promise<Video[]> {
-  const channelUrl = `${youtubeFeedBaseUrl}?channel_id=${gangwonFcChannelId}`;
-  const videos = await fetchFeedVideos(channelUrl, Math.min(Math.max(limit, 12), 50));
-
-  return uniqueVideos(videos)
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-    .slice(0, limit);
-}
-
 export async function fetchKLeagueGangwonHighlights(limit = 12): Promise<Video[]> {
   const channelUrl = `${youtubeFeedBaseUrl}?channel_id=${kLeagueHighlightsChannelId}`;
   const videos = await fetchFeedVideos(channelUrl, 50);
@@ -57,6 +62,15 @@ export async function fetchKLeagueGangwonHighlights(limit = 12): Promise<Video[]
   return uniqueVideos(videos)
     .filter(isGangwonVideo)
     .filter(isHighlightVideo)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, limit);
+}
+
+export async function fetchGangwonOfficialVideos(limit = 12): Promise<Video[]> {
+  const channelUrl = `${youtubeFeedBaseUrl}?channel_id=${gangwonFcChannelId}`;
+  const videos = await fetchFeedVideos(channelUrl, Math.min(Math.max(limit, 12), 50));
+
+  return uniqueVideos(videos)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, limit);
 }
