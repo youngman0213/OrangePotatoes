@@ -77,6 +77,38 @@ const stadiumAliases = [
   { keyword: "\ubd80\ucc9c", name: "\ubd80\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5" }
 ];
 
+const homeStadiumByTeamId: Record<string, string> = {
+  K01: "\uc6b8\uc0b0\ubb38\uc218\ucd95\uad6c\uacbd\uae30\uc7a5",
+  K02: "\uc218\uc6d0\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  K03: "\ud3ec\ud56d\uc2a4\ud2f8\uc57c\ub4dc",
+  K04: "\uc81c\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  K05: "\uc804\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  K06: "\ubd80\uc0b0\uc544\uc2dc\uc544\ub4dc\uc8fc\uacbd\uae30\uc7a5",
+  K07: "\uad11\uc591\ucd95\uad6c\uc804\uc6a9\uad6c\uc7a5",
+  K08: "\ud0c4\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K09: "\uc11c\uc6b8\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  K10: "\ub300\uc804\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  K17: "\ub300\uad6cDGB\ub300\uad6c\uc740\ud589\ud30c\ud06c",
+  K18: "\uc778\ucc9c \ucd95\uad6c\uc804\uc6a9\uacbd\uae30\uc7a5",
+  K20: "\ucc3d\uc6d0\ucd95\uad6c\uc13c\ud130",
+  K21: "\uac15\ub989\ud558\uc774\uc6d0\uc544\ub808\ub098",
+  K22: "\uad11\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5",
+  K26: "\ubd80\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K27: "\uc548\uc591\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K29: "\uc218\uc6d0\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K31: "\ubaa9\ub3d9\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K32: "\uc548\uc0b0\uc640\uc2a4\ud0c0\ub514\uc6c0",
+  K34: "\uc774\uc21c\uc2e0\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K35: "\uae40\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K36: "\uae40\ud3ec\uc194\ud130\ucd95\uad6c\uc7a5",
+  K37: "\uccad\uc8fc\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K38: "\ucc9c\uc548\uc885\ud569\uc6b4\ub3d9\uc7a5",
+  K39: "\ud654\uc131\uc885\ud569\uacbd\uae30\ud0c0\uc6b4",
+  K40: "\ud30c\uc8fc\uc2a4\ud0c0\ub514\uc6c0",
+  K41: "\uae40\ud574\uc6b4\ub3d9\uc7a5",
+  K42: "\uc6a9\uc778\ubbf8\ub974\uc2a4\ud0c0\ub514\uc6c0"
+};
+
 interface KLeagueScheduleItem {
   year: number;
   leagueId: number;
@@ -194,7 +226,7 @@ function normalizeKLeagueMatch(item: KLeagueScheduleItem): Match {
     date: toIsoDateFromKLeague(item.gameDate, item.gameTime),
     homeTeam: normalizeTeam(item.homeTeamName, item.homeTeam),
     awayTeam: normalizeTeam(item.awayTeamName, item.awayTeam),
-    venue: normalizeStadium(item.fieldNameFull || item.fieldName || ""),
+    venue: normalizeStadium(item.fieldNameFull || item.fieldName || "", item.homeTeam),
     isHome: item.homeTeam === gangwonTeamId,
     status: isFinished ? "finished" : "scheduled",
     homeScore: isFinished ? item.homeGoal : null,
@@ -451,7 +483,9 @@ function normalizeTeam(team: string, teamId?: string) {
   return team;
 }
 
-function normalizeStadium(stadium: string) {
+function normalizeStadium(stadium: string, homeTeamId?: string) {
+  if (homeTeamId && homeStadiumByTeamId[homeTeamId]) return homeStadiumByTeamId[homeTeamId];
+
   const normalized = stadium.replace(/\s+/g, "");
   const exact = stadiumNames[stadium] ?? stadiumNames[normalized];
   if (exact) return exact;
