@@ -9,7 +9,7 @@ import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
-import type { Standing } from "@/types";
+import type { Match, Standing } from "@/types";
 
 const text = {
   gangwon: "강원FC",
@@ -63,14 +63,14 @@ export default async function HomePage() {
           <div className="grid grid-cols-2 gap-3 lg:hidden">
             <MobileRankCard standing={gangwonStanding} />
             <MobileRecentMatchCard
-              title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
+              match={recentMatch}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
           </div>
 
           <section className="hidden lg:block">
             <RecentMatchCard
-              title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
+              match={recentMatch}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
           </section>
@@ -118,11 +118,15 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
   );
 }
 
-function RecentMatchCard({ title, meta }: { title: string; meta: string }) {
+function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-orange">{text.recentMatch}</p>
-      <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{title}</h3>
+      {match ? (
+        <ScoreBoard match={match} size="desktop" />
+      ) : (
+        <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{text.noResult}</h3>
+      )}
       <p className="mt-3 text-center text-sm font-bold text-slate-500">{meta}</p>
     </article>
   );
@@ -171,19 +175,19 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-[11px] font-black text-gangwon-orange">{text.currentRank}</p>
-          <h3 className="mt-1 text-2xl font-black leading-none text-gangwon-navy">
+          <h3 className="mt-1 text-[32px] font-black leading-none text-gangwon-navy">
             {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
           </h3>
         </div>
         <div className="text-right">
           <p className="text-[11px] font-black text-slate-400">{text.points}</p>
-          <p className="mt-1 text-xl font-black leading-none text-gangwon-orange">{standing ? standing.points : "-"}</p>
+          <p className="mt-1 text-2xl font-black leading-none text-gangwon-orange">{standing ? standing.points : "-"}</p>
         </div>
       </div>
-      <p className="mt-3 truncate text-xs font-black text-slate-600">
+      <p className="mt-2 truncate text-center text-xs font-black text-slate-600">
         {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
       </p>
-      <div className="mt-auto flex gap-1 pt-3">
+      <div className="mt-auto flex justify-center gap-1 pt-2">
         {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
           <span
             key={`${form}-${index}`}
@@ -198,14 +202,56 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
   );
 }
 
-function MobileRecentMatchCard({ title, meta }: { title: string; meta: string }) {
+function MobileRecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <p className="text-[11px] font-black text-gangwon-orange">{text.recentMatch}</p>
-      <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{title}</h3>
+      {match ? (
+        <ScoreBoard match={match} size="mobile" />
+      ) : (
+        <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{text.noResult}</h3>
+      )}
       <p className="mt-auto line-clamp-1 pt-3 text-center text-xs font-bold text-slate-500">{meta}</p>
     </article>
   );
+}
+
+function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" }) {
+  const compact = size === "mobile";
+
+  return (
+    <div className={compact ? "mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4"}>
+      <TeamBadge name={match.homeTeam} compact={compact} isHome />
+      <div className="text-center">
+        <p className={compact ? "text-xl font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
+          {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
+        </p>
+      </div>
+      <TeamBadge name={match.awayTeam} compact={compact} />
+    </div>
+  );
+}
+
+function TeamBadge({ name, compact, isHome = false }: { name: string; compact: boolean; isHome?: boolean }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <span className={`${compact ? "h-9 w-9 text-[11px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black text-white ${isHome ? "bg-gangwon-orange" : "bg-gangwon-navy"}`}>
+        {getTeamShortName(name)}
+      </span>
+      <span className={`${compact ? "max-w-14 text-[10px]" : "max-w-24 text-xs"} truncate font-black text-slate-600`}>
+        {name}
+      </span>
+    </div>
+  );
+}
+
+function getTeamShortName(name: string) {
+  return name
+    .replace("FC", "")
+    .replace("HD", "")
+    .replace("하나시티즌", "")
+    .trim()
+    .slice(0, 2);
 }
 
 function OfficialLinks() {
