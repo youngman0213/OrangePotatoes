@@ -3,8 +3,9 @@ import type { Video, VideoCategory } from "@/types";
 
 const youtubeFeedBaseUrl = "https://www.youtube.com/feeds/videos.xml";
 const coupangKLeaguePlaylistId = "PLWTZYHe9YKAKlowFKOlQDtcrfE-ldfMVq";
+const kLeagueHighlightsChannelId = "UCYVxbD_KLbC39PPW9iTBcmQ";
 const gangwonFcChannelId = "UCuLjoid8kKTKITvkUP94kJA";
-const cacheSeconds = 60 * 60 * 6;
+const cacheSeconds = 60 * 60 * 3;
 
 const gangwonKeywords = ["강원", "강원FC", "Gangwon", "Gangwon FC"];
 const highlightKeywords = ["하이라이트", "Highlights", "Highlight", "2-Minute", "2 Minute", "5-Min", "5 Minute", "H/L"];
@@ -45,6 +46,17 @@ export async function fetchGangwonOfficialVideos(limit = 12): Promise<Video[]> {
   const videos = await fetchFeedVideos(channelUrl, Math.min(Math.max(limit, 12), 50));
 
   return uniqueVideos(videos)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, limit);
+}
+
+export async function fetchKLeagueGangwonHighlights(limit = 12): Promise<Video[]> {
+  const channelUrl = `${youtubeFeedBaseUrl}?channel_id=${kLeagueHighlightsChannelId}`;
+  const videos = await fetchFeedVideos(channelUrl, 50);
+
+  return uniqueVideos(videos)
+    .filter(isGangwonVideo)
+    .filter(isHighlightVideo)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
     .slice(0, limit);
 }

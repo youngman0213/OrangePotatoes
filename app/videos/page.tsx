@@ -10,14 +10,16 @@ import type { Video } from "@/types";
 
 interface VideosResponse {
   highlights?: Video[];
+  kLeagueHighlights?: Video[];
   clubVideos?: Video[];
   error?: string;
 }
 
-type VideoTab = "highlights" | "club";
+type VideoTab = "highlights" | "kleague" | "club";
 
 const tabs = [
   { label: "하이라이트", value: "highlights" },
+  { label: "K리그 하이라이트", value: "kleague" },
   { label: "구단 유튜브", value: "club" }
 ];
 
@@ -27,6 +29,7 @@ const labels = {
   loading: "영상을 불러오는 중입니다.",
   loadFailed: "영상을 불러오지 못했습니다. 공식 채널에서 확인해주세요.",
   noHighlights: "표시할 하이라이트 영상이 없습니다.",
+  noKLeagueHighlights: "표시할 K리그 하이라이트 영상이 없습니다.",
   noClubVideos: "표시할 구단 영상이 없습니다.",
   officialYoutube: "공식 유튜브에서 보기"
 };
@@ -34,6 +37,7 @@ const labels = {
 export default function VideosPage() {
   const [activeTab, setActiveTab] = useState<VideoTab>("highlights");
   const [highlights, setHighlights] = useState<Video[]>([]);
+  const [kLeagueHighlights, setKLeagueHighlights] = useState<Video[]>([]);
   const [clubVideos, setClubVideos] = useState<Video[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -43,6 +47,7 @@ export default function VideosPage() {
       .then((response) => response.json())
       .then((data: VideosResponse) => {
         setHighlights(data.highlights ?? []);
+        setKLeagueHighlights(data.kLeagueHighlights ?? []);
         setClubVideos(data.clubVideos ?? []);
         setError(data.error ?? "");
       })
@@ -51,10 +56,20 @@ export default function VideosPage() {
   }, []);
 
   const activeVideos = useMemo(
-    () => activeTab === "highlights" ? highlights : clubVideos,
-    [activeTab, clubVideos, highlights]
+    () => {
+      if (activeTab === "highlights") return highlights;
+      if (activeTab === "kleague") return kLeagueHighlights;
+      return clubVideos;
+    },
+    [activeTab, clubVideos, highlights, kLeagueHighlights]
   );
-  const emptyText = error || (activeTab === "highlights" ? labels.noHighlights : labels.noClubVideos);
+  const emptyText = error || (
+    activeTab === "highlights"
+      ? labels.noHighlights
+      : activeTab === "kleague"
+        ? labels.noKLeagueHighlights
+        : labels.noClubVideos
+  );
 
   return (
     <div className="grid gap-6">
@@ -72,7 +87,9 @@ export default function VideosPage() {
             label: labels.officialYoutube,
             href: activeTab === "highlights"
               ? "https://www.youtube.com/@CoupangPlaySports"
-              : "https://www.youtube.com/@gangwonfc2008/videos"
+              : activeTab === "kleague"
+                ? "https://www.youtube.com/@kleaguehighlights/videos"
+                : "https://www.youtube.com/@gangwonfc2008/videos"
           }}
         />
       )}

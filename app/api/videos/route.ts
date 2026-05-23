@@ -1,33 +1,41 @@
 import { NextResponse } from "next/server";
-import { fetchCoupangGangwonHighlights, fetchGangwonOfficialVideos } from "@/lib/youtubeVideos";
+import {
+  fetchCoupangGangwonHighlights,
+  fetchGangwonOfficialVideos,
+  fetchKLeagueGangwonHighlights
+} from "@/lib/youtubeVideos";
 
-export const revalidate = 21600;
+export const revalidate = 10800;
 
 export async function GET() {
-  const [highlightsResult, clubVideosResult] = await Promise.allSettled([
+  const [highlightsResult, kLeagueHighlightsResult, clubVideosResult] = await Promise.allSettled([
     fetchCoupangGangwonHighlights(12),
+    fetchKLeagueGangwonHighlights(12),
     fetchGangwonOfficialVideos(12)
   ]);
 
   const highlights = highlightsResult.status === "fulfilled" ? highlightsResult.value : [];
+  const kLeagueHighlights = kLeagueHighlightsResult.status === "fulfilled" ? kLeagueHighlightsResult.value : [];
   const clubVideos = clubVideosResult.status === "fulfilled" ? clubVideosResult.value : [];
   const errors = [
     highlightsResult.status === "rejected" ? getVideoErrorMessage(highlightsResult.reason) : "",
+    kLeagueHighlightsResult.status === "rejected" ? getVideoErrorMessage(kLeagueHighlightsResult.reason) : "",
     clubVideosResult.status === "rejected" ? getVideoErrorMessage(clubVideosResult.reason) : ""
   ].filter(Boolean);
 
   return NextResponse.json(
     {
       highlights,
+      kLeagueHighlights,
       clubVideos,
-      items: [...highlights, ...clubVideos],
+      items: [...highlights, ...kLeagueHighlights, ...clubVideos],
       source: "youtube-rss",
       error: errors[0],
       updatedAt: new Date().toISOString()
     },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=21600, stale-while-revalidate=21600, stale-if-error=86400"
+        "Cache-Control": "public, s-maxage=10800, stale-while-revalidate=10800, stale-if-error=86400"
       }
     }
   );
