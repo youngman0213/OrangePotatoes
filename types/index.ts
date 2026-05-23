@@ -110,4 +110,5 @@ export interface LeaguePlayerStat {
   yellowCards: number;
   redCards: number;
   played: number;
+  bestEleven?: number;
 }

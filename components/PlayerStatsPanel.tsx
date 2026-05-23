@@ -13,7 +13,7 @@ interface PlayerStatsPanelProps {
   ratingsError?: boolean;
 }
 
-type StatKey = "goals" | "assists" | "yellowCards";
+type StatKey = "goals" | "assists" | "yellowCards" | "bestEleven";
 type GangwonTabKey = StatKey | "averageRating";
 
 const labels = {
@@ -28,9 +28,11 @@ const labels = {
   goals: "득점",
   assists: "도움",
   yellowCards: "경고",
+  bestEleven: "베스트11",
   goal: "골",
   assist: "도움",
   card: "장",
+  times: "회",
   count: "개",
   played: "출전",
   games: "경기",
@@ -42,6 +44,7 @@ const gangwonTabs = [
   { label: labels.goals, value: "goals" },
   { label: labels.assists, value: "assists" },
   { label: labels.yellowCards, value: "yellowCards" },
+  { label: labels.bestEleven, value: "bestEleven" },
   { label: labels.ratingTitle, value: "averageRating" }
 ];
 
@@ -53,7 +56,8 @@ const leagueTabs = [
 const suffixMap: Record<StatKey, string> = {
   goals: labels.goal,
   assists: labels.count,
-  yellowCards: labels.card
+  yellowCards: labels.card,
+  bestEleven: labels.times
 };
 
 export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: PlayerStatsPanelProps) {

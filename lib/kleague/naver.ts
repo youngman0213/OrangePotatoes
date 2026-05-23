@@ -45,6 +45,7 @@ interface NaverPlayerStatRow {
   yellowCards?: number | null;
   redCards?: number | null;
   matchesPlayed?: number | null;
+  bestEleven?: number | null;
 }
 
 export async function fetchNaverStandings(seasonCode = KLEAGUE_SEASON): Promise<SourceStanding[]> {
@@ -125,7 +126,8 @@ export async function fetchNaverPlayerRecords({
       attackPoints: toNumber(row.offencePoints),
       matches: toNumber(row.matchesPlayed),
       yellowCards: toNumber(row.yellowCards),
-      redCards: toNumber(row.redCards)
+      redCards: toNumber(row.redCards),
+      bestEleven: toNumber(row.bestEleven)
     };
   });
 }
@@ -160,7 +162,8 @@ function mergePlayerRecords(rows: SourcePlayerRecord[]) {
       attackPoints: Math.max(current.attackPoints, row.attackPoints),
       matches: Math.max(current.matches, row.matches),
       yellowCards: Math.max(current.yellowCards, row.yellowCards),
-      redCards: Math.max(current.redCards, row.redCards)
+      redCards: Math.max(current.redCards, row.redCards),
+      bestEleven: Math.max(current.bestEleven ?? 0, row.bestEleven ?? 0)
     });
   }
 

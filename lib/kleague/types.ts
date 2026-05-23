@@ -61,6 +61,7 @@ export interface SourcePlayerRecord {
   matches: number;
   yellowCards: number;
   redCards: number;
+  bestEleven?: number;
 }
 
 export interface VerifiedStanding extends Omit<SourceStanding, "source"> {
