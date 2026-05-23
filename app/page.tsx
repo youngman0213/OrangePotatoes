@@ -8,9 +8,9 @@ import { VideoCard } from "@/components/VideoCard";
 import { clubPosts as mockClubPosts, matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
 import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialClubPosts, fetchOfficialMatches } from "@/lib/officialFeed";
-import { formatDate, formatTime, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
+import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
-import type { Match, Standing } from "@/types";
+import type { Standing } from "@/types";
 
 const text = {
   gangwon: "강원FC",
@@ -21,8 +21,6 @@ const text = {
   afterFinished: "경기 종료 후 업데이트",
   currentRank: "현재 순위",
   noStanding: "순위 정보 없음",
-  homeDday: "다음 홈경기",
-  noHomeMatch: "예정된 홈경기가 없습니다.",
   recentForm: "최근 5경기",
   recentNews: "최신 뉴스",
   clubPosts: "구단 공식 소식",
@@ -51,7 +49,6 @@ export default async function HomePage() {
   const videos = videosResult.status === "fulfilled" && videosResult.value.length ? videosResult.value : mockVideos;
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
-  const nextHomeMatch = getNextHomeMatch(matches);
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
 
   return (
@@ -70,18 +67,12 @@ export default async function HomePage() {
           <RankCard standing={gangwonStanding} />
         </div>
 
-        <section className="grid gap-4 sm:grid-cols-2">
+        <section>
           <InfoCard
             icon={<Goal size={22} />}
             label={text.recentMatch}
             title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
             meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
-          />
-          <InfoCard
-            icon={<CalendarDays size={22} />}
-            label={text.homeDday}
-            title={nextHomeMatch ? getHomeMatchDday(nextHomeMatch) : text.noHomeMatch}
-            meta={nextHomeMatch ? `${getOpponent(nextHomeMatch)} / ${formatDate(nextHomeMatch.date)} ${formatTime(nextHomeMatch.date)} / ${nextHomeMatch.venue}` : text.noHomeMatch}
           />
         </section>
 
@@ -190,26 +181,4 @@ function OfficialLinks() {
       </div>
     </section>
   );
-}
-
-function getNextHomeMatch(matches: Match[]) {
-  const now = Date.now();
-
-  return [...matches]
-    .filter((match) => match.isHome && match.status !== "finished" && new Date(match.date).getTime() >= now)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
-}
-
-function getHomeMatchDday(match: Match) {
-  const now = new Date();
-  const matchDate = new Date(match.date);
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const target = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
-  const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
-
-  return diff <= 0 ? "오늘 홈경기" : `홈경기 D-${diff}`;
-}
-
-function getOpponent(match: Match) {
-  return match.isHome ? match.awayTeam : match.homeTeam;
 }
