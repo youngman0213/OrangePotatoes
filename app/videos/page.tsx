@@ -60,11 +60,19 @@ export default function VideosPage() {
       <FilterTabs tabs={tabs} active={activeTab} onChange={(value) => setActiveTab(value as VideoTab)} />
 
       {loading ? (
-        <LoadingState />
+        <LoadingState message="영상을 불러오는 중입니다." />
       ) : activeVideos.length ? (
         <VideoGrid videos={activeVideos} />
       ) : (
-        <EmptyState title={emptyText} />
+        <EmptyState
+          title={emptyText}
+          action={{
+            label: "공식 유튜브에서 보기",
+            href: activeTab === "highlights"
+              ? "https://www.youtube.com/@CoupangPlaySports"
+              : "https://www.youtube.com/@gangwonfc2008/videos"
+          }}
+        />
       )}
     </div>
   );

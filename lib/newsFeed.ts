@@ -54,7 +54,8 @@ async function fetchNewsQuery(query: string, queryIndex: number): Promise<NewsIt
   const items: GoogleNewsItem[] = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
 
   return items.map((item, index) => {
-    const title = cleanText(item.title ?? fallbackTitle);
+    const rawTitle = cleanText(item.title ?? fallbackTitle);
+    const title = cleanNewsTitle(rawTitle);
     const summary = cleanText(stripHtml(item.description ?? ""));
     const source = typeof item.source === "string" ? item.source : item.source?.["#text"] ?? "Google News";
 
@@ -65,7 +66,7 @@ async function fetchNewsQuery(query: string, queryIndex: number): Promise<NewsIt
       url: item.link ?? feedUrl,
       summary: summary || fallbackSummary,
       publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
-      category: categorizeNews(title, summary),
+      category: categorizeNews(title, summary, source),
       thumbnailUrl: ""
     };
   });
@@ -125,6 +126,13 @@ function normalizeNewsTitle(title: string) {
     .toLowerCase();
 }
 
+function cleanNewsTitle(title: string) {
+  return title
+    .replace(/\s-\s[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/g, "")
+    .replace(/\s-\s[^-]{2,30}$/g, "")
+    .trim();
+}
+
 function areSameStoryTitle(a: string, b: string) {
   if (!a || !b) return false;
   if (a === b) return true;
@@ -141,8 +149,8 @@ function areSameStoryTitle(a: string, b: string) {
   return overlap / shorter.length >= 0.9;
 }
 
-function categorizeNews(title: string, summary: string): NewsCategory {
-  const text = `${title} ${summary}`;
+function categorizeNews(title: string, summary: string, source = ""): NewsCategory {
+  const text = `${title} ${summary} ${source}`;
 
   if (/(\ubd80\uc0c1|\uacb0\uc7a5|\ubcf5\uadc0|\uc7ac\ud65c|\ud68c\ubcf5)/.test(text)) return "injury";
   if (/(\uc774\uc801|\uc601\uc785|\uc784\ub300|\uacc4\uc57d|\ud569\ub958|\ubc29\ucd9c|\uc7ac\uacc4\uc57d)/.test(text)) return "transfer";

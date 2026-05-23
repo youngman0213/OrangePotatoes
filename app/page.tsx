@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarDays, Goal, Table2 } from "lucide-react";
+import { CalendarDays, ExternalLink, Goal, HomeIcon, Table2, Youtube } from "lucide-react";
 import { ClubPostCard } from "@/components/ClubPostCard";
 import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
@@ -10,12 +10,11 @@ import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialClubPosts, fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, formatTime, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
-import type { Match } from "@/types";
+import type { Match, Standing } from "@/types";
 
 const text = {
   gangwon: "강원FC",
   nextMatch: "다음 경기",
-  nextMatchLoading: "다음 경기 정보를 불러오는 중입니다.",
   noNextMatch: "예정된 경기 정보가 없습니다.",
   recentMatch: "최근 경기",
   noResult: "결과 없음",
@@ -24,9 +23,12 @@ const text = {
   noStanding: "순위 정보 없음",
   homeDday: "다음 홈경기",
   noHomeMatch: "예정된 홈경기가 없습니다.",
-  recentNews: "최근 뉴스",
+  recentForm: "최근 5경기",
+  recentNews: "최신 뉴스",
   clubPosts: "구단 공식 소식",
   latestVideos: "최신 영상",
+  officialLinks: "공식 링크",
+  allNews: "전체 보기",
   games: "경기",
   wins: "승",
   draws: "무",
@@ -53,17 +55,18 @@ export default async function HomePage() {
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
 
   return (
-    <div className="grid gap-8">
-      <section className="grid gap-4 lg:grid-cols-[1.45fr_0.9fr]">
-        <div>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
+      <div className="grid gap-6">
+        <section>
           <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" />
           {nextMatch ? (
             <MatchCard match={nextMatch} featured />
           ) : (
-            <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta={text.nextMatchLoading} />
+            <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta="경기 페이지에서 전체 일정을 확인해주세요." />
           )}
-        </div>
-        <div className="grid gap-4">
+        </section>
+
+        <section className="grid gap-4 sm:grid-cols-2">
           <InfoCard
             icon={<Goal size={22} />}
             label={text.recentMatch}
@@ -71,52 +74,117 @@ export default async function HomePage() {
             meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
           />
           <InfoCard
-            icon={<Table2 size={22} />}
-            label={text.currentRank}
-            title={gangwonStanding ? `${gangwonStanding.rank}${text.rankSuffix} / ${text.points} ${gangwonStanding.points}` : text.noStanding}
-            meta={gangwonStanding ? `${gangwonStanding.played}${text.games} ${gangwonStanding.wins}${text.wins} ${gangwonStanding.draws}${text.draws} ${gangwonStanding.losses}${text.losses}` : "K리그1"}
-          />
-          <InfoCard
             icon={<CalendarDays size={22} />}
             label={text.homeDday}
             title={nextHomeMatch ? getHomeMatchDday(nextHomeMatch) : text.noHomeMatch}
             meta={nextHomeMatch ? `${getOpponent(nextHomeMatch)} / ${formatDate(nextHomeMatch.date)} ${formatTime(nextHomeMatch.date)} / ${nextHomeMatch.venue}` : text.noHomeMatch}
           />
-        </div>
-      </section>
+        </section>
 
-      <section>
-        <SectionHeader title={text.recentNews} eyebrow="기사 모음" href="/news" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sortByPublishedDesc(news).slice(0, 5).map((item) => <NewsCard key={item.id} item={item} />)}
-        </div>
-      </section>
+        <section>
+          <SectionHeader title={text.recentNews} eyebrow="기사 모음" href="/news" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {sortByPublishedDesc(news).slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+          </div>
+        </section>
 
-      <section>
-        <SectionHeader title={text.clubPosts} eyebrow="공식 채널" href="/club" />
-        <div className="grid gap-4 md:grid-cols-3">
-          {sortByPublishedDesc(clubPosts).slice(0, 3).map((post) => <ClubPostCard key={post.id} post={post} />)}
-        </div>
-      </section>
+        <section>
+          <SectionHeader title={text.clubPosts} eyebrow="공식 채널" href="/club" />
+          <div className="grid gap-3 md:grid-cols-3">
+            {sortByPublishedDesc(clubPosts).slice(0, 3).map((post) => <ClubPostCard key={post.id} post={post} />)}
+          </div>
+        </section>
+      </div>
 
-      <section>
-        <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
-        <div className="grid gap-4 md:grid-cols-3">
-          {sortByPublishedDesc(videos).slice(0, 3).map((video) => <VideoCard key={video.id} video={video} />)}
-        </div>
-      </section>
+      <aside className="grid gap-4 lg:sticky lg:top-24">
+        <RankCard standing={gangwonStanding} />
+        <FormCard standing={gangwonStanding} />
+        <section>
+          <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {sortByPublishedDesc(videos).slice(0, 2).map((video) => <VideoCard key={video.id} video={video} compact />)}
+          </div>
+        </section>
+        <OfficialLinks />
+      </aside>
     </div>
   );
 }
 
 function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string; title: string; meta: string }) {
   return (
-    <article className="rounded-lg bg-white p-5 shadow-card ring-1 ring-slate-100">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-orange-50 text-gangwon-orange">{icon}</div>
+    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-gangwon-orange">{icon}</div>
       <p className="text-xs font-black uppercase text-slate-400">{label}</p>
-      <h3 className="mt-1 text-xl font-black text-gangwon-navy">{title}</h3>
-      <p className="mt-2 text-sm font-bold text-slate-500">{meta}</p>
+      <h3 className="mt-1 text-lg font-black text-gangwon-navy">{title}</h3>
+      <p className="mt-2 line-clamp-2 text-sm font-bold text-slate-500">{meta}</p>
     </article>
+  );
+}
+
+function RankCard({ standing }: { standing?: Standing }) {
+  return (
+    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+      <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <h3 className="text-3xl font-black text-gangwon-navy">
+          {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
+        </h3>
+        <p className="text-right text-sm font-black text-slate-600">
+          {standing ? `${text.points} ${standing.points}` : text.noStanding}
+        </p>
+      </div>
+      <p className="mt-2 text-sm font-bold text-slate-500">
+        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
+      </p>
+    </article>
+  );
+}
+
+function FormCard({ standing }: { standing?: Standing }) {
+  return (
+    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+      <p className="text-xs font-black text-slate-400">{text.recentForm}</p>
+      <div className="mt-3 flex gap-2">
+        {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
+          <span
+            key={`${form}-${index}`}
+            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
+          >
+            {form}
+          </span>
+        ))}
+        {!standing?.recentForm.length ? <span className="text-sm font-bold text-slate-400">-</span> : null}
+      </div>
+    </article>
+  );
+}
+
+function OfficialLinks() {
+  const links = [
+    { href: "https://www.gangwon-fc.com/", label: "공식 홈페이지", icon: HomeIcon },
+    { href: "https://www.youtube.com/@gangwonfc2008/videos", label: "공식 유튜브", icon: Youtube },
+    { href: "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014", label: "티켓 예매", icon: ExternalLink }
+  ];
+
+  return (
+    <section>
+      <SectionHeader title={text.officialLinks} eyebrow="바로가기" />
+      <div className="grid gap-2">
+        {links.map((link) => {
+          const Icon = link.icon;
+          return (
+            <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-lg bg-white px-4 py-3 text-sm font-black text-gangwon-navy shadow-card ring-1 ring-slate-100 hover:text-gangwon-orange">
+              <span className="inline-flex items-center gap-2">
+                <Icon size={17} className="text-gangwon-orange" aria-hidden="true" />
+                {link.label}
+              </span>
+              <ExternalLink size={14} aria-hidden="true" />
+            </a>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -135,7 +203,7 @@ function getHomeMatchDday(match: Match) {
   const target = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
   const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
 
-  return diff <= 0 ? "오늘 홈경기" : `다음 홈경기까지 D-${diff}`;
+  return diff <= 0 ? "오늘 홈경기" : `홈경기 D-${diff}`;
 }
 
 function getOpponent(match: Match) {

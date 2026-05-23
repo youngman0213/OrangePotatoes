@@ -20,7 +20,7 @@ export function Header() {
           </span>
           <span>
             <span className="block text-lg font-black leading-5 text-gangwon-navy">강원FC HUB</span>
-            <span className="text-xs font-bold text-slate-500">Unofficial Fan Info</span>
+            <span className="text-xs font-bold text-slate-500">비공식 팬 정보</span>
           </span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
