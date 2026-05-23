@@ -18,31 +18,15 @@ const labels = {
   error: "뉴스를 불러오지 못했습니다. 잠시 후 다시 확인해주세요.",
   all: "전체",
   match: "경기",
-  player: "선수",
-  transfer: "이적",
-  injury: "부상",
-  interview: "인터뷰",
-  preview: "프리뷰",
-  review: "리뷰",
-  club: "구단",
-  ticket: "티켓",
-  event: "이벤트",
-  other: "기타"
+  player: "선수·이적",
+  club: "구단"
 };
 
 const tabs: Array<{ label: string; value: NewsCategory | "all" }> = [
   { label: labels.all, value: "all" },
   { label: labels.match, value: "match" },
   { label: labels.player, value: "player" },
-  { label: labels.transfer, value: "transfer" },
-  { label: labels.injury, value: "injury" },
-  { label: labels.interview, value: "interview" },
-  { label: labels.preview, value: "preview" },
-  { label: labels.review, value: "review" },
-  { label: labels.club, value: "club" },
-  { label: labels.ticket, value: "ticket" },
-  { label: labels.event, value: "event" },
-  { label: labels.other, value: "other" }
+  { label: labels.club, value: "club" }
 ];
 
 export default function NewsPage() {

@@ -3,16 +3,16 @@ import type { NewsItem } from "@/types";
 
 const categoryLabels: Record<NewsItem["category"], string> = {
   match: "경기",
-  player: "선수",
-  transfer: "이적",
-  injury: "부상",
-  interview: "인터뷰",
-  preview: "프리뷰",
-  review: "리뷰",
+  player: "선수·이적",
+  transfer: "선수·이적",
+  injury: "선수·이적",
+  interview: "선수·이적",
+  preview: "경기",
+  review: "경기",
   club: "구단",
-  ticket: "티켓",
-  event: "이벤트",
-  other: "기타"
+  ticket: "구단",
+  event: "구단",
+  other: "전체"
 };
 
 export function NewsCard({ item }: { item: NewsItem }) {
