@@ -6,13 +6,13 @@ import { CalendarDays, Home, Megaphone, Newspaper, PlaySquare, Table2, Users } f
 import { classNames } from "@/lib/utils";
 
 const items = [
-  { href: "/", label: "홈", icon: Home },
-  { href: "/matches", label: "경기", icon: CalendarDays },
-  { href: "/news", label: "뉴스", icon: Newspaper },
-  { href: "/club", label: "소식", icon: Megaphone },
-  { href: "/videos", label: "영상", icon: PlaySquare },
-  { href: "/standings", label: "순위", icon: Table2 },
-  { href: "/players", label: "선수", icon: Users }
+  { href: "/", label: "\ud648", icon: Home },
+  { href: "/matches", label: "\uacbd\uae30", icon: CalendarDays },
+  { href: "/standings", label: "\uc21c\uc704", icon: Table2 },
+  { href: "/players", label: "\uc120\uc218", icon: Users },
+  { href: "/news", label: "\ub274\uc2a4", icon: Newspaper },
+  { href: "/club", label: "\uc18c\uc2dd", icon: Megaphone },
+  { href: "/videos", label: "\uc601\uc0c1", icon: PlaySquare }
 ];
 
 export function MobileNav() {
