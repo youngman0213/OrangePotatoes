@@ -1,4 +1,4 @@
-import { ExternalLink, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import { ExternalImage } from "@/components/ExternalImage";
 import type { Video } from "@/types";
 
@@ -12,8 +12,13 @@ const videoCategoryLabels: Record<Video["category"], string> = {
 
 export function VideoCard({ video, compact = false }: { video: Video; compact?: boolean }) {
   return (
-    <article className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-lg">
-      <a href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noreferrer" className="group block">
+    <a
+      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+      target="_blank"
+      rel="noreferrer"
+      className="group block overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-lg"
+    >
+      <article>
         <div className="relative aspect-video bg-slate-100">
           <ExternalImage src={video.thumbnailUrl} />
           <span className="absolute left-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-black text-white">{videoCategoryLabels[video.category]}</span>
@@ -21,22 +26,16 @@ export function VideoCard({ video, compact = false }: { video: Video; compact?: 
             <Play size={20} fill="currentColor" aria-hidden="true" />
           </span>
         </div>
-      </a>
-      <div className={compact ? "p-3" : "p-4"}>
-        <h3 className="line-clamp-2 text-sm font-black leading-6 text-gangwon-navy sm:text-base">{video.title}</h3>
-        <div className="mt-2 flex items-center gap-2 text-xs font-bold text-slate-400">
-          <span className="truncate">{video.channelTitle || "YouTube"}</span>
-          <span aria-hidden="true">·</span>
-          <span className="shrink-0">{formatVideoDate(video.publishedAt)}</span>
+        <div className={compact ? "p-3" : "p-4"}>
+          <h3 className="line-clamp-2 text-sm font-black leading-6 text-gangwon-navy sm:text-base">{video.title}</h3>
+          <div className="mt-2 flex items-center gap-2 text-xs font-bold text-slate-400">
+            <span className="truncate">{video.channelTitle || "YouTube"}</span>
+            <span aria-hidden="true">·</span>
+            <span className="shrink-0">{formatVideoDate(video.publishedAt)}</span>
+          </div>
         </div>
-        <div className="mt-3 flex justify-end">
-          <a href={`https://www.youtube.com/watch?v=${video.youtubeId}`} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 text-xs font-black text-gangwon-orange">
-            유튜브로 보기
-            <ExternalLink size={13} aria-hidden="true" />
-          </a>
-        </div>
-      </div>
-    </article>
+      </article>
+    </a>
   );
 }
 

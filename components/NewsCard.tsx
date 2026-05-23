@@ -1,4 +1,3 @@
-import { ExternalLink } from "lucide-react";
 import type { NewsItem } from "@/types";
 
 const categoryLabels: Record<NewsItem["category"], string> = {
@@ -17,23 +16,24 @@ const categoryLabels: Record<NewsItem["category"], string> = {
 
 export function NewsCard({ item }: { item: NewsItem }) {
   return (
-    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-black text-gangwon-orange">
-          {categoryLabels[item.category]}
-        </span>
-        <span className="text-xs font-bold text-slate-400">{formatNewsDate(item.publishedAt)}</span>
-      </div>
-      <h3 className="line-clamp-2 text-base font-black leading-6 text-gangwon-navy">{item.title}</h3>
-      <p className="mt-2 hidden text-sm leading-6 text-slate-500 sm:line-clamp-2 sm:block">{item.summary}</p>
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="truncate text-xs font-black text-slate-500">{item.source}</span>
-        <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-1 text-xs font-black text-gangwon-orange">
-          원문 보기
-          <ExternalLink size={13} aria-hidden="true" />
-        </a>
-      </div>
-    </article>
+    <a
+      href={item.url}
+      target="_blank"
+      rel="noreferrer"
+      className="block rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:ring-orange-100"
+    >
+      <article>
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-black text-gangwon-orange">
+            {categoryLabels[item.category]}
+          </span>
+          <span className="text-xs font-bold text-slate-400">{formatNewsDate(item.publishedAt)}</span>
+        </div>
+        <h3 className="line-clamp-2 text-base font-black leading-6 text-gangwon-navy">{item.title}</h3>
+        <p className="mt-2 hidden text-sm leading-6 text-slate-500 sm:line-clamp-2 sm:block">{item.summary}</p>
+        <p className="mt-4 truncate text-xs font-black text-slate-500">{item.source}</p>
+      </article>
+    </a>
   );
 }
 
