@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ExternalLink, Instagram, Megaphone, ShoppingBag, Ticket, Youtube } from "lucide-react";
+import { Instagram, Megaphone, ShoppingBag, Ticket, Youtube } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ClubPostCard } from "@/components/ClubPostCard";
 import { EmptyState } from "@/components/EmptyState";
@@ -23,41 +23,34 @@ const labels = {
   official: "\uacf5\uc2dd \ud648\ud398\uc774\uc9c0",
   instagram: "\uc778\uc2a4\ud0c0\uadf8\ub7a8",
   youtube: "\uc720\ud29c\ube0c",
-  store: "MD \uc2a4\ud1a0\uc5b4",
-  reserve: "\uc608\ub9e4",
-  go: "\uc774\ub3d9"
+  store: "MD \uc2a4\ud1a0\uc5b4"
 };
 
 const quickLinks = [
   {
     title: labels.ticket,
     href: ticketUrl,
-    label: labels.reserve,
     icon: Ticket,
     featured: true
   },
   {
     title: labels.official,
     href: "https://www.gangwon-fc.com/",
-    label: labels.go,
     icon: Megaphone
   },
   {
     title: labels.instagram,
     href: "https://www.instagram.com/gangwon_fc/",
-    label: labels.go,
     icon: Instagram
   },
   {
     title: labels.youtube,
     href: "https://www.youtube.com/@gangwonfc2008/videos",
-    label: labels.go,
     icon: Youtube
   },
   {
     title: labels.store,
     href: "https://gangwon-fc.imweb.me/",
-    label: labels.go,
     icon: ShoppingBag
   }
 ];
@@ -108,13 +101,11 @@ export default function ClubPage() {
 function QuickLinkCard({
   title,
   href,
-  label,
   icon: Icon,
   featured = false
 }: {
   title: string;
   href: string;
-  label: string;
   icon: LucideIcon;
   featured?: boolean;
 }) {
@@ -131,10 +122,6 @@ function QuickLinkCard({
         </span>
         <div className="min-w-0">
           <h3 className="truncate text-sm font-black">{title}</h3>
-          <span className={`mt-1 inline-flex items-center gap-1 text-xs font-black ${featured ? "text-white" : "text-gangwon-orange"}`}>
-            {label}
-            <ExternalLink size={13} aria-hidden="true" />
-          </span>
         </div>
       </div>
     </a>

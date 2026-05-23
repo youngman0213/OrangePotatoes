@@ -298,12 +298,11 @@ function OfficialLinks() {
         {links.map((link) => {
           const Icon = link.icon;
           return (
-            <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-lg bg-white px-4 py-3 text-sm font-black text-gangwon-navy shadow-card ring-1 ring-slate-100 hover:text-gangwon-orange">
+            <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="flex items-center rounded-lg bg-white px-4 py-3 text-sm font-black text-gangwon-navy shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:text-gangwon-orange hover:ring-orange-100">
               <span className="inline-flex items-center gap-2">
                 <Icon size={17} className="text-gangwon-orange" aria-hidden="true" />
                 {link.label}
               </span>
-              <ExternalLink size={14} aria-hidden="true" />
             </a>
           );
         })}
