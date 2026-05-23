@@ -14,11 +14,16 @@ const parser = new XMLParser({
   removeNSPrefix: true
 });
 
-const newsQueries = [
-  "\uac15\uc6d0FC",
-  "\uac15\uc6d0FC K\ub9ac\uadf8",
-  "\uac15\uc6d0 \ucd95\uad6c",
-  "Gangwon FC"
+const rssSources = [
+  { label: "전체", url: createGoogleNewsRssUrl("\uac15\uc6d0FC") },
+  { label: "K리그", url: createGoogleNewsRssUrl("\uac15\uc6d0FC K\ub9ac\uadf8") },
+  { label: "강원 축구", url: createGoogleNewsRssUrl("\uac15\uc6d0 \ucd95\uad6c") },
+  { label: "Gangwon FC", url: createGoogleNewsRssUrl("Gangwon FC") },
+  {
+    label: "스포츠니어스",
+    url: "https://news.google.com/rss/search?q=%EA%B0%95%EC%9B%90FC+site:sports-g.com&hl=ko&gl=KR&ceid=KR:ko",
+    sourceName: "sports-g.com"
+  }
 ];
 const newsCategoryKeywords: Record<"match" | "player" | "club", string[]> = {
   match: ["경기", "vs", "골", "승", "패", "무승부", "결과", "득점", "실점", "하이라이트", "프리뷰", "리뷰", "분석"],
@@ -30,7 +35,7 @@ const fallbackTitle = "\uac15\uc6d0FC \ub274\uc2a4";
 const fallbackSummary = "\uc6d0\ubb38 \ub9c1\ud06c\uc5d0\uc11c \uae30\uc0ac \ub0b4\uc6a9\uc744 \ud655\uc778\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.";
 
 export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
-  const results = await Promise.allSettled(newsQueries.map((query, queryIndex) => fetchNewsQuery(query, queryIndex)));
+  const results = await Promise.allSettled(rssSources.map((source, sourceIndex) => fetchNewsSource(source, sourceIndex)));
   const items = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
 
   if (!items.length) {
@@ -40,9 +45,8 @@ export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
   return sortNewsByPublishedDesc(dedupeNews(items)).slice(0, limit);
 }
 
-async function fetchNewsQuery(query: string, queryIndex: number): Promise<NewsItem[]> {
-  const feedUrl = createGoogleNewsRssUrl(query);
-  const response = await fetch(feedUrl, {
+async function fetchNewsSource(source: { label: string; url: string; sourceName?: string }, sourceIndex: number): Promise<NewsItem[]> {
+  const response = await fetch(source.url, {
     next: { revalidate: 60 * 20 },
     headers: {
       "User-Agent": "OrangePotatoesFanHub/1.0"
@@ -62,13 +66,13 @@ async function fetchNewsQuery(query: string, queryIndex: number): Promise<NewsIt
     const rawTitle = cleanText(item.title ?? fallbackTitle);
     const title = cleanNewsTitle(rawTitle);
     const summary = cleanText(stripHtml(item.description ?? ""));
-    const source = typeof item.source === "string" ? item.source : item.source?.["#text"] ?? "Google News";
+    const itemSource = typeof item.source === "string" ? item.source : item.source?.["#text"] ?? "Google News";
 
     return {
-      id: `google-news-${queryIndex}-${index}-${item.pubDate ?? title}`,
+      id: `google-news-${sourceIndex}-${index}-${item.pubDate ?? title}`,
       title,
-      source,
-      url: item.link ?? feedUrl,
+      source: source.sourceName ?? itemSource,
+      url: item.link ?? source.url,
       summary: summary || fallbackSummary,
       publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
       category: categorizeNews(title),
