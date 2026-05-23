@@ -144,11 +144,10 @@ function RankCard({ standing }: { standing?: Standing }) {
           </p>
         </div>
       </div>
-      <p className="mt-2 text-sm font-bold text-slate-500">
-        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
-      </p>
       <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
-        <p className="text-xs font-black text-slate-400">{text.recentForm}</p>
+        <p className="text-sm font-black text-slate-600">
+          {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
+        </p>
         <div className="flex gap-1.5">
           {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
             <span
