@@ -20,8 +20,7 @@ const labels = {
   gangwonTitle: "강원 선수 개인기록",
   leagueTitle: "리그 개인 순위",
   ratingTitle: "평균평점",
-  ratingEyebrow: "K리그 공식 경기 평점 기반 평균",
-  ratingDescription: "경기별 선수 평점을 누적해 계산한 팬사이트 자체 평균입니다.",
+  ratingEyebrow: "K리그 공식 경기 평점 기반",
   ratingFailed: "평점 데이터를 불러오지 못했습니다.",
   ratingMatches: "반영",
   latestRating: "최근",
@@ -101,7 +100,6 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
     <div>
       <div className="mb-3">
         <p className="text-xs font-black uppercase text-gangwon-orange">{labels.ratingEyebrow}</p>
-        <p className="mt-1 text-xs font-bold leading-5 text-slate-400">{labels.ratingDescription}</p>
       </div>
 
       {hasError ? (
