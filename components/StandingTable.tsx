@@ -4,7 +4,7 @@ import { classNames, isGangwon } from "@/lib/utils";
 
 const labels = {
   summaryTitle: "강원FC 현재 순위",
-  leagueListTitle: "리그 전체 순위",
+  leagueListTitle: "리그 순위",
   rank: "순위",
   place: "위",
   team: "팀",
@@ -27,7 +27,7 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
   const goalsAgainstRank = gangwon ? getMetricRank(standings, "goalsAgainst", "asc", gangwon.team) : null;
 
   return (
-    <section className="grid gap-4">
+    <section className="grid gap-3">
       {gangwon ? <GangwonSummaryCard standing={gangwon} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} /> : null}
       <LeagueTable standings={standings} />
     </section>
@@ -37,7 +37,7 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
 function LeagueTable({ standings }: { standings: Standing[] }) {
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
-      <div className="flex items-center justify-between gap-3 px-4 py-4">
+      <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div>
           <p className="text-xs font-black text-gangwon-orange">순위표</p>
           <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
@@ -82,7 +82,7 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
               </tr>
             )) : (
               <tr>
-                <td colSpan={11} className="px-4 py-8 text-center text-sm font-bold text-slate-500">
+                <td colSpan={11} className="px-4 py-6 text-center text-sm font-bold text-slate-500">
                   {labels.empty}
                 </td>
               </tr>
@@ -104,17 +104,17 @@ function GangwonSummaryCard({
   goalsAgainstRank: number | null;
 }) {
   return (
-    <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-5 text-white shadow-card">
+    <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-3.5 text-white shadow-card sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black text-white/75">강원 요약</p>
-          <h2 className="mt-1 text-xl font-black">{labels.summaryTitle}</h2>
+          <h2 className="mt-1 text-lg font-black sm:text-xl">{labels.summaryTitle}</h2>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange">
           {standing.rank}{labels.place}
         </span>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-2">
         <SummaryMetric label={labels.played} value={standing.played} />
         <SummaryMetric label={labels.wdl} value={`${standing.wins}/${standing.draws}/${standing.losses}`} />
         <SummaryMetric label={labels.points} value={standing.points} />
@@ -122,7 +122,7 @@ function GangwonSummaryCard({
         <SummaryMetric label={labels.goalsFor} value={`${standing.goalsFor}${formatRankSuffix(goalsForRank)}`} />
         <SummaryMetric label={labels.goalsAgainst} value={`${standing.goalsAgainst}${formatRankSuffix(goalsAgainstRank)}`} />
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-3">
+      <div className="mt-2.5 flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2">
         <span className="text-xs font-black text-white/75">{labels.form}</span>
         <FormDots team={standing.team} form={standing.recentForm} light />
       </div>
@@ -132,9 +132,9 @@ function GangwonSummaryCard({
 
 function SummaryMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-lg bg-white/10 px-3 py-3">
-      <p className="text-xs font-bold text-white/70">{label}</p>
-      <p className="mt-1 text-2xl font-black">{value}</p>
+    <div className="rounded-lg bg-white/10 px-2.5 py-2">
+      <p className="text-[11px] font-bold text-white/70 sm:text-xs">{label}</p>
+      <p className="mt-0.5 text-lg font-black sm:mt-1 sm:text-2xl">{value}</p>
     </div>
   );
 }
@@ -183,9 +183,9 @@ function formatRankSuffix(rank: number | null) {
 }
 
 function Th({ children }: { children: ReactNode }) {
-  return <th className="whitespace-nowrap px-4 py-3 font-black">{children}</th>;
+  return <th className="whitespace-nowrap px-3 py-2.5 font-black sm:px-4 sm:py-3">{children}</th>;
 }
 
 function Td({ children, strong = false }: { children: ReactNode; strong?: boolean }) {
-  return <td className={classNames("whitespace-nowrap px-4 py-4 text-slate-600", strong && "font-black text-gangwon-navy")}>{children}</td>;
+  return <td className={classNames("whitespace-nowrap px-3 py-3 text-slate-600 sm:px-4 sm:py-4", strong && "font-black text-gangwon-navy")}>{children}</td>;
 }
