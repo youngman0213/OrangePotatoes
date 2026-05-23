@@ -62,6 +62,21 @@ const stadiumNames: Record<string, string> = {
   "\uc548\uc591\uc885\ud569": "\uc548\uc591\uc885\ud569\uc6b4\ub3d9\uc7a5"
 };
 
+const stadiumAliases = [
+  { keyword: "\uac15\ub989\ud558\uc774\uc6d0", name: "\uac15\ub989\ud558\uc774\uc6d0\uc544\ub808\ub098" },
+  { keyword: "\uc778\ucc9c", name: "\uc778\ucc9c \ucd95\uad6c\uc804\uc6a9\uacbd\uae30\uc7a5" },
+  { keyword: "\uad11\uc8fc", name: "\uad11\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5" },
+  { keyword: "\ub300\uc804", name: "\ub300\uc804\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5" },
+  { keyword: "\uae40\ucc9c", name: "\uae40\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5" },
+  { keyword: "\ud3ec\ud56d", name: "\ud3ec\ud56d\uc2a4\ud2f8\uc57c\ub4dc" },
+  { keyword: "\uc804\uc8fc", name: "\uc804\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5" },
+  { keyword: "\uc11c\uc6b8", name: "\uc11c\uc6b8\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5" },
+  { keyword: "\uc6b8\uc0b0", name: "\uc6b8\uc0b0\ubb38\uc218\ucd95\uad6c\uacbd\uae30\uc7a5" },
+  { keyword: "\uc81c\uc8fc", name: "\uc81c\uc8fc\uc6d4\ub4dc\ucef5\uacbd\uae30\uc7a5" },
+  { keyword: "\uc548\uc591", name: "\uc548\uc591\uc885\ud569\uc6b4\ub3d9\uc7a5" },
+  { keyword: "\ubd80\ucc9c", name: "\ubd80\ucc9c\uc885\ud569\uc6b4\ub3d9\uc7a5" }
+];
+
 interface KLeagueScheduleItem {
   year: number;
   leagueId: number;
@@ -437,7 +452,12 @@ function normalizeTeam(team: string, teamId?: string) {
 }
 
 function normalizeStadium(stadium: string) {
-  return stadiumNames[stadium] ?? stadium;
+  const normalized = stadium.replace(/\s+/g, "");
+  const exact = stadiumNames[stadium] ?? stadiumNames[normalized];
+  if (exact) return exact;
+
+  const alias = stadiumAliases.find((item) => normalized.includes(item.keyword.replace(/\s+/g, "")));
+  return alias?.name ?? stadium;
 }
 
 function normalize(value: string) {
