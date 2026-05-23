@@ -143,9 +143,13 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
 
 function getTopRows(rows: LeaguePlayerStat[], key: StatKey, includeZero = false) {
   return [...rows]
-    .filter((row) => includeZero || row[key] > 0)
-    .sort((a, b) => b[key] - a[key] || b.attackPoints - a.attackPoints || b.played - a.played)
+    .filter((row) => includeZero || getStatValue(row, key) > 0)
+    .sort((a, b) => getStatValue(b, key) - getStatValue(a, key) || b.attackPoints - a.attackPoints || b.played - a.played)
     .slice(0, 5);
+}
+
+function getStatValue(row: LeaguePlayerStat, key: StatKey) {
+  return Number(row[key] ?? 0);
 }
 
 function formatRating(value: number) {
@@ -217,7 +221,7 @@ function StatsList({
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-lg font-black text-gangwon-orange sm:text-xl">{Number(row[valueKey] ?? 0)}<span className="text-sm">{suffixMap[valueKey]}</span></p>
+              <p className="text-lg font-black text-gangwon-orange sm:text-xl">{getStatValue(row, valueKey)}<span className="text-sm">{suffixMap[valueKey]}</span></p>
             </div>
           </div>
         );
