@@ -118,9 +118,9 @@ function GangwonSummaryCard({
         <SummaryMetric label={labels.played} value={standing.played} />
         <SummaryMetric label={labels.wdl} value={`${standing.wins}/${standing.draws}/${standing.losses}`} />
         <SummaryMetric label={labels.points} value={standing.points} />
+        <SummaryMetric label={labels.goalsFor} value={`${standing.goalsFor} ${formatRankSuffix(goalsForRank)}`} />
+        <SummaryMetric label={labels.goalsAgainst} value={`${standing.goalsAgainst} ${formatRankSuffix(goalsAgainstRank)}`} />
         <SummaryMetric label={labels.goalDifference} value={formatGoalDifference(standing.goalDifference)} />
-        <SummaryMetric label={labels.goalsFor} value={`${standing.goalsFor}${formatRankSuffix(goalsForRank)}`} />
-        <SummaryMetric label={labels.goalsAgainst} value={`${standing.goalsAgainst}${formatRankSuffix(goalsAgainstRank)}`} />
       </div>
       <div className="mt-2.5 flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2">
         <span className="text-xs font-black text-white/75">{labels.form}</span>

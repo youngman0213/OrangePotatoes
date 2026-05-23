@@ -160,7 +160,7 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
           </p>
           {standing ? (
             <p className="mt-1 text-xs font-bold text-slate-400">
-              {text.goalsFor} {standing.goalsFor}{formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst}{formatRankSuffix(goalsAgainstRank)}
+              {text.goalsFor} {standing.goalsFor} {formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
             </p>
           ) : null}
         </div>
@@ -200,7 +200,7 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
       </p>
       {standing ? (
         <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
-          {text.goalsFor} {standing.goalsFor}{formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst}{formatRankSuffix(goalsAgainstRank)}
+          {text.goalsFor} {standing.goalsFor} {formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
         </p>
       ) : null}
       <div className="mt-auto flex justify-center gap-1.5 pt-1.5">

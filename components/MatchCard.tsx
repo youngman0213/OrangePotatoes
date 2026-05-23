@@ -45,7 +45,7 @@ export function MatchCard({ match, featured = false, embedded = false }: MatchCa
         <TeamName name={match.awayTeam} align="left" />
       </div>
 
-      <div className="mt-4 grid gap-2 text-sm text-slate-500">
+      <div className="mt-4 grid justify-items-center gap-2 text-center text-sm text-slate-500">
         <p className="font-bold text-slate-700">
           {formatDate(match.date, { year: "numeric" })} {formatTime(match.date)}
         </p>
@@ -55,7 +55,7 @@ export function MatchCard({ match, featured = false, embedded = false }: MatchCa
         </p>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap justify-center gap-2">
         {match.status === "scheduled" ? (
           <ActionLink href={match.ticketUrl} label={labels.ticket} icon="ticket" />
         ) : (
