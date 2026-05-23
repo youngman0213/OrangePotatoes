@@ -5,6 +5,7 @@ export const classNames = (...classes: Array<string | false | null | undefined>)
 
 export const formatDate = (date: string, options?: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
     month: "long",
     day: "numeric",
     weekday: "short",
@@ -13,6 +14,7 @@ export const formatDate = (date: string, options?: Intl.DateTimeFormatOptions) =
 
 export const formatTime = (date: string) =>
   new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false
@@ -20,6 +22,7 @@ export const formatTime = (date: string) =>
 
 export const formatShortDate = (date: string) =>
   new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
@@ -37,7 +40,8 @@ export const statusTone: Record<MatchStatus, string> = {
   finished: "bg-gangwon-navy text-white"
 };
 
-export const getMatchMonth = (date: string) => `${new Date(date).getMonth() + 1}\uc6d4`;
+export const getMatchMonth = (date: string) =>
+  `${new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "numeric" }).format(new Date(date))}\uc6d4`;
 
 export const sortByDateAsc = <T extends { date: string }>(items: T[]) =>
   [...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
