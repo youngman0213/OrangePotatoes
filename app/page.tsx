@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
 import { CalendarDays, ExternalLink, Goal, HomeIcon, Youtube } from "lucide-react";
-import { ClubPostCard } from "@/components/ClubPostCard";
 import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { VideoCard } from "@/components/VideoCard";
-import { clubPosts as mockClubPosts, matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
+import { matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
 import { fetchGangwonNews } from "@/lib/newsFeed";
-import { fetchOfficialClubPosts, fetchOfficialMatches } from "@/lib/officialFeed";
+import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
 import type { Standing } from "@/types";
@@ -23,7 +22,6 @@ const text = {
   noStanding: "순위 정보 없음",
   recentForm: "최근 5경기",
   recentNews: "최신 뉴스",
-  clubPosts: "구단 공식 소식",
   latestVideos: "최신 영상",
   officialLinks: "공식 링크",
   allNews: "전체 보기",
@@ -36,16 +34,14 @@ const text = {
 };
 
 export default async function HomePage() {
-  const [matchesResult, newsResult, clubPostsResult, videosResult] = await Promise.allSettled([
+  const [matchesResult, newsResult, videosResult] = await Promise.allSettled([
     fetchOfficialMatches(),
     fetchGangwonNews(8),
-    fetchOfficialClubPosts(8),
     fetchGangwonVideos(8)
   ]);
 
   const matches = matchesResult.status === "fulfilled" && matchesResult.value.length ? matchesResult.value : mockMatches;
   const news = newsResult.status === "fulfilled" && newsResult.value.length ? newsResult.value : mockNews;
-  const clubPosts = clubPostsResult.status === "fulfilled" && clubPostsResult.value.length ? clubPostsResult.value : mockClubPosts;
   const videos = videosResult.status === "fulfilled" && videosResult.value.length ? videosResult.value : mockVideos;
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
@@ -83,12 +79,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section>
-          <SectionHeader title={text.clubPosts} eyebrow="공식 채널" href="/club" />
-          <div className="grid gap-3 md:grid-cols-3">
-            {sortByPublishedDesc(clubPosts).slice(0, 3).map((post) => <ClubPostCard key={post.id} post={post} />)}
-          </div>
-        </section>
+        <OfficialLinks />
       </div>
 
       <aside className="grid gap-4 lg:sticky lg:top-24">
@@ -101,7 +92,6 @@ export default async function HomePage() {
             {sortByPublishedDesc(videos).slice(0, 2).map((video) => <VideoCard key={video.id} video={video} compact />)}
           </div>
         </section>
-        <OfficialLinks />
       </aside>
     </div>
   );
@@ -165,7 +155,7 @@ function OfficialLinks() {
   return (
     <section>
       <SectionHeader title={text.officialLinks} eyebrow="바로가기" />
-      <div className="grid gap-2">
+      <div className="grid gap-2 sm:grid-cols-3">
         {links.map((link) => {
           const Icon = link.icon;
           return (
