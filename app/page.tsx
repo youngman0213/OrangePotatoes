@@ -171,27 +171,27 @@ function RankCard({ standing }: { standing?: Standing }) {
 
 function MobileRankCard({ standing }: { standing?: Standing }) {
   return (
-    <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+    <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-[11px] font-black text-gangwon-orange">{text.currentRank}</p>
+          <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
           <h3 className="mt-1 text-[32px] font-black leading-none text-gangwon-navy">
             {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
           </h3>
         </div>
         <div className="text-right">
-          <p className="text-[11px] font-black text-slate-400">{text.points}</p>
+          <p className="text-xs font-black text-slate-400">{text.points}</p>
           <p className="mt-1 text-2xl font-black leading-none text-gangwon-orange">{standing ? standing.points : "-"}</p>
         </div>
       </div>
-      <p className="mt-2 truncate text-center text-xs font-black text-slate-600">
+      <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600">
         {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
       </p>
-      <div className="mt-auto flex justify-center gap-1 pt-2">
+      <div className="mt-auto flex justify-center gap-1.5 pt-2">
         {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
           <span
             key={`${form}-${index}`}
-            className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
+            className={`flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
           >
             {form}
           </span>
@@ -204,14 +204,14 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
 
 function MobileRecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
-    <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <p className="text-[11px] font-black text-gangwon-orange">{text.recentMatch}</p>
+    <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+      <p className="text-xs font-black text-gangwon-orange">{text.recentMatch}</p>
       {match ? (
         <ScoreBoard match={match} size="mobile" />
       ) : (
         <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{text.noResult}</h3>
       )}
-      <p className="mt-auto line-clamp-1 pt-3 text-center text-xs font-bold text-slate-500">{meta}</p>
+      <p className="mt-auto line-clamp-1 pt-2 text-center text-[11px] font-bold text-slate-400">{meta}</p>
     </article>
   );
 }
@@ -220,10 +220,10 @@ function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" 
   const compact = size === "mobile";
 
   return (
-    <div className={compact ? "mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4"}>
+    <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4"}>
       <TeamBadge name={match.homeTeam} compact={compact} isHome />
       <div className="text-center">
-        <p className={compact ? "text-xl font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
+        <p className={compact ? "text-[24px] font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
           {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
         </p>
       </div>
@@ -235,10 +235,10 @@ function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" 
 function TeamBadge({ name, compact, isHome = false }: { name: string; compact: boolean; isHome?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className={`${compact ? "h-9 w-9 text-[11px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black text-white ${isHome ? "bg-gangwon-orange" : "bg-gangwon-navy"}`}>
+      <span className={`${compact ? "h-8 w-8 text-[10px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black text-white ${isHome ? "bg-gangwon-orange" : "bg-gangwon-navy"}`}>
         {getTeamShortName(name)}
       </span>
-      <span className={`${compact ? "max-w-14 text-[10px]" : "max-w-24 text-xs"} truncate font-black text-slate-600`}>
+      <span className={`${compact ? "max-w-12 text-[9px]" : "max-w-24 text-xs"} truncate font-black text-slate-500`}>
         {name}
       </span>
     </div>
