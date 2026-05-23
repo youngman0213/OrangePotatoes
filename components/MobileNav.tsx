@@ -2,17 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Home, Megaphone, Newspaper, PlaySquare, Table2, Users } from "lucide-react";
+import { CalendarDays, Home, Megaphone, Newspaper, PlaySquare, Table2 } from "lucide-react";
 import { classNames } from "@/lib/utils";
 
 const items = [
-  { href: "/", label: "\ud648", icon: Home },
-  { href: "/matches", label: "\uacbd\uae30", icon: CalendarDays },
-  { href: "/standings", label: "\uc21c\uc704", icon: Table2 },
-  { href: "/players", label: "\uc120\uc218", icon: Users },
-  { href: "/news", label: "\ub274\uc2a4", icon: Newspaper },
-  { href: "/club", label: "\uc18c\uc2dd", icon: Megaphone },
-  { href: "/videos", label: "\uc601\uc0c1", icon: PlaySquare }
+  { href: "/", label: "홈", icon: Home },
+  { href: "/matches", label: "경기", icon: CalendarDays },
+  { href: "/standings", label: "순위", icon: Table2 },
+  { href: "/news", label: "뉴스", icon: Newspaper },
+  { href: "/videos", label: "영상", icon: PlaySquare },
+  { href: "/club", label: "소식", icon: Megaphone }
 ];
 
 export function MobileNav() {
@@ -20,7 +19,7 @@ export function MobileNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white md:hidden">
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-6">
         {items.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;

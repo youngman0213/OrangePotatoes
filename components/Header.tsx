@@ -2,13 +2,12 @@ import Link from "next/link";
 import { Trophy } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "\ud648" },
-  { href: "/matches", label: "\uacbd\uae30" },
-  { href: "/standings", label: "\uc21c\uc704" },
-  { href: "/players", label: "\uc120\uc218" },
-  { href: "/news", label: "\ub274\uc2a4" },
-  { href: "/club", label: "\uc18c\uc2dd" },
-  { href: "/videos", label: "\uc601\uc0c1" }
+  { href: "/", label: "홈" },
+  { href: "/matches", label: "경기" },
+  { href: "/standings", label: "순위" },
+  { href: "/news", label: "뉴스" },
+  { href: "/videos", label: "영상" },
+  { href: "/club", label: "소식" }
 ];
 
 export function Header() {
@@ -20,7 +19,7 @@ export function Header() {
             <Trophy size={22} aria-hidden="true" />
           </span>
           <span>
-            <span className="block text-lg font-black leading-5 text-gangwon-navy">\uac15\uc6d0FC HUB</span>
+            <span className="block text-lg font-black leading-5 text-gangwon-navy">강원FC HUB</span>
             <span className="text-xs font-bold text-slate-500">Unofficial Fan Info</span>
           </span>
         </Link>
