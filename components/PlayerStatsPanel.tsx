@@ -14,6 +14,7 @@ interface PlayerStatsPanelProps {
 }
 
 type StatKey = "goals" | "assists" | "yellowCards";
+type GangwonTabKey = StatKey | "averageRating";
 
 const labels = {
   gangwonTitle: "강원 선수 개인기록",
@@ -41,7 +42,8 @@ const labels = {
 const gangwonTabs = [
   { label: labels.goals, value: "goals" },
   { label: labels.assists, value: "assists" },
-  { label: labels.yellowCards, value: "yellowCards" }
+  { label: labels.yellowCards, value: "yellowCards" },
+  { label: labels.ratingTitle, value: "averageRating" }
 ];
 
 const leagueTabs = [
@@ -62,10 +64,10 @@ const statLabelMap: Record<StatKey, string> = {
 };
 
 export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: PlayerStatsPanelProps) {
-  const [activeGangwon, setActiveGangwon] = useState<StatKey>("goals");
+  const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("goals");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
   const gangwonStats = useMemo(() => stats.filter((item) => isGangwon(item.club)), [stats]);
-  const gangwonRows = useMemo(() => getTopRows(gangwonStats, activeGangwon, true), [activeGangwon, gangwonStats]);
+  const gangwonRows = useMemo(() => activeGangwon === "averageRating" ? [] : getTopRows(gangwonStats, activeGangwon, true), [activeGangwon, gangwonStats]);
   const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
 
   if (!stats.length) {
@@ -80,16 +82,18 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: 
   return (
     <section className="grid gap-3 sm:gap-5">
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow="강원 기록" title={labels.gangwonTitle}>
-          <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as StatKey)} />
+        <StatsHeader eyebrow={labels.gangwonTitle} title={labels.gangwonTitle} hideTitle>
+          <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as GangwonTabKey)} />
         </StatsHeader>
-        <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
+        {activeGangwon === "averageRating" ? (
+          <RatingPanel ratings={ratings} hasError={ratingsError} />
+        ) : (
+          <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
+        )}
       </article>
 
-      <RatingPanel ratings={ratings} hasError={ratingsError} />
-
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow="리그 순위" title={labels.leagueTitle}>
+        <StatsHeader eyebrow={labels.leagueTitle} title={labels.leagueTitle} hideTitle>
           <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
         </StatsHeader>
         <StatsList rows={leagueRows} valueKey={activeLeague} showClub />
@@ -100,10 +104,9 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: 
 
 function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; hasError: boolean }) {
   return (
-    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
+    <div>
       <div className="mb-3">
         <p className="text-xs font-black uppercase text-gangwon-orange">{labels.ratingEyebrow}</p>
-        <h2 className="text-lg font-black text-gangwon-navy sm:text-xl">{labels.ratingTitle}</h2>
         <p className="mt-1 text-xs font-bold leading-5 text-slate-400">{labels.ratingDescription}</p>
       </div>
 
@@ -139,7 +142,7 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
       ) : (
         <p className="rounded-lg bg-slate-50 px-4 py-4 text-sm font-bold text-slate-500">{labels.ratingFailed}</p>
       )}
-    </article>
+    </div>
   );
 }
 
@@ -154,12 +157,12 @@ function formatRating(value: number) {
   return value.toFixed(2);
 }
 
-function StatsHeader({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
+function StatsHeader({ eyebrow, title, children, hideTitle = false }: { eyebrow: string; title: string; children: ReactNode; hideTitle?: boolean }) {
   return (
     <div className="mb-3 flex flex-col gap-2 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div>
         <p className="text-xs font-black uppercase text-gangwon-orange">{eyebrow}</p>
-        <h2 className="text-lg font-black text-gangwon-navy sm:text-xl">{title}</h2>
+        {hideTitle ? null : <h2 className="text-lg font-black text-gangwon-navy sm:text-xl">{title}</h2>}
       </div>
       {children}
     </div>
