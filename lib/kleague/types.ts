@@ -87,3 +87,15 @@ export interface GangwonSummary {
   topAssists: VerifiedPlayerRecord[];
   topYellowCards: VerifiedPlayerRecord[];
 }
+
+export interface GangwonPlayerRating {
+  rank: number;
+  playerKey: string;
+  playerName: string;
+  number: number;
+  position: string;
+  averageRating: number;
+  ratingMatches: number;
+  latestRating: number;
+  latestMatchDate: string;
+}

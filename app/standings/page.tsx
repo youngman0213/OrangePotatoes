@@ -3,6 +3,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
+import { getGangwonAverageRatings } from "@/lib/kleague/ratings";
 import type { LeaguePlayerStat } from "@/types";
 
 export const revalidate = 21600;
@@ -14,9 +15,10 @@ const labels = {
 };
 
 export default async function StandingsPage() {
-  const [standingsResult, statsResult] = await Promise.allSettled([
+  const [standingsResult, statsResult, ratingsResult] = await Promise.allSettled([
     getVerifiedStandings(),
-    getVerifiedCombinedPlayerRecords()
+    getVerifiedCombinedPlayerRecords(),
+    getGangwonAverageRatings()
   ]);
   const tableStandings = standingsResult.status === "fulfilled" && standingsResult.value.data.length ? standingsResult.value.data.map((row) => ({
     rank: row.rank,
@@ -43,6 +45,8 @@ export default async function StandingsPage() {
     played: row.matches
   })) : [];
   const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : fallbackPlayerStats;
+  const playerRatings = ratingsResult.status === "fulfilled" ? ratingsResult.value : [];
+  const ratingsError = ratingsResult.status === "rejected";
   const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
 
   return (
@@ -50,7 +54,7 @@ export default async function StandingsPage() {
       <StandingTable standings={tableStandings} />
 
       <SectionHeader title={labels.playerStats} />
-      <PlayerStatsPanel stats={playerStats} />
+      <PlayerStatsPanel stats={playerStats} ratings={playerRatings} ratingsError={ratingsError} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
   );

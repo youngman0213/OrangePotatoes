@@ -4,10 +4,13 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { FilterTabs } from "@/components/FilterTabs";
 import { classNames, isGangwon } from "@/lib/utils";
+import type { GangwonPlayerRating } from "@/lib/kleague/types";
 import type { LeaguePlayerStat } from "@/types";
 
 interface PlayerStatsPanelProps {
   stats: LeaguePlayerStat[];
+  ratings?: GangwonPlayerRating[];
+  ratingsError?: boolean;
 }
 
 type StatKey = "goals" | "assists" | "yellowCards";
@@ -15,6 +18,12 @@ type StatKey = "goals" | "assists" | "yellowCards";
 const labels = {
   gangwonTitle: "강원 선수 개인기록",
   leagueTitle: "리그 개인 순위",
+  ratingTitle: "평균평점",
+  ratingEyebrow: "K리그 공식 경기 평점 기반 평균",
+  ratingDescription: "경기별 선수 평점을 누적해 계산한 팬사이트 자체 평균입니다.",
+  ratingFailed: "평점 데이터를 불러오지 못했습니다.",
+  ratingMatches: "반영",
+  latestRating: "최근",
   loadFailed: "강원 선수 개인기록을 표시할 수 없습니다.",
   goals: "득점",
   assists: "도움",
@@ -52,7 +61,7 @@ const statLabelMap: Record<StatKey, string> = {
   yellowCards: labels.yellowCards
 };
 
-export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
+export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: PlayerStatsPanelProps) {
   const [activeGangwon, setActiveGangwon] = useState<StatKey>("goals");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
   const gangwonStats = useMemo(() => stats.filter((item) => isGangwon(item.club)), [stats]);
@@ -77,6 +86,8 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
         <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
       </article>
 
+      <RatingPanel ratings={ratings} hasError={ratingsError} />
+
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
         <StatsHeader eyebrow="리그 순위" title={labels.leagueTitle}>
           <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
@@ -87,11 +98,60 @@ export function PlayerStatsPanel({ stats }: PlayerStatsPanelProps) {
   );
 }
 
+function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; hasError: boolean }) {
+  return (
+    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
+      <div className="mb-3">
+        <p className="text-xs font-black uppercase text-gangwon-orange">{labels.ratingEyebrow}</p>
+        <h2 className="text-lg font-black text-gangwon-navy sm:text-xl">{labels.ratingTitle}</h2>
+        <p className="mt-1 text-xs font-bold leading-5 text-slate-400">{labels.ratingDescription}</p>
+      </div>
+
+      {hasError ? (
+        <p className="rounded-lg bg-slate-50 px-4 py-4 text-sm font-bold text-slate-500">{labels.ratingFailed}</p>
+      ) : ratings.length ? (
+        <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-1">
+          {ratings.map((row) => (
+            <div key={row.playerKey} className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-orange-50 px-3 py-3 ring-1 ring-orange-100 sm:px-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gangwon-orange text-xs font-black text-white sm:h-9 sm:w-9 sm:text-sm">
+                  {row.rank}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate text-sm font-black text-slate-900 sm:text-base">{row.playerName}</p>
+                    <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 ring-1 ring-orange-100">
+                      {row.number} / {row.position}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs font-bold text-slate-400">
+                    {labels.ratingMatches} {row.ratingMatches}경기 · {labels.latestRating} {formatRating(row.latestRating)}
+                  </p>
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[11px] font-black text-slate-400">{labels.ratingTitle}</p>
+                <p className="text-lg font-black text-gangwon-orange sm:text-xl">{formatRating(row.averageRating)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="rounded-lg bg-slate-50 px-4 py-4 text-sm font-bold text-slate-500">{labels.ratingFailed}</p>
+      )}
+    </article>
+  );
+}
+
 function getTopRows(rows: LeaguePlayerStat[], key: StatKey, includeZero = false) {
   return [...rows]
     .filter((row) => includeZero || row[key] > 0)
     .sort((a, b) => b[key] - a[key] || b.attackPoints - a.attackPoints || b.played - a.played)
     .slice(0, 5);
+}
+
+function formatRating(value: number) {
+  return value.toFixed(2);
 }
 
 function StatsHeader({ eyebrow, title, children }: { eyebrow: string; title: string; children: ReactNode }) {
