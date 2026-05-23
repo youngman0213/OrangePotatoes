@@ -29,6 +29,8 @@ const text = {
   wins: "승",
   draws: "무",
   losses: "패",
+  goalsFor: "득점",
+  goalsAgainst: "실점",
   points: "승점",
   rankSuffix: "위"
 };
@@ -46,6 +48,8 @@ export default async function HomePage() {
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
+  const goalsForRank = gangwonStanding ? getMetricRank(standings, "goalsFor", "desc", gangwonStanding.team) : null;
+  const goalsAgainstRank = gangwonStanding ? getMetricRank(standings, "goalsAgainst", "asc", gangwonStanding.team) : null;
 
   return (
     <div className="grid gap-6">
@@ -61,7 +65,7 @@ export default async function HomePage() {
           </section>
 
           <div className="grid grid-cols-2 gap-3 lg:hidden">
-            <MobileRankCard standing={gangwonStanding} />
+            <MobileRankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
             <MobileRecentMatchCard
               match={recentMatch}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
@@ -89,7 +93,7 @@ export default async function HomePage() {
 
         <aside className="grid gap-4 lg:sticky lg:top-24">
           <div className="hidden lg:block">
-            <RankCard standing={gangwonStanding} />
+            <RankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
           </div>
           <section>
             <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
@@ -132,7 +136,7 @@ function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   );
 }
 
-function RankCard({ standing }: { standing?: Standing }) {
+function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <div className="flex items-start justify-between gap-4">
@@ -150,9 +154,16 @@ function RankCard({ standing }: { standing?: Standing }) {
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
-        <p className="text-sm font-black text-slate-600">
-          {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
-        </p>
+        <div>
+          <p className="text-sm font-black text-slate-600">
+            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
+          </p>
+          {standing ? (
+            <p className="mt-1 text-xs font-bold text-slate-400">
+              {text.goalsFor} {standing.goalsFor}{formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst}{formatRankSuffix(goalsAgainstRank)}
+            </p>
+          ) : null}
+        </div>
         <div className="flex gap-1.5">
           {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
             <span
@@ -169,9 +180,9 @@ function RankCard({ standing }: { standing?: Standing }) {
   );
 }
 
-function MobileRankCard({ standing }: { standing?: Standing }) {
+function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
   return (
-    <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+    <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
@@ -187,7 +198,12 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
       <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600">
         {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
       </p>
-      <div className="mt-auto flex justify-center gap-1.5 pt-2">
+      {standing ? (
+        <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
+          {text.goalsFor} {standing.goalsFor}{formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst}{formatRankSuffix(goalsAgainstRank)}
+        </p>
+      ) : null}
+      <div className="mt-auto flex justify-center gap-1.5 pt-1.5">
         {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
           <span
             key={`${form}-${index}`}
@@ -252,6 +268,20 @@ function getTeamShortName(name: string) {
     .replace("하나시티즌", "")
     .trim()
     .slice(0, 2);
+}
+
+function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direction: "asc" | "desc", team: string) {
+  const sorted = [...rows].sort((a, b) => {
+    const diff = direction === "asc" ? a[key] - b[key] : b[key] - a[key];
+    return diff || a.rank - b.rank;
+  });
+  const index = sorted.findIndex((row) => row.team === team);
+
+  return index >= 0 ? index + 1 : null;
+}
+
+function formatRankSuffix(rank: number | null) {
+  return rank ? `(${rank}위)` : "";
 }
 
 function OfficialLinks() {
