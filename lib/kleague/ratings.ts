@@ -1,4 +1,3 @@
-import * as cheerio from "cheerio";
 import { cachedExternalJson } from "@/lib/kleague/cache";
 import { KLEAGUE_SEASON, type GangwonPlayerRating } from "@/lib/kleague/types";
 import { fetchOfficialMatches } from "@/lib/officialFeed";
@@ -17,22 +16,55 @@ type RatingAccumulator = {
 
 type MatchIdentity = {
   year: string;
+  leagueId: string;
   gameId: string;
   meetSeq: string;
 };
 
+type KLeagueMatchRecordPlayer = {
+  teamName?: string | null;
+  playerId?: string | null;
+  playerName?: string | null;
+  backNo?: string | number | null;
+  playerPos?: string | null;
+  playerPoint?: number | string | null;
+};
+
+type KLeagueMatchRecordDetailResponse = {
+  resultCode?: string;
+  data?: {
+    listA?: KLeagueMatchRecordPlayer[];
+    listH?: KLeagueMatchRecordPlayer[];
+  };
+};
+
 const kLeagueBaseUrl = "https://www.kleague.com";
+const gangwonTeamName = "\uac15\uc6d0FC";
 const minimumRatingMatches = 3;
 
+const teamNameToId: Record<string, string> = {
+  "\uc6b8\uc0b0 HD": "K01",
+  "\ud3ec\ud56d": "K03",
+  "\uc81c\uc8fc": "K04",
+  "\uc804\ubd81": "K05",
+  "FC\uc11c\uc6b8": "K09",
+  "\ub300\uc804": "K10",
+  "\uc778\ucc9c": "K18",
+  "\uac15\uc6d0FC": "K21",
+  "\uad11\uc8fc": "K22",
+  "\ubd80\ucc9c": "K26",
+  "\uc548\uc591": "K27",
+  "\uae40\ucc9c": "K35"
+};
+
 export async function getGangwonAverageRatings(seasonCode = KLEAGUE_SEASON): Promise<GangwonPlayerRating[]> {
-  return cachedExternalJson(`gangwon-average-ratings-${seasonCode}`, () => fetchGangwonAverageRatings(seasonCode));
+  return cachedExternalJson(`gangwon-average-ratings-v2-${seasonCode}`, () => fetchGangwonAverageRatings(seasonCode));
 }
 
 async function fetchGangwonAverageRatings(seasonCode: string): Promise<GangwonPlayerRating[]> {
   const matches = await fetchOfficialMatches();
   const finishedLeagueMatches = matches
-    .filter((match) => match.status === "finished" && match.competition.includes("K리그1"))
-    .filter((match) => match.id.includes(`kleague-match-${seasonCode}-`))
+    .filter((match) => match.status === "finished" && match.id.includes(`kleague-match-${seasonCode}-`))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const settled = await Promise.allSettled(finishedLeagueMatches.map(fetchMatchRatings));
@@ -78,35 +110,36 @@ async function fetchMatchRatings(match: Match): Promise<RatingAccumulator[]> {
   const identity = parseMatchIdentity(match.id);
   if (!identity) return [];
 
-  const response = await fetch(createPdfDownloadUrl(identity), {
+  const response = await fetch(`${kLeagueBaseUrl}/api/ddf/match/getMatchRecordAllDetail.do`, {
+    method: "POST",
     next: { revalidate: 60 * 60 * 12 },
     headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       "User-Agent": "OrangePotatoesFanHub/1.0"
-    }
+    },
+    body: createMatchRecordBody(identity, match)
   });
 
   if (!response.ok) {
-    throw new Error(`K League rating page request failed: ${response.status}`);
+    throw new Error(`K League rating API request failed: ${response.status}`);
   }
 
-  const html = await response.text();
-  const $ = cheerio.load(html);
-  const table = $(".player-table").eq(match.isHome ? 0 : 1);
+  const payload = (await response.json()) as KLeagueMatchRecordDetailResponse;
+  if (payload.resultCode !== "200") return [];
+
+  const players = match.isHome ? payload.data?.listH ?? [] : payload.data?.listA ?? [];
   const rows: RatingAccumulator[] = [];
 
-  table.find("tbody tr").each((_, row) => {
-    const cells = $(row).find("td").toArray().map((cell) => $(cell));
-    if (cells.length < 13) return;
+  for (const player of players) {
+    const number = toNumber(String(player.backNo ?? ""));
+    const position = cleanText(player.playerPos ?? "");
+    const playerName = cleanPlayerName(player.playerName ?? "");
+    const rating = toRating(String(player.playerPoint ?? ""));
 
-    const number = toNumber(cells[0].text());
-    const position = cleanText(cells[1].text());
-    const playerName = cleanPlayerName(cells[2].clone().children().remove().end().text());
-    const rating = toRating(cells[12].text());
-
-    if (!number || !playerName || !position || !rating || rating <= 0) return;
+    if (!number || !playerName || !position || !rating || rating <= 0) continue;
 
     rows.push({
-      playerKey: `${playerName}-${number}-${position}`,
+      playerKey: player.playerId ? `${player.playerId}-${number}` : `${playerName}-${number}-${position}`,
       playerName,
       number,
       position,
@@ -115,7 +148,7 @@ async function fetchMatchRatings(match: Match): Promise<RatingAccumulator[]> {
       totalRating: rating,
       ratingMatches: 1
     });
-  });
+  }
 
   return rows;
 }
@@ -126,19 +159,35 @@ function parseMatchIdentity(id: string): MatchIdentity | null {
 
   return {
     year: matched[1],
+    leagueId: matched[2],
     gameId: matched[3],
     meetSeq: matched[4]
   };
 }
 
-function createPdfDownloadUrl(identity: MatchIdentity) {
-  return `${kLeagueBaseUrl}/match/pdfDownload.do?gameId=${identity.gameId}&meetSeq=${identity.meetSeq}&year=${identity.year}`;
+function createMatchRecordBody(identity: MatchIdentity, match: Match) {
+  const roundId = match.round.match(/\d+/)?.[0] ?? "";
+
+  return new URLSearchParams({
+    year: identity.year,
+    yearTst: identity.year,
+    meetSeq: identity.meetSeq,
+    gameId: identity.gameId,
+    gameIdTst: identity.gameId,
+    homeTeam: getTeamId(match.homeTeam),
+    awayTeam: getTeamId(match.awayTeam),
+    roundId
+  }).toString();
+}
+
+function getTeamId(teamName: string) {
+  return teamNameToId[teamName] ?? (teamName === "\uac15\uc6d0" ? teamNameToId[gangwonTeamName] : "");
 }
 
 function cleanPlayerName(value: string) {
   return cleanText(value)
     .replace(/\(\d{2}\)/g, "")
-    .replace(/[★☆↓↑]/g, "")
+    .replace(/[☆★]/g, "")
     .replace(/\(C\)/g, "")
     .trim();
 }

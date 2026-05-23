@@ -57,12 +57,6 @@ const suffixMap: Record<StatKey, string> = {
   yellowCards: labels.card
 };
 
-const statLabelMap: Record<StatKey, string> = {
-  goals: labels.goals,
-  assists: labels.assists,
-  yellowCards: labels.yellowCards
-};
-
 export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: PlayerStatsPanelProps) {
   const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("goals");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
@@ -133,7 +127,6 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
                 </div>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-[11px] font-black text-slate-400">{labels.ratingTitle}</p>
                 <p className="text-lg font-black text-gangwon-orange sm:text-xl">{formatRating(row.averageRating)}</p>
               </div>
             </div>
@@ -223,7 +216,6 @@ function StatsList({
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-[11px] font-black text-slate-400">{statLabelMap[valueKey]}</p>
               <p className="text-lg font-black text-gangwon-orange sm:text-xl">{Number(row[valueKey] ?? 0)}<span className="text-sm">{suffixMap[valueKey]}</span></p>
             </div>
           </div>
