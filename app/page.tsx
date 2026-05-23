@@ -79,6 +79,10 @@ export default async function HomePage() {
               {sortByPublishedDesc(news).slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
             </div>
           </section>
+
+          <div className="hidden lg:block">
+            <OfficialLinks />
+          </div>
         </div>
 
         <aside className="grid gap-4 lg:sticky lg:top-24">
@@ -94,7 +98,9 @@ export default async function HomePage() {
         </aside>
       </div>
 
-      <OfficialLinks />
+      <div className="lg:hidden">
+        <OfficialLinks />
+      </div>
     </div>
   );
 }
