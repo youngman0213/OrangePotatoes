@@ -75,7 +75,7 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: 
   return (
     <section className="grid gap-3 sm:gap-5">
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow={labels.gangwonTitle} title={labels.gangwonTitle} hideTitle>
+        <StatsHeader title={labels.gangwonTitle}>
           <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as GangwonTabKey)} />
         </StatsHeader>
         {activeGangwon === "averageRating" ? (
@@ -86,7 +86,7 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: 
       </article>
 
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 sm:p-5">
-        <StatsHeader eyebrow={labels.leagueTitle} title={labels.leagueTitle} hideTitle>
+        <StatsHeader title={labels.leagueTitle}>
           <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
         </StatsHeader>
         <StatsList rows={leagueRows} valueKey={activeLeague} showClub />
@@ -99,7 +99,7 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
   return (
     <div>
       <div className="mb-3">
-        <p className="text-xs font-black uppercase text-gangwon-orange">{labels.ratingEyebrow}</p>
+        <p className="text-xs font-bold text-slate-400">{labels.ratingEyebrow}</p>
       </div>
 
       {hasError ? (
@@ -148,12 +148,11 @@ function formatRating(value: number) {
   return value.toFixed(2);
 }
 
-function StatsHeader({ eyebrow, title, children, hideTitle = false }: { eyebrow: string; title: string; children: ReactNode; hideTitle?: boolean }) {
+function StatsHeader({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="mb-3 flex flex-col gap-2 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <div>
-        <p className="text-xs font-black uppercase text-gangwon-orange">{eyebrow}</p>
-        {hideTitle ? null : <h2 className="text-lg font-black text-gangwon-navy sm:text-xl">{title}</h2>}
+        <h2 className="text-lg font-black text-gangwon-navy sm:text-xl">{title}</h2>
       </div>
       {children}
     </div>

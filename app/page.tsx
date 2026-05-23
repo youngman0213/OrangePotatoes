@@ -125,7 +125,7 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
 function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-orange">{text.recentMatch}</p>
+      <p className="text-xs font-black text-gangwon-navy">{text.recentMatch}</p>
       {match ? (
         <ScoreBoard match={match} size="desktop" />
       ) : (
@@ -141,7 +141,7 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
+          <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
           <h3 className="mt-1 text-3xl font-black text-gangwon-navy">
             {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
           </h3>
@@ -185,7 +185,7 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
+          <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
           <h3 className="mt-1 text-[32px] font-black leading-none text-gangwon-navy">
             {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
           </h3>
@@ -221,7 +221,7 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
 function MobileRecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
     <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-orange">{text.recentMatch}</p>
+      <p className="text-xs font-black text-gangwon-navy">{text.recentMatch}</p>
       {match ? (
         <ScoreBoard match={match} size="mobile" />
       ) : (

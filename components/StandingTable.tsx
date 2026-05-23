@@ -39,7 +39,6 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
     <div className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
       <div className="flex items-center justify-between gap-3 px-4 py-3">
         <div>
-          <p className="text-xs font-black text-gangwon-orange">순위표</p>
           <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
         </div>
       </div>
@@ -107,8 +106,7 @@ function GangwonSummaryCard({
     <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-3.5 text-white shadow-card sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-black text-white/75">강원 요약</p>
-          <h2 className="mt-1 text-lg font-black sm:text-xl">{labels.summaryTitle}</h2>
+          <h2 className="text-lg font-black sm:text-xl">{labels.summaryTitle}</h2>
         </div>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange">
           {standing.rank}{labels.place}

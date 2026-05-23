@@ -1,5 +1,4 @@
 import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
-import { SectionHeader } from "@/components/SectionHeader";
 import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
@@ -9,7 +8,6 @@ import type { LeaguePlayerStat } from "@/types";
 export const revalidate = 21600;
 
 const labels = {
-  playerStats: "개인 기록",
   source: "데이터 출처: K리그 공식 기록 / 검증: 네이버 스포츠",
   checkedAt: "기준 시각"
 };
@@ -53,7 +51,6 @@ export default async function StandingsPage() {
     <div className="grid gap-5 sm:gap-6">
       <StandingTable standings={tableStandings} />
 
-      <SectionHeader title={labels.playerStats} />
       <PlayerStatsPanel stats={playerStats} ratings={playerRatings} ratingsError={ratingsError} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
