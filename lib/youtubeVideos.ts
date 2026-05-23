@@ -1,42 +1,37 @@
+import { XMLParser } from "fast-xml-parser";
 import type { Video, VideoCategory } from "@/types";
 
-const youtubePlaylistItemsUrl = "https://www.googleapis.com/youtube/v3/playlistItems";
+const youtubeFeedBaseUrl = "https://www.youtube.com/feeds/videos.xml";
 const coupangKLeaguePlaylistId = "PLWTZYHe9YKAKlowFKOlQDtcrfE-ldfMVq";
-const gangwonFcUploadsPlaylistId = "UUuLjoid8kKTKITvkUP94kJA";
+const gangwonFcChannelId = "UCuLjoid8kKTKITvkUP94kJA";
 const cacheSeconds = 60 * 60 * 6;
 
-const gangwonKeywords = ["\uac15\uc6d0", "\uac15\uc6d0FC", "Gangwon", "Gangwon FC"];
-const highlightKeywords = ["\ud558\uc774\ub77c\uc774\ud2b8", "Highlights", "Highlight", "2-Minute", "2 Minute", "5-Min", "5 Minute", "H/L"];
+const gangwonKeywords = ["강원", "강원FC", "Gangwon", "Gangwon FC"];
+const highlightKeywords = ["하이라이트", "Highlights", "Highlight", "2-Minute", "2 Minute", "5-Min", "5 Minute", "H/L"];
 
-interface YouTubeApiResponse<T> {
-  items?: T[];
-  error?: {
-    message?: string;
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  removeNSPrefix: true
+});
+
+interface YouTubeFeedEntry {
+  title?: string;
+  videoId?: string;
+  published?: string;
+  author?: {
+    name?: string;
   };
-}
-
-interface YouTubePlaylistItem {
-  snippet?: YouTubeSnippet & {
-    resourceId?: {
-      videoId?: string;
+  group?: {
+    description?: string;
+    thumbnail?: {
+      "@_url"?: string;
     };
   };
 }
 
-interface YouTubeSnippet {
-  title?: string;
-  description?: string;
-  publishedAt?: string;
-  channelTitle?: string;
-  thumbnails?: {
-    medium?: { url?: string };
-    high?: { url?: string };
-    default?: { url?: string };
-  };
-}
-
 export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]> {
-  const playlistVideos = await fetchPlaylistVideos(coupangKLeaguePlaylistId, 50);
+  const playlistUrl = `${youtubeFeedBaseUrl}?playlist_id=${coupangKLeaguePlaylistId}`;
+  const playlistVideos = await fetchFeedVideos(playlistUrl, 50);
 
   return uniqueVideos(playlistVideos)
     .filter(isGangwonVideo)
@@ -46,7 +41,8 @@ export async function fetchCoupangGangwonHighlights(limit = 12): Promise<Video[]
 }
 
 export async function fetchGangwonOfficialVideos(limit = 12): Promise<Video[]> {
-  const videos = await fetchPlaylistVideos(gangwonFcUploadsPlaylistId, Math.min(Math.max(limit, 12), 50));
+  const channelUrl = `${youtubeFeedBaseUrl}?channel_id=${gangwonFcChannelId}`;
+  const videos = await fetchFeedVideos(channelUrl, Math.min(Math.max(limit, 12), 50));
 
   return uniqueVideos(videos)
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
@@ -63,54 +59,46 @@ export function isHighlightVideo(video: Pick<Video, "title" | "description">) {
   return highlightKeywords.some((keyword) => text.includes(keyword.toLowerCase()));
 }
 
-async function fetchPlaylistVideos(playlistId: string, maxResults: number) {
-  const apiKey = getYouTubeApiKey();
-  const params = new URLSearchParams({
-    part: "snippet",
-    playlistId,
-    maxResults: String(maxResults),
-    key: apiKey
+async function fetchFeedVideos(feedUrl: string, maxResults: number) {
+  const response = await fetch(feedUrl, {
+    next: { revalidate: cacheSeconds },
+    headers: {
+      Accept: "application/atom+xml, application/xml, text/xml",
+      "User-Agent": "OrangePotatoesFanHub/1.0"
+    }
   });
-
-  const response = await fetch(`${youtubePlaylistItemsUrl}?${params.toString()}`, {
-    next: { revalidate: cacheSeconds }
-  });
-  const payload = await response.json() as YouTubeApiResponse<YouTubePlaylistItem>;
 
   if (!response.ok) {
-    throw new Error(payload.error?.message ?? `YouTube playlist request failed: ${response.status}`);
+    throw new Error(`YouTube feed request failed: ${response.status}`);
   }
 
-  return (payload.items ?? []).map(toPlaylistVideo).filter((video): video is Video => Boolean(video));
+  const xml = await response.text();
+  const parsed = parser.parse(xml);
+  const rawEntries = parsed?.feed?.entry;
+  const entries: YouTubeFeedEntry[] = Array.isArray(rawEntries) ? rawEntries : rawEntries ? [rawEntries] : [];
+
+  return entries
+    .slice(0, maxResults)
+    .map(toFeedVideo)
+    .filter((video): video is Video => Boolean(video));
 }
 
-function getYouTubeApiKey() {
-  const apiKey = process.env.YOUTUBE_API_KEY;
-  if (!apiKey) {
-    throw new Error("YOUTUBE_API_KEY is not configured.");
-  }
+function toFeedVideo(entry: YouTubeFeedEntry): Video | null {
+  const youtubeId = entry.videoId?.trim();
+  if (!youtubeId) return null;
 
-  return apiKey;
-}
-
-function toPlaylistVideo(item: YouTubePlaylistItem): Video | null {
-  return toVideo(item.snippet?.resourceId?.videoId, item.snippet);
-}
-
-function toVideo(youtubeId: string | undefined, snippet: YouTubeSnippet | undefined): Video | null {
-  if (!youtubeId || !snippet?.title) return null;
-
-  const title = decodeHtml(snippet.title);
-  const description = snippet.description ?? "";
+  const title = decodeHtml(entry.title?.trim() || "강원FC 영상");
+  const description = decodeHtml(entry.group?.description?.trim() ?? "");
+  const channelTitle = decodeHtml(entry.author?.name?.trim() ?? "YouTube");
 
   return {
     id: `youtube-${youtubeId}`,
     title,
     youtubeId,
-    thumbnailUrl: snippet.thumbnails?.high?.url ?? snippet.thumbnails?.medium?.url ?? snippet.thumbnails?.default?.url ?? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
-    publishedAt: snippet.publishedAt ?? new Date().toISOString(),
+    thumbnailUrl: entry.group?.thumbnail?.["@_url"] ?? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
+    publishedAt: entry.published ?? new Date().toISOString(),
     category: categorizeVideo(`${title} ${description}`),
-    channelTitle: snippet.channelTitle,
+    channelTitle,
     description
   };
 }
@@ -126,9 +114,9 @@ function uniqueVideos(videos: Video[]) {
 
 function categorizeVideo(text: string): VideoCategory {
   if (isHighlightVideo({ title: text })) return "highlight";
-  if (/(\uc778\ud130\ubdf0|\uc218\ud6c8|\uc18c\uac10|\uae30\uc790\ud68c\uacac|interview)/i.test(text)) return "interview";
-  if (/(\ud6c8\ub828|\ud2b8\ub808\uc774\ub2dd|\uc5f0\uc2b5|training)/i.test(text)) return "training";
-  if (/(\ube44\ud558\uc778\ub4dc|\ucd9c\uadfc\uae38|\ub77c\ucee4\ub8f8|\ube0c\uc774\ub85c\uadf8|\uc2a4\ucf00\uce58|behind)/i.test(text)) return "behind";
+  if (/(인터뷰|수훈|소감|기자회견|interview)/i.test(text)) return "interview";
+  if (/(훈련|트레이닝|연습|training)/i.test(text)) return "training";
+  if (/(비하인드|출근길|라커룸|브이로그|스케치|behind)/i.test(text)) return "behind";
 
   return "other";
 }

@@ -21,7 +21,7 @@ export async function GET() {
       highlights,
       clubVideos,
       items: [...highlights, ...clubVideos],
-      source: "youtube-data-api",
+      source: "youtube-rss",
       error: errors[0],
       updatedAt: new Date().toISOString()
     },
@@ -35,10 +35,6 @@ export async function GET() {
 
 function getVideoErrorMessage(error: unknown) {
   const rawMessage = error instanceof Error ? error.message : "";
-
-  if (rawMessage.includes("YOUTUBE_API_KEY")) {
-    return "YouTube API 키가 설정되지 않았습니다.";
-  }
 
   if (/quota|Quota|Search Queries|youtube\.googleapis\.com/.test(rawMessage)) {
     return "오늘 YouTube API 사용량을 초과했습니다. 공식 채널에서 확인해주세요.";
