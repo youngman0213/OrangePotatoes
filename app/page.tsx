@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarDays, ExternalLink, Goal, HomeIcon, Youtube } from "lucide-react";
+import { CalendarDays, ExternalLink, HomeIcon, Youtube } from "lucide-react";
 import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -69,9 +69,7 @@ export default async function HomePage() {
           </div>
 
           <section className="hidden lg:block">
-            <InfoCard
-              icon={<Goal size={22} />}
-              label={text.recentMatch}
+            <RecentMatchCard
               title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
@@ -116,6 +114,16 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
       <p className="text-xs font-black uppercase text-slate-400">{label}</p>
       <h3 className="mt-1 text-lg font-black text-gangwon-navy">{title}</h3>
       <p className="mt-2 line-clamp-2 text-sm font-bold text-slate-500">{meta}</p>
+    </article>
+  );
+}
+
+function RecentMatchCard({ title, meta }: { title: string; meta: string }) {
+  return (
+    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+      <p className="text-xs font-black text-gangwon-orange">{text.recentMatch}</p>
+      <h3 className="mt-2 text-xl font-black text-gangwon-navy">{title}</h3>
+      <p className="mt-3 text-sm font-bold text-slate-500">{meta}</p>
     </article>
   );
 }
@@ -193,10 +201,7 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
 function MobileRecentMatchCard({ title, meta }: { title: string; meta: string }) {
   return (
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-gangwon-orange">
-        <Goal size={18} aria-hidden="true" />
-      </div>
-      <p className="mt-3 text-[11px] font-black text-slate-400">{text.recentMatch}</p>
+      <p className="text-[11px] font-black text-gangwon-orange">{text.recentMatch}</p>
       <h3 className="mt-1 line-clamp-2 text-sm font-black leading-5 text-gangwon-navy">{title}</h3>
       <p className="mt-auto line-clamp-1 pt-3 text-xs font-bold text-slate-500">{meta}</p>
     </article>
