@@ -122,8 +122,8 @@ function RecentMatchCard({ title, meta }: { title: string; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-orange">{text.recentMatch}</p>
-      <h3 className="mt-2 text-xl font-black text-gangwon-navy">{title}</h3>
-      <p className="mt-3 text-sm font-bold text-slate-500">{meta}</p>
+      <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{title}</h3>
+      <p className="mt-3 text-center text-sm font-bold text-slate-500">{meta}</p>
     </article>
   );
 }
@@ -202,8 +202,8 @@ function MobileRecentMatchCard({ title, meta }: { title: string; meta: string })
   return (
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <p className="text-[11px] font-black text-gangwon-orange">{text.recentMatch}</p>
-      <h3 className="mt-1 line-clamp-2 text-sm font-black leading-5 text-gangwon-navy">{title}</h3>
-      <p className="mt-auto line-clamp-1 pt-3 text-xs font-bold text-slate-500">{meta}</p>
+      <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{title}</h3>
+      <p className="mt-auto line-clamp-1 pt-3 text-center text-xs font-bold text-slate-500">{meta}</p>
     </article>
   );
 }
