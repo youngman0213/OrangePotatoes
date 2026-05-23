@@ -159,7 +159,7 @@ function RankCard({ standing }: { standing?: Standing }) {
 
 function MobileRankCard({ standing }: { standing?: Standing }) {
   return (
-    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+    <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-[11px] font-black text-gangwon-orange">{text.currentRank}</p>
@@ -175,7 +175,7 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
       <p className="mt-3 truncate text-xs font-black text-slate-600">
         {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
       </p>
-      <div className="mt-3 flex gap-1">
+      <div className="mt-auto flex gap-1 pt-3">
         {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
           <span
             key={`${form}-${index}`}
@@ -192,13 +192,13 @@ function MobileRankCard({ standing }: { standing?: Standing }) {
 
 function MobileRecentMatchCard({ title, meta }: { title: string; meta: string }) {
   return (
-    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-gangwon-orange">
+    <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-gangwon-orange">
         <Goal size={18} aria-hidden="true" />
       </div>
-      <p className="text-[11px] font-black text-slate-400">{text.recentMatch}</p>
-      <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-black leading-5 text-gangwon-navy">{title}</h3>
-      <p className="mt-2 line-clamp-1 text-xs font-bold text-slate-500">{meta}</p>
+      <p className="mt-3 text-[11px] font-black text-slate-400">{text.recentMatch}</p>
+      <h3 className="mt-1 line-clamp-2 text-sm font-black leading-5 text-gangwon-navy">{title}</h3>
+      <p className="mt-auto line-clamp-1 pt-3 text-xs font-bold text-slate-500">{meta}</p>
     </article>
   );
 }
