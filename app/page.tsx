@@ -51,10 +51,10 @@ export default async function HomePage() {
     <div className="grid gap-6">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
         <div className="grid gap-6">
-          <section>
-            <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" />
+          <section className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
+            <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" compact />
             {nextMatch ? (
-              <MatchCard match={nextMatch} featured />
+              <MatchCard match={nextMatch} featured embedded />
             ) : (
               <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta="경기 페이지에서 전체 일정을 확인해주세요." />
             )}

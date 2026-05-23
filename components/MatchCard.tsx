@@ -5,6 +5,7 @@ import { classNames, formatDate, formatTime, isGangwon, statusLabel, statusTone 
 interface MatchCardProps {
   match: Match;
   featured?: boolean;
+  embedded?: boolean;
 }
 
 const labels = {
@@ -16,11 +17,11 @@ const labels = {
   detail: "\uc0c1\uc138 \uacb0\uacfc"
 };
 
-export function MatchCard({ match, featured = false }: MatchCardProps) {
+export function MatchCard({ match, featured = false, embedded = false }: MatchCardProps) {
   const showScore = match.status !== "scheduled";
 
   return (
-    <article className={classNames("rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100", featured && "border-l-4 border-gangwon-orange p-5")}>
+    <article className={classNames("rounded-lg bg-white p-4", embedded ? "bg-slate-50 ring-1 ring-slate-100" : "shadow-card ring-1 ring-slate-100", featured && "border-l-4 border-gangwon-orange", featured && !embedded && "p-5")}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-gangwon-orange">{match.competition}</span>
