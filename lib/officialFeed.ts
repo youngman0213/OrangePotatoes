@@ -178,15 +178,14 @@ export async function fetchOfficialMatches(limit?: number): Promise<Match[]> {
     { length: scheduleSeasonEndMonth - scheduleSeasonStartMonth + 1 },
     (_, index) => scheduleSeasonStartMonth + index
   );
-  const results = await Promise.allSettled(months.map((month) => fetchKLeagueScheduleMonth(scheduleSeasonYear, month)));
-  const matches = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+  const [kLeagueResults, officialResults] = await Promise.all([
+    Promise.allSettled(months.map((month) => fetchKLeagueScheduleMonth(scheduleSeasonYear, month))),
+    Promise.allSettled(months.map((month) => fetchOfficialMatchesByUrl(createScheduleUrl(scheduleSeasonYear, month))))
+  ]);
+  const matches = kLeagueResults.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
+  const officialMatches = officialResults.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
 
-  if (!matches.length) {
-    const fallbackMatches = await fetchOfficialMatchesByUrl(scheduleUrl);
-    return typeof limit === "number" ? fallbackMatches.slice(0, limit) : fallbackMatches;
-  }
-
-  const uniqueMatches = dedupeMatches(matches);
+  const uniqueMatches = dedupeMatches([...matches, ...officialMatches]);
   return typeof limit === "number" ? uniqueMatches.slice(0, limit) : uniqueMatches;
 }
 
