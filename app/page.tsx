@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarDays, ExternalLink, Goal, HomeIcon, Table2, Youtube } from "lucide-react";
+import { CalendarDays, ExternalLink, Goal, HomeIcon, Youtube } from "lucide-react";
 import { ClubPostCard } from "@/components/ClubPostCard";
 import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
@@ -66,6 +66,10 @@ export default async function HomePage() {
           )}
         </section>
 
+        <div className="lg:hidden">
+          <RankCard standing={gangwonStanding} />
+        </div>
+
         <section className="grid gap-4 sm:grid-cols-2">
           <InfoCard
             icon={<Goal size={22} />}
@@ -97,8 +101,9 @@ export default async function HomePage() {
       </div>
 
       <aside className="grid gap-4 lg:sticky lg:top-24">
-        <RankCard standing={gangwonStanding} />
-        <FormCard standing={gangwonStanding} />
+        <div className="hidden lg:block">
+          <RankCard standing={gangwonStanding} />
+        </div>
         <section>
           <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -125,36 +130,36 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
 function RankCard({ standing }: { standing?: Standing }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
-      <div className="mt-2 flex items-end justify-between gap-3">
-        <h3 className="text-3xl font-black text-gangwon-navy">
-          {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
-        </h3>
-        <p className="text-right text-sm font-black text-slate-600">
-          {standing ? `${text.points} ${standing.points}` : text.noStanding}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-black text-gangwon-orange">{text.currentRank}</p>
+          <h3 className="mt-1 text-3xl font-black text-gangwon-navy">
+            {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
+          </h3>
+        </div>
+        <div className="text-right">
+          <p className="text-xs font-black text-slate-400">{text.points}</p>
+          <p className="mt-1 text-2xl font-black text-gangwon-orange">
+            {standing ? standing.points : "-"}
+          </p>
+        </div>
       </div>
       <p className="mt-2 text-sm font-bold text-slate-500">
         {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
       </p>
-    </article>
-  );
-}
-
-function FormCard({ standing }: { standing?: Standing }) {
-  return (
-    <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-slate-400">{text.recentForm}</p>
-      <div className="mt-3 flex gap-2">
-        {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
-          <span
-            key={`${form}-${index}`}
-            className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
-          >
-            {form}
-          </span>
-        ))}
-        {!standing?.recentForm.length ? <span className="text-sm font-bold text-slate-400">-</span> : null}
+      <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
+        <p className="text-xs font-black text-slate-400">{text.recentForm}</p>
+        <div className="flex gap-1.5">
+          {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
+            <span
+              key={`${form}-${index}`}
+              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
+            >
+              {form}
+            </span>
+          ))}
+          {!standing?.recentForm.length ? <span className="text-sm font-bold text-slate-400">-</span> : null}
+        </div>
       </div>
     </article>
   );

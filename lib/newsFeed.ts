@@ -32,7 +32,7 @@ export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
     throw new Error("News feed request failed");
   }
 
-  return dedupeNews(items).slice(0, limit);
+  return sortNewsByPublishedDesc(dedupeNews(items)).slice(0, limit);
 }
 
 async function fetchNewsQuery(query: string, queryIndex: number): Promise<NewsItem[]> {
@@ -99,6 +99,10 @@ function dedupeNews(items: NewsItem[]) {
   }
 
   return unique;
+}
+
+function sortNewsByPublishedDesc(items: NewsItem[]) {
+  return [...items].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 }
 
 function normalizeNewsUrl(url: string) {

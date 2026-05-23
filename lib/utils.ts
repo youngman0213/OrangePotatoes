@@ -41,7 +41,7 @@ export const statusTone: Record<MatchStatus, string> = {
 };
 
 export const getMatchMonth = (date: string) =>
-  `${new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "numeric" }).format(new Date(date))}\uc6d4`;
+  new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", month: "numeric" }).format(new Date(date));
 
 export const sortByDateAsc = <T extends { date: string }>(items: T[]) =>
   [...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
