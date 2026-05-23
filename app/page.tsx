@@ -60,11 +60,15 @@ export default async function HomePage() {
             )}
           </section>
 
-          <div className="lg:hidden">
-            <RankCard standing={gangwonStanding} />
+          <div className="grid grid-cols-2 gap-3 lg:hidden">
+            <MobileRankCard standing={gangwonStanding} />
+            <MobileRecentMatchCard
+              title={recentMatch ? `${recentMatch.homeTeam} ${recentMatch.homeScore} : ${recentMatch.awayScore} ${recentMatch.awayTeam}` : text.noResult}
+              meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
+            />
           </div>
 
-          <section>
+          <section className="hidden lg:block">
             <InfoCard
               icon={<Goal size={22} />}
               label={text.recentMatch}
@@ -149,6 +153,52 @@ function RankCard({ standing }: { standing?: Standing }) {
           {!standing?.recentForm.length ? <span className="text-sm font-bold text-slate-400">-</span> : null}
         </div>
       </div>
+    </article>
+  );
+}
+
+function MobileRankCard({ standing }: { standing?: Standing }) {
+  return (
+    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-[11px] font-black text-gangwon-orange">{text.currentRank}</p>
+          <h3 className="mt-1 text-2xl font-black leading-none text-gangwon-navy">
+            {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
+          </h3>
+        </div>
+        <div className="text-right">
+          <p className="text-[11px] font-black text-slate-400">{text.points}</p>
+          <p className="mt-1 text-xl font-black leading-none text-gangwon-orange">{standing ? standing.points : "-"}</p>
+        </div>
+      </div>
+      <p className="mt-3 truncate text-xs font-black text-slate-600">
+        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
+      </p>
+      <div className="mt-3 flex gap-1">
+        {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
+          <span
+            key={`${form}-${index}`}
+            className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
+          >
+            {form}
+          </span>
+        ))}
+        {!standing?.recentForm.length ? <span className="text-xs font-bold text-slate-400">-</span> : null}
+      </div>
+    </article>
+  );
+}
+
+function MobileRecentMatchCard({ title, meta }: { title: string; meta: string }) {
+  return (
+    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
+      <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-orange-50 text-gangwon-orange">
+        <Goal size={18} aria-hidden="true" />
+      </div>
+      <p className="text-[11px] font-black text-slate-400">{text.recentMatch}</p>
+      <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-black leading-5 text-gangwon-navy">{title}</h3>
+      <p className="mt-2 line-clamp-1 text-xs font-bold text-slate-500">{meta}</p>
     </article>
   );
 }
