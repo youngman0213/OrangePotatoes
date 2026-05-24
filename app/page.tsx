@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { CalendarDays, ExternalLink, HomeIcon, Youtube } from "lucide-react";
-import { MatchGoalList } from "@/components/MatchGoalList";
 import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -12,8 +11,6 @@ import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
 import type { Match, MatchGoalEvent, Standing } from "@/types";
-
-export const dynamic = "force-dynamic";
 
 const text = {
   gangwon: "\uac15\uc6d0FC",
@@ -222,20 +219,23 @@ function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: M
 
 function ScoreBoard({ match, goals, size }: { match: Match; goals: MatchGoalEvent[]; size: "mobile" | "desktop" }) {
   const compact = size === "mobile";
+  const homeGoals = goals.filter((goal) => isSameScoreTeam(goal.team, match.homeTeam));
+  const awayGoals = goals.filter((goal) => isSameScoreTeam(goal.team, match.awayTeam));
+
   return (
     <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-start gap-4"}>
-      <TeamScoreBlock match={match} name={match.homeTeam} goals={goals} compact={compact} />
+      <TeamScoreBlock name={match.homeTeam} goals={homeGoals} compact={compact} />
       <div className={compact ? "pt-2 text-center" : "pt-4 text-center"}>
         <p className={compact ? "text-[24px] font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
           {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
         </p>
       </div>
-      <TeamScoreBlock match={match} name={match.awayTeam} goals={goals} compact={compact} />
+      <TeamScoreBlock name={match.awayTeam} goals={awayGoals} compact={compact} />
     </div>
   );
 }
 
-function TeamScoreBlock({ match, name, goals, compact }: { match: Match; name: string; goals: MatchGoalEvent[]; compact: boolean }) {
+function TeamScoreBlock({ name, goals, compact }: { name: string; goals: MatchGoalEvent[]; compact: boolean }) {
   const colors = getTeamBadgeColors(name);
 
   return (
@@ -246,7 +246,15 @@ function TeamScoreBlock({ match, name, goals, compact }: { match: Match; name: s
       >
         {getTeamShortName(name)}
       </span>
-      <MatchGoalList match={match} teamName={name} initialGoals={goals} compact={compact} />
+      {goals.length ? (
+        <div className="grid max-w-full gap-0.5 text-center">
+          {goals.map((goal, index) => (
+            <span key={`${goal.playerName}-${goal.minute}-${index}`} className={compact ? "truncate text-[9px] font-bold text-slate-400" : "truncate text-[11px] font-bold text-slate-400"}>
+              {formatGoalMinute(goal)} {goal.playerName}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -268,6 +276,16 @@ function RecentForm({ form, size }: { form: string[]; size: "sm" | "md" }) {
       ))}
     </div>
   );
+}
+
+function formatGoalMinute(goal: MatchGoalEvent) {
+  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}'` : `${goal.minute}'`;
+}
+
+function isSameScoreTeam(goalTeam: string, matchTeam: string) {
+  const goal = normalizeTeamName(goalTeam);
+  const match = normalizeTeamName(matchTeam);
+  return match.includes(goal) || goal.includes(match);
 }
 
 function normalizeTeamName(name: string) {

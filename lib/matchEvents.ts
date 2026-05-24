@@ -2,7 +2,6 @@ import type { Match, MatchGoalEvent } from "@/types";
 
 const kLeagueMatchInfoUrl = "https://www.kleague.com/api/ddf/match/matchInfo.do";
 const kLeagueScheduleUrl = "https://www.kleague.com/getScheduleList.do";
-const kLeaguePlayerRecordUrl = "https://www.kleague.com/record/player.do";
 const gangwonTeamId = "K21";
 
 interface KLeagueMatchEvent {
@@ -53,8 +52,7 @@ interface KLeagueMatchParams {
 export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent[]> {
   if (match.status !== "finished") return [];
   const params = await resolveKLeagueMatchParams(match);
-  if (!params) return getKnownGoalEvents(match);
-  const playerNameMap = await fetchPlayerNameMap(params.year).catch(() => new Map<string, string>());
+  if (!params) return [];
 
   const response = await fetch(kLeagueMatchInfoUrl, {
     method: "POST",
@@ -70,7 +68,7 @@ export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent
     })
   });
 
-  if (!response.ok) return getKnownGoalEvents(match);
+  if (!response.ok) return [];
 
   const payload = (await response.json()) as KLeagueMatchInfoResponse;
   const events = [
@@ -84,12 +82,10 @@ export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent
     ...(payload.data?.extraTimeSecondHalfList ?? [])
   ];
 
-  const goals = events
+  return events
     .filter((event) => event.eventName === "\ub4dd\uc810" && event.playerName)
-    .map((event) => toGoalEvent(event, playerNameMap))
+    .map(toGoalEvent)
     .sort((a, b) => (a.minute + (a.stoppageTime ?? 0) / 100) - (b.minute + (b.stoppageTime ?? 0) / 100));
-
-  return goals.length ? goals : getKnownGoalEvents(match);
 }
 
 async function resolveKLeagueMatchParams(match: Match): Promise<KLeagueMatchParams | null> {
@@ -156,46 +152,7 @@ function normalizeTeamName(name: string) {
   return name.replace(/FC|HD|\ud604\ub300|\uc0c1\ubb34|\uc2a4\ud2f8\ub7ec\uc2a4|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
 }
 
-function getKnownGoalEvents(match: Match): MatchGoalEvent[] {
-  const isGangwonUlsan =
-    match.date.startsWith("2026-05-17") &&
-    isSameTeamName(match.homeTeam, "\uac15\uc6d0") &&
-    isSameTeamName(match.awayTeam, "\uc6b8\uc0b0") &&
-    match.homeScore === 2 &&
-    match.awayScore === 0;
-
-  if (!isGangwonUlsan) return [];
-
-  return [
-    { team: "\uac15\uc6d0", playerName: "\ucd5c\ubcd1\ucc2c", minute: 22, half: "first" },
-    { team: "\uac15\uc6d0", playerName: "\uac15\ud22c\uc9c0", minute: 45, stoppageTime: 1, half: "first" }
-  ];
-}
-
-async function fetchPlayerNameMap(year: string) {
-  const url = `${kLeaguePlayerRecordUrl}?leagueId=1&year=${year}&recordType=player`;
-  const response = await fetch(url, {
-    next: { revalidate: 60 * 60 * 12 },
-    headers: {
-      "User-Agent": "OrangePotatoesFanHub/1.0"
-    }
-  });
-
-  if (!response.ok) return new Map<string, string>();
-
-  const html = await response.text();
-  const map = new Map<string, string>();
-  const pattern = /playerDetail\.do\?playerId=(\d+)['"][^>]*>\s*([^<]+)\s*</g;
-  let matched: RegExpExecArray | null;
-
-  while ((matched = pattern.exec(html))) {
-    map.set(matched[1], decodeHtml(matched[2].trim()));
-  }
-
-  return map;
-}
-
-function toGoalEvent(event: KLeagueMatchEvent, playerNameMap: Map<string, string>): MatchGoalEvent {
+function toGoalEvent(event: KLeagueMatchEvent): MatchGoalEvent {
   const half = getHalf(event.halfType);
   const rawMinute = Number(event.timeMin ?? 0);
   const roundedMinute = rawMinute + (Number(event.timeSec ?? 0) > 0 ? 1 : 0);
@@ -205,32 +162,11 @@ function toGoalEvent(event: KLeagueMatchEvent, playerNameMap: Map<string, string
 
   return {
     team: event.teamName ?? "",
-    playerName: normalizePlayerName(event.playerName ?? "", event.playerId, playerNameMap),
+    playerName: event.playerName ?? "",
     minute,
     stoppageTime,
     half
   };
-}
-
-function normalizePlayerName(name: string, playerId: string | undefined, playerNameMap: Map<string, string>) {
-  const namesByEnglish: Record<string, string> = {
-    "MARKO TUCI": "\uac15\ud22c\uc9c0",
-    "MARKO TUCIC": "\uac15\ud22c\uc9c0",
-    "BYEONGCHAN CHOE": "\ucd5c\ubcd1\ucc2c",
-    "BYUNGCHAN CHOE": "\ucd5c\ubcd1\ucc2c"
-  };
-
-  if (playerId && playerNameMap.has(playerId)) return playerNameMap.get(playerId) ?? name;
-  return namesByEnglish[name.toUpperCase()] ?? name;
-}
-
-function decodeHtml(value: string) {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, "\"")
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
 }
 
 function getHalf(value: number | undefined): MatchGoalEvent["half"] {
