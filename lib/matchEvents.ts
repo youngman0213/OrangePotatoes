@@ -5,6 +5,7 @@ const kLeagueMatchInfoUrl = "https://www.kleague.com/api/ddf/match/matchInfo.do"
 interface KLeagueMatchEvent {
   eventName?: string;
   teamName?: string;
+  playerId?: string;
   playerName?: string;
   halfType?: number;
   timeMin?: number;
@@ -76,11 +77,27 @@ function toGoalEvent(event: KLeagueMatchEvent): MatchGoalEvent {
 
   return {
     team: event.teamName ?? "",
-    playerName: event.playerName ?? "",
+    playerName: normalizePlayerName(event.playerName ?? "", event.playerId),
     minute,
     stoppageTime,
     half
   };
+}
+
+function normalizePlayerName(name: string, playerId?: string) {
+  const namesById: Record<string, string> = {
+    "20180057": "\ucd5c\ubcd1\ucc2c",
+    "20230308": "\uac15\ud22c\uc9c0"
+  };
+  const namesByEnglish: Record<string, string> = {
+    "MARKO TUCI": "\uac15\ud22c\uc9c0",
+    "MARKO TUCIC": "\uac15\ud22c\uc9c0",
+    "BYEONGCHAN CHOE": "\ucd5c\ubcd1\ucc2c",
+    "BYUNGCHAN CHOE": "\ucd5c\ubcd1\ucc2c"
+  };
+
+  if (playerId && namesById[playerId]) return namesById[playerId];
+  return namesByEnglish[name.toUpperCase()] ?? name;
 }
 
 function getHalf(value: number | undefined): MatchGoalEvent["half"] {

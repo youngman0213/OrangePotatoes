@@ -132,8 +132,7 @@ function RecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGo
       <p className="text-xs font-black text-gangwon-navy">최근 경기 결과</p>
       {match ? (
         <>
-          <ScoreBoard match={match} size="desktop" />
-          <GoalSummary goals={goals} />
+          <ScoreBoard match={match} goals={goals} size="desktop" />
         </>
       ) : (
         <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{text.noResult}</h3>
@@ -231,8 +230,7 @@ function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: M
       <p className="text-xs font-black text-gangwon-navy">최근 경기 결과</p>
       {match ? (
         <>
-          <ScoreBoard match={match} size="mobile" />
-          <GoalSummary goals={goals} compact />
+          <ScoreBoard match={match} goals={goals} size="mobile" />
         </>
       ) : (
         <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{text.noResult}</h3>
@@ -242,54 +240,71 @@ function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: M
   );
 }
 
-function GoalSummary({ goals, compact = false }: { goals: MatchGoalEvent[]; compact?: boolean }) {
-  if (!goals.length) return null;
+function ScoreBoard({ match, goals, size }: { match: Match; goals: MatchGoalEvent[]; size: "mobile" | "desktop" }) {
+  const compact = size === "mobile";
+  const homeGoals = goals.filter((goal) => isSameScoreTeam(goal.team, match.homeTeam));
+  const awayGoals = goals.filter((goal) => isSameScoreTeam(goal.team, match.awayTeam));
 
   return (
-    <div className={compact ? "mt-2 grid gap-0.5 text-center" : "mt-3 flex flex-wrap justify-center gap-2 text-center"}>
-      {goals.map((goal, index) => (
-        <span
-          key={`${goal.playerName}-${goal.minute}-${index}`}
-          className={compact ? "text-[10px] font-bold text-slate-400" : "rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500"}
-        >
-          {goal.playerName} {formatGoalMinute(goal)}
-        </span>
-      ))}
+    <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-start gap-4"}>
+      <TeamScoreBlock name={match.homeTeam} goals={homeGoals} compact={compact} isHome />
+      <div className={compact ? "pt-2 text-center" : "pt-4 text-center"}>
+        <p className={compact ? "text-[24px] font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
+          {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
+        </p>
+      </div>
+      <TeamScoreBlock name={match.awayTeam} goals={awayGoals} compact={compact} />
+    </div>
+  );
+}
+
+function TeamScoreBlock({ name, goals, compact, isHome = false }: { name: string; goals: MatchGoalEvent[]; compact: boolean; isHome?: boolean }) {
+  const colors = getTeamBadgeColors(name);
+
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-1">
+      <span className={`${compact ? "h-8 w-8 text-[10px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black shadow-sm`} style={{ backgroundColor: colors.background, color: colors.text }}>
+        {getTeamShortName(name)}
+      </span>
+      {goals.length ? (
+        <div className="grid max-w-full gap-0.5 text-center">
+          {goals.map((goal, index) => (
+            <span key={`${goal.playerName}-${goal.minute}-${index}`} className={compact ? "truncate text-[9px] font-bold text-slate-400" : "truncate text-[11px] font-bold text-slate-400"}>
+              {formatGoalMinute(goal)} {goal.playerName}
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 function formatGoalMinute(goal: MatchGoalEvent) {
-  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}분` : `${goal.minute}분`;
+  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}'` : `${goal.minute}'`;
 }
 
-function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" }) {
-  const compact = size === "mobile";
-
-  return (
-    <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4"}>
-      <TeamBadge name={match.homeTeam} compact={compact} isHome />
-      <div className="text-center">
-        <p className={compact ? "text-[24px] font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
-          {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
-        </p>
-      </div>
-      <TeamBadge name={match.awayTeam} compact={compact} />
-    </div>
-  );
+function isSameScoreTeam(goalTeam: string, matchTeam: string) {
+  return matchTeam.includes(goalTeam) || goalTeam.includes(matchTeam.replace("FC", "").replace("HD", "").trim());
 }
 
-function TeamBadge({ name, compact, isHome = false }: { name: string; compact: boolean; isHome?: boolean }) {
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <span className={`${compact ? "h-8 w-8 text-[10px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black text-white ${isHome ? "bg-gangwon-orange" : "bg-gangwon-navy"}`}>
-        {getTeamShortName(name)}
-      </span>
-      <span className={`${compact ? "max-w-12 text-[9px]" : "max-w-24 text-xs"} truncate font-black text-slate-500`}>
-        {name}
-      </span>
-    </div>
-  );
+function getTeamBadgeColors(name: string) {
+  const normalized = name.toLowerCase();
+  const colors = [
+    { keyword: "강원", background: "#f37021", text: "#ffffff" },
+    { keyword: "울산", background: "#0f4c9a", text: "#ffffff" },
+    { keyword: "전북", background: "#0b8f3a", text: "#ffffff" },
+    { keyword: "서울", background: "#d71920", text: "#ffffff" },
+    { keyword: "포항", background: "#d71920", text: "#ffffff" },
+    { keyword: "대전", background: "#8b1d41", text: "#ffffff" },
+    { keyword: "광주", background: "#f5c400", text: "#111827" },
+    { keyword: "제주", background: "#e35205", text: "#ffffff" },
+    { keyword: "김천", background: "#b91c1c", text: "#ffffff" },
+    { keyword: "안양", background: "#581c87", text: "#ffffff" },
+    { keyword: "수원", background: "#1d4ed8", text: "#ffffff" },
+    { keyword: "인천", background: "#111827", text: "#ffffff" }
+  ];
+
+  return colors.find((item) => normalized.includes(item.keyword)) ?? { background: "#101827", text: "#ffffff" };
 }
 
 function getTeamShortName(name: string) {
