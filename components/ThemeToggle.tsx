@@ -51,16 +51,16 @@ export function ThemeToggle() {
             type="button"
             onClick={() => changeMode(item.value)}
             className={classNames(
-              "flex h-8 items-center gap-1 rounded-full px-2 text-xs font-bold transition",
+              "flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition",
               active
                 ? "bg-gangwon-orange text-white shadow-sm"
                 : "text-slate-500 hover:bg-white hover:text-gangwon-orange"
             )}
             title={`${item.label} 모드`}
+            aria-label={`${item.label} 모드`}
             aria-pressed={active}
           >
             <Icon size={15} aria-hidden="true" />
-            <span className="hidden lg:inline">{item.label}</span>
           </button>
         );
       })}
