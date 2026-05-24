@@ -21,10 +21,11 @@ const rssSources = [
   { label: "Gangwon FC", url: createGoogleNewsRssUrl("Gangwon FC") },
   {
     label: "스포츠니어스",
-    url: "https://news.google.com/rss/search?q=%EA%B0%95%EC%9B%90FC+site:sports-g.com&hl=ko&gl=KR&ceid=KR:ko",
+    url: "https://news.google.com/rss/search?q=%EA%B0%95%EC%9B%90FC+site:sports-g.com+when%3A15d&hl=ko&gl=KR&ceid=KR:ko",
     sourceName: "sports-g.com"
   }
 ];
+const maxNewsAgeDays = 15;
 const newsCategoryKeywords: Record<"match" | "player" | "club", string[]> = {
   match: ["경기", "vs", "골", "승", "패", "무승부", "결과", "득점", "실점", "하이라이트", "프리뷰", "리뷰", "분석"],
   player: ["선수", "영입", "이적", "계약", "부상", "복귀", "국가대표", "대표팀", "출전", "훈련"],
@@ -42,7 +43,7 @@ export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
     throw new Error("News feed request failed");
   }
 
-  return sortNewsByPublishedDesc(dedupeNews(items)).slice(0, limit);
+  return sortNewsByPublishedDesc(dedupeNews(items.filter(isRecentNewsItem))).slice(0, limit);
 }
 
 async function fetchNewsSource(source: { label: string; url: string; sourceName?: string }, sourceIndex: number): Promise<NewsItem[]> {
@@ -83,7 +84,15 @@ async function fetchNewsSource(source: { label: string; url: string; sourceName?
 }
 
 function createGoogleNewsRssUrl(query: string) {
-  return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`;
+  return `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:${maxNewsAgeDays}d`)}&hl=ko&gl=KR&ceid=KR:ko`;
+}
+
+function isRecentNewsItem(item: NewsItem) {
+  const publishedTime = new Date(item.publishedAt).getTime();
+  if (!Number.isFinite(publishedTime)) return false;
+
+  const maxAgeMs = maxNewsAgeDays * 24 * 60 * 60 * 1000;
+  return Date.now() - publishedTime <= maxAgeMs;
 }
 
 function dedupeNews(items: NewsItem[]) {
