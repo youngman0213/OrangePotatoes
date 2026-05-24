@@ -10,7 +10,7 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, active, onChange }: FilterTabsProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2">
+    <div className="flex gap-2 overflow-x-auto px-px pb-2 pt-1">
       {tabs.map((tab) => (
         <button
           key={tab.value}
