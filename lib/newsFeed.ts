@@ -9,6 +9,10 @@ interface GoogleNewsItem {
   description?: string;
 }
 
+interface ParsedNewsItem extends NewsItem {
+  sourcePublishedAt?: string;
+}
+
 const parser = new XMLParser({
   ignoreAttributes: false,
   removeNSPrefix: true
@@ -43,10 +47,11 @@ export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
     throw new Error("News feed request failed");
   }
 
-  return sortNewsByPublishedDesc(dedupeNews(items.filter(isRecentNewsItem))).slice(0, limit);
+  const verifiedItems = await verifyOriginalPublishedDates(items);
+  return sortNewsByPublishedDesc(dedupeNews(verifiedItems.filter(isRecentNewsItem))).slice(0, limit);
 }
 
-async function fetchNewsSource(source: { label: string; url: string; sourceName?: string }, sourceIndex: number): Promise<NewsItem[]> {
+async function fetchNewsSource(source: { label: string; url: string; sourceName?: string }, sourceIndex: number): Promise<ParsedNewsItem[]> {
   const response = await fetch(source.url, {
     next: { revalidate: 60 * 20 },
     headers: {
@@ -77,10 +82,57 @@ async function fetchNewsSource(source: { label: string; url: string; sourceName?
       url: item.link ?? source.url,
       summary: summary || fallbackSummary,
       publishedAt: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString(),
+      sourcePublishedAt: undefined,
       category: categorizeNews(title),
       thumbnailUrl: ""
     };
   });
+}
+
+async function verifyOriginalPublishedDates(items: ParsedNewsItem[]) {
+  const settled = await Promise.allSettled(items.map(async (item) => {
+    const sourcePublishedAt = await fetchOriginalPublishedAt(item.url);
+    return sourcePublishedAt ? { ...item, publishedAt: sourcePublishedAt, sourcePublishedAt } : item;
+  }));
+
+  return settled.map((result, index) => result.status === "fulfilled" ? result.value : items[index]).filter((item): item is ParsedNewsItem => Boolean(item));
+}
+
+async function fetchOriginalPublishedAt(url: string) {
+  if (!url || url.includes("news.google.com/")) return null;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3500);
+
+  try {
+    const response = await fetch(url, {
+      next: { revalidate: 60 * 60 * 12 },
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "OrangePotatoesFanHub/1.0",
+        Accept: "text/html,application/xhtml+xml"
+      }
+    });
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    const originalDate = parseOriginalArticleDate(html);
+    if (originalDate) return originalDate.toISOString();
+
+    const matched = html.match(/<(?:meta|time|span|p|div)[^>]+(?:property|name|itemprop|datetime|content)=["'](?:article:published_time|datePublished|pubdate|published_time|regdate)["'][^>]*(?:content|datetime)=["']([^"']+)["']/i)
+      ?? html.match(/<(?:meta|time|span|p|div)[^>]+(?:content|datetime)=["']([^"']+)["'][^>]+(?:property|name|itemprop)=["'](?:article:published_time|datePublished|pubdate|published_time|regdate|date)["']/i)
+      ?? html.match(/(?:입력|등록|승인)\s*[:：]?\s*(\d{4}[.-]\d{1,2}[.-]\d{1,2}(?:\s+\d{1,2}:\d{2})?)/);
+
+    if (!matched?.[1]) return null;
+
+    const parsed = parseKoreanDate(matched[1]);
+    return parsed && isRecentDate(parsed) ? parsed.toISOString() : parsed?.toISOString() ?? null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function createGoogleNewsRssUrl(query: string) {
@@ -91,8 +143,24 @@ function isRecentNewsItem(item: NewsItem) {
   const publishedTime = new Date(item.publishedAt).getTime();
   if (!Number.isFinite(publishedTime)) return false;
 
+  return isRecentDate(new Date(publishedTime));
+}
+
+function isRecentDate(date: Date) {
   const maxAgeMs = maxNewsAgeDays * 24 * 60 * 60 * 1000;
-  return Date.now() - publishedTime <= maxAgeMs;
+  return Date.now() - date.getTime() <= maxAgeMs;
+}
+
+function parseKoreanDate(value: string) {
+  const normalized = value.trim().replace(/\./g, "-").replace(/\s+/g, " ");
+  const date = new Date(normalized);
+  return Number.isFinite(date.getTime()) ? date : null;
+}
+
+function parseOriginalArticleDate(html: string) {
+  const plainText = cleanText(stripHtml(html));
+  const registered = plainText.match(/(?:등록|입력|승인)\s*[:：]?\s*(\d{4}[.-]\d{1,2}[.-]\d{1,2}(?:\s+\d{1,2}:\d{2})?)/);
+  return registered?.[1] ? parseKoreanDate(registered[1]) : null;
 }
 
 function dedupeNews(items: NewsItem[]) {
