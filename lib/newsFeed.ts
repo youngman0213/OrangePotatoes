@@ -38,6 +38,9 @@ const newsCategoryKeywords: Record<"match" | "player" | "club", string[]> = {
 const fallbackNewsUrl = "https://news.google.com/search?q=%EA%B0%95%EC%9B%90FC&hl=ko&gl=KR&ceid=KR:ko";
 const fallbackTitle = "\uac15\uc6d0FC \ub274\uc2a4";
 const fallbackSummary = "\uc6d0\ubb38 \ub9c1\ud06c\uc5d0\uc11c \uae30\uc0ac \ub0b4\uc6a9\uc744 \ud655\uc778\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.";
+const knownStaleTitleKeys = [
+  normalizeNewsTitle("서울·강원FC, 아시아 챔피언스리그 16강 진출…울산은 탈락")
+];
 
 export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
   const results = await Promise.allSettled(rssSources.map((source, sourceIndex) => fetchNewsSource(source, sourceIndex)));
@@ -48,7 +51,7 @@ export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
   }
 
   const verifiedItems = await verifyOriginalPublishedDates(items);
-  return sortNewsByPublishedDesc(dedupeNews(verifiedItems.filter(isRecentNewsItem))).slice(0, limit);
+  return sortNewsByPublishedDesc(dedupeNews(verifiedItems.filter(shouldKeepNewsItem))).slice(0, limit);
 }
 
 async function fetchNewsSource(source: { label: string; url: string; sourceName?: string }, sourceIndex: number): Promise<ParsedNewsItem[]> {
@@ -144,6 +147,23 @@ function isRecentNewsItem(item: NewsItem) {
   if (!Number.isFinite(publishedTime)) return false;
 
   return isRecentDate(new Date(publishedTime));
+}
+
+function shouldKeepNewsItem(item: ParsedNewsItem) {
+  if (!isRecentNewsItem(item)) return false;
+  if (!item.sourcePublishedAt && isLikelyStaleGoogleNewsItem(item)) return false;
+
+  return true;
+}
+
+function isLikelyStaleGoogleNewsItem(item: NewsItem) {
+  const text = `${item.title} ${item.summary}`.toLowerCase();
+  const titleKey = normalizeNewsTitle(item.title);
+
+  if (knownStaleTitleKeys.includes(titleKey)) return true;
+  if (/(8월|9월|10월|11월|12월).*(이달의|영플레이어|선수상|수상)/.test(text)) return true;
+
+  return false;
 }
 
 function isRecentDate(date: Date) {
