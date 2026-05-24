@@ -149,7 +149,7 @@ function FormDots({ team, form, light = false, compact = false }: { team: string
           key={`${team}-${index}-${result}`}
           className={classNames(
             "flex items-center justify-center rounded-full pt-px text-xs font-black leading-none text-white",
-            compact ? "h-4.5 w-4.5 text-[9px]" : "h-6 w-6",
+            compact ? "h-[18px] w-[18px] text-[9px]" : "h-6 w-6",
             result === "W" && "bg-emerald-500",
             result === "D" && "bg-slate-400",
             result === "L" && "bg-red-500"
