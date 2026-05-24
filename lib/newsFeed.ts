@@ -43,6 +43,7 @@ const knownStaleTitleKeys = [
   normalizeNewsTitle("K리그1 강원-울산, 수원FC-제주 경기 시간 변경")
 ];
 const blockedNewsSources = ["transfermarkt"];
+const blockedNewsTitleKeywords = ["군수", "도의원", "선거", "유세", "공약", "후보"];
 
 export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
   const results = await Promise.allSettled(rssSources.map((source, sourceIndex) => fetchNewsSource(source, sourceIndex)));
@@ -160,11 +161,22 @@ function shouldKeepNewsItem(item: ParsedNewsItem) {
 }
 
 function isArticleLikeNews(item: NewsItem) {
+  const text = `${item.title} ${item.summary}`;
   const source = item.source.toLowerCase();
   if (blockedNewsSources.some((blocked) => source.includes(blocked))) return false;
   if (!hasHangul(item.title)) return false;
+  if (blockedNewsTitleKeywords.some((keyword) => item.title.includes(keyword))) return false;
+  if (!isGangwonFcRelevantNews(text)) return false;
 
   return true;
+}
+
+function isGangwonFcRelevantNews(text: string) {
+  if (/강원\s*FC/i.test(text)) return true;
+  if (/gangwon\s*fc/i.test(text)) return true;
+  if (/K리그|케이리그|ACLE|아시아\s*챔피언스리그|코리아컵/i.test(text) && /강원/i.test(text)) return true;
+
+  return false;
 }
 
 function isLikelyStaleGoogleNewsItem(item: NewsItem) {
