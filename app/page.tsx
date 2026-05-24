@@ -5,11 +5,12 @@ import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { VideoCard } from "@/components/VideoCard";
 import { matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
+import { fetchMatchGoalEvents } from "@/lib/matchEvents";
 import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
-import type { Match, Standing } from "@/types";
+import type { Match, MatchGoalEvent, Standing } from "@/types";
 
 const text = {
   gangwon: "강원FC",
@@ -47,6 +48,7 @@ export default async function HomePage() {
   const videos = videosResult.status === "fulfilled" && videosResult.value.length ? videosResult.value : mockVideos;
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
+  const recentMatchGoals = recentMatch ? await fetchMatchGoalEvents(recentMatch).catch(() => []) : [];
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
   const goalsForRank = gangwonStanding ? getMetricRank(standings, "goalsFor", "desc", gangwonStanding.team) : null;
   const goalsAgainstRank = gangwonStanding ? getMetricRank(standings, "goalsAgainst", "asc", gangwonStanding.team) : null;
@@ -68,6 +70,7 @@ export default async function HomePage() {
             <MobileRankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
             <MobileRecentMatchCard
               match={recentMatch}
+              goals={recentMatchGoals}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
           </div>
@@ -75,6 +78,7 @@ export default async function HomePage() {
           <section className="hidden lg:block">
             <RecentMatchCard
               match={recentMatch}
+              goals={recentMatchGoals}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
           </section>
@@ -122,12 +126,15 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
   );
 }
 
-function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
+function RecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-navy">{text.recentMatch}</p>
+      <p className="text-xs font-black text-gangwon-navy">최근 경기 결과</p>
       {match ? (
-        <ScoreBoard match={match} size="desktop" />
+        <>
+          <ScoreBoard match={match} size="desktop" />
+          <GoalSummary goals={goals} />
+        </>
       ) : (
         <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{text.noResult}</h3>
       )}
@@ -218,18 +225,42 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
   );
 }
 
-function MobileRecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
+function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
   return (
     <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-navy">{text.recentMatch}</p>
+      <p className="text-xs font-black text-gangwon-navy">최근 경기 결과</p>
       {match ? (
-        <ScoreBoard match={match} size="mobile" />
+        <>
+          <ScoreBoard match={match} size="mobile" />
+          <GoalSummary goals={goals} compact />
+        </>
       ) : (
         <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{text.noResult}</h3>
       )}
       <p className="mt-auto line-clamp-1 pt-2 text-center text-[11px] font-bold text-slate-400">{meta}</p>
     </article>
   );
+}
+
+function GoalSummary({ goals, compact = false }: { goals: MatchGoalEvent[]; compact?: boolean }) {
+  if (!goals.length) return null;
+
+  return (
+    <div className={compact ? "mt-2 grid gap-0.5 text-center" : "mt-3 flex flex-wrap justify-center gap-2 text-center"}>
+      {goals.map((goal, index) => (
+        <span
+          key={`${goal.playerName}-${goal.minute}-${index}`}
+          className={compact ? "text-[10px] font-bold text-slate-400" : "rounded-full bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-500"}
+        >
+          {goal.playerName} {formatGoalMinute(goal)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function formatGoalMinute(goal: MatchGoalEvent) {
+  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}분` : `${goal.minute}분`;
 }
 
 function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" }) {
