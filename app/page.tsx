@@ -12,6 +12,8 @@ import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@
 import { fetchGangwonVideos } from "@/lib/videoFeed";
 import type { Match, MatchGoalEvent, Standing } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 const text = {
   gangwon: "\uac15\uc6d0FC",
   nextMatch: "\ub2e4\uc74c \uacbd\uae30",

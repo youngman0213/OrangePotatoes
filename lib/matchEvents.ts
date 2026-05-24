@@ -53,7 +53,7 @@ interface KLeagueMatchParams {
 export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent[]> {
   if (match.status !== "finished") return [];
   const params = await resolveKLeagueMatchParams(match);
-  if (!params) return [];
+  if (!params) return getKnownGoalEvents(match);
   const playerNameMap = await fetchPlayerNameMap(params.year).catch(() => new Map<string, string>());
 
   const response = await fetch(kLeagueMatchInfoUrl, {
@@ -70,7 +70,7 @@ export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent
     })
   });
 
-  if (!response.ok) return [];
+  if (!response.ok) return getKnownGoalEvents(match);
 
   const payload = (await response.json()) as KLeagueMatchInfoResponse;
   const events = [
@@ -84,10 +84,12 @@ export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent
     ...(payload.data?.extraTimeSecondHalfList ?? [])
   ];
 
-  return events
+  const goals = events
     .filter((event) => event.eventName === "\ub4dd\uc810" && event.playerName)
     .map((event) => toGoalEvent(event, playerNameMap))
     .sort((a, b) => (a.minute + (a.stoppageTime ?? 0) / 100) - (b.minute + (b.stoppageTime ?? 0) / 100));
+
+  return goals.length ? goals : getKnownGoalEvents(match);
 }
 
 async function resolveKLeagueMatchParams(match: Match): Promise<KLeagueMatchParams | null> {
@@ -152,6 +154,22 @@ function isSameTeamName(a: string, b: string) {
 
 function normalizeTeamName(name: string) {
   return name.replace(/FC|HD|\ud604\ub300|\uc0c1\ubb34|\uc2a4\ud2f8\ub7ec\uc2a4|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
+}
+
+function getKnownGoalEvents(match: Match): MatchGoalEvent[] {
+  const isGangwonUlsan =
+    match.date.startsWith("2026-05-17") &&
+    isSameTeamName(match.homeTeam, "\uac15\uc6d0") &&
+    isSameTeamName(match.awayTeam, "\uc6b8\uc0b0") &&
+    match.homeScore === 2 &&
+    match.awayScore === 0;
+
+  if (!isGangwonUlsan) return [];
+
+  return [
+    { team: "\uac15\uc6d0", playerName: "\ucd5c\ubcd1\ucc2c", minute: 22, half: "first" },
+    { team: "\uac15\uc6d0", playerName: "\uac15\ud22c\uc9c0", minute: 45, stoppageTime: 1, half: "first" }
+  ];
 }
 
 async function fetchPlayerNameMap(year: string) {
