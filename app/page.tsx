@@ -168,7 +168,7 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
           {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
             <span
               key={`${form}-${index}`}
-              className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
+              className={`flex h-7 w-7 items-center justify-center rounded-full pt-px text-xs font-black leading-none text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
             >
               {form}
             </span>
@@ -207,7 +207,7 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
         {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
           <span
             key={`${form}-${index}`}
-            className={`flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-black text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
+            className={`flex h-5 w-5 items-center justify-center rounded-full pt-px text-[9px] font-black leading-none text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
           >
             {form}
           </span>
