@@ -13,27 +13,23 @@ import { fetchGangwonVideos } from "@/lib/videoFeed";
 import type { Match, MatchGoalEvent, Standing } from "@/types";
 
 const text = {
-  gangwon: "강원FC",
-  nextMatch: "다음 경기",
-  noNextMatch: "예정된 경기 정보가 없습니다.",
-  recentMatch: "최근 경기",
-  noResult: "결과 없음",
-  afterFinished: "경기 종료 후 업데이트",
-  currentRank: "현재 순위",
-  noStanding: "순위 정보 없음",
-  recentForm: "최근 5경기",
-  recentNews: "최신 뉴스",
-  latestVideos: "최신 영상",
-  officialLinks: "공식 링크",
-  allNews: "전체 보기",
-  games: "경기",
-  wins: "승",
-  draws: "무",
-  losses: "패",
-  goalsFor: "득점",
-  goalsAgainst: "실점",
-  points: "승점",
-  rankSuffix: "위"
+  gangwon: "\uac15\uc6d0FC",
+  nextMatch: "\ub2e4\uc74c \uacbd\uae30",
+  noNextMatch: "\uc608\uc815\ub41c \uacbd\uae30 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  noResult: "\uacb0\uacfc \uc5c6\uc74c",
+  afterFinished: "\uacbd\uae30 \uc885\ub8cc \ud6c4 \uc5c5\ub370\uc774\ud2b8",
+  currentRank: "\ud604\uc7ac \uc21c\uc704",
+  recentNews: "\ucd5c\uc2e0 \ub274\uc2a4",
+  latestVideos: "\ucd5c\uc2e0 \uc601\uc0c1",
+  officialLinks: "\uacf5\uc2dd \ub9c1\ud06c",
+  games: "\uacbd\uae30",
+  wins: "\uc2b9",
+  draws: "\ubb34",
+  losses: "\ud328",
+  goalsFor: "\ub4dd\uc810",
+  goalsAgainst: "\uc2e4\uc810",
+  points: "\uc2b9\uc810",
+  rankSuffix: "\uc704"
 };
 
 export default async function HomePage() {
@@ -58,11 +54,16 @@ export default async function HomePage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
         <div className="grid gap-6">
           <section className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-            <SectionHeader title={text.nextMatch} eyebrow="경기 정보" href="/matches" compact />
+            <SectionHeader title={text.nextMatch} eyebrow="\uacbd\uae30 \uc815\ubcf4" href="/matches" compact />
             {nextMatch ? (
               <MatchCard match={nextMatch} featured embedded />
             ) : (
-              <InfoCard icon={<CalendarDays size={22} />} label={text.nextMatch} title={text.noNextMatch} meta="경기 페이지에서 전체 일정을 확인해주세요." />
+              <InfoCard
+                icon={<CalendarDays size={22} />}
+                label={text.nextMatch}
+                title={text.noNextMatch}
+                meta="\uacbd\uae30 \ud398\uc774\uc9c0\uc5d0\uc11c \uc804\uccb4 \uc77c\uc815\uc744 \ud655\uc778\ud574\uc8fc\uc138\uc694."
+              />
             )}
           </section>
 
@@ -84,9 +85,11 @@ export default async function HomePage() {
           </section>
 
           <section>
-            <SectionHeader title={text.recentNews} eyebrow="기사 모음" href="/news" />
+            <SectionHeader title={text.recentNews} eyebrow="\uae30\uc0ac \ubaa8\uc74c" href="/news" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {sortByPublishedDesc(news).slice(0, 3).map((item) => <NewsCard key={item.id} item={item} />)}
+              {sortByPublishedDesc(news).slice(0, 3).map((item) => (
+                <NewsCard key={item.id} item={item} />
+              ))}
             </div>
           </section>
 
@@ -100,9 +103,11 @@ export default async function HomePage() {
             <RankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
           </div>
           <section>
-            <SectionHeader title={text.latestVideos} eyebrow="영상 모음" href="/videos" />
+            <SectionHeader title={text.latestVideos} eyebrow="\uc601\uc0c1 \ubaa8\uc74c" href="/videos" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              {sortByPublishedDesc(videos).slice(0, 2).map((video) => <VideoCard key={video.id} video={video} compact />)}
+              {sortByPublishedDesc(videos).slice(0, 2).map((video) => (
+                <VideoCard key={video.id} video={video} compact />
+              ))}
             </div>
           </section>
         </aside>
@@ -129,11 +134,9 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
 function RecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-navy">최근 경기 결과</p>
+      <p className="text-xs font-black text-gangwon-navy">\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc</p>
       {match ? (
-        <>
-          <ScoreBoard match={match} goals={goals} size="desktop" />
-        </>
+        <ScoreBoard match={match} goals={goals} size="desktop" />
       ) : (
         <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{text.noResult}</h3>
       )}
@@ -148,21 +151,17 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
-          <h3 className="mt-1 text-3xl font-black text-gangwon-navy">
-            {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
-          </h3>
+          <h3 className="mt-1 text-3xl font-black text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
         </div>
         <div className="text-right">
           <p className="text-xs font-black text-slate-400">{text.points}</p>
-          <p className="mt-1 text-2xl font-black text-gangwon-orange">
-            {standing ? standing.points : "-"}
-          </p>
+          <p className="mt-1 text-2xl font-black text-gangwon-orange">{standing ? standing.points : "-"}</p>
         </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
         <div>
           <p className="text-sm font-black text-slate-600">
-            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
+            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K\ub9ac\uadf81"}
           </p>
           {standing ? (
             <p className="mt-1 text-xs font-bold text-slate-400">
@@ -170,17 +169,7 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
             </p>
           ) : null}
         </div>
-        <div className="flex gap-1.5">
-          {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
-            <span
-              key={`${form}-${index}`}
-              className={`flex h-7 w-7 items-center justify-center rounded-full pt-px text-xs font-black leading-none text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
-            >
-              {form}
-            </span>
-          ))}
-          {!standing?.recentForm.length ? <span className="text-sm font-bold text-slate-400">-</span> : null}
-        </div>
+        <RecentForm form={standing?.recentForm ?? []} size="md" />
       </div>
     </article>
   );
@@ -192,9 +181,7 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
-          <h3 className="mt-1 text-[32px] font-black leading-none text-gangwon-navy">
-            {standing ? `${standing.rank}${text.rankSuffix}` : "-"}
-          </h3>
+          <h3 className="mt-1 text-[32px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
         </div>
         <div className="text-right">
           <p className="text-xs font-black text-slate-400">{text.points}</p>
@@ -202,23 +189,15 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
         </div>
       </div>
       <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600">
-        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K리그1"}
+        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K\ub9ac\uadf81"}
       </p>
       {standing ? (
         <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
           {text.goalsFor} {standing.goalsFor} {formatRankSuffix(goalsForRank)} / {text.goalsAgainst} {standing.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
         </p>
       ) : null}
-      <div className="mt-auto flex justify-center gap-1.5 pt-1.5">
-        {(standing?.recentForm.length ? standing.recentForm : []).slice(0, 5).map((form, index) => (
-          <span
-            key={`${form}-${index}`}
-            className={`flex h-5 w-5 items-center justify-center rounded-full pt-px text-[9px] font-black leading-none text-white ${form === "W" ? "bg-gangwon-orange" : form === "D" ? "bg-slate-400" : "bg-red-500"}`}
-          >
-            {form}
-          </span>
-        ))}
-        {!standing?.recentForm.length ? <span className="text-xs font-bold text-slate-400">-</span> : null}
+      <div className="mt-auto flex justify-center pt-1.5">
+        <RecentForm form={standing?.recentForm ?? []} size="sm" />
       </div>
     </article>
   );
@@ -227,11 +206,9 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
 function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
   return (
     <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-navy">최근 경기 결과</p>
+      <p className="text-xs font-black text-gangwon-navy">\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc</p>
       {match ? (
-        <>
-          <ScoreBoard match={match} goals={goals} size="mobile" />
-        </>
+        <ScoreBoard match={match} goals={goals} size="mobile" />
       ) : (
         <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{text.noResult}</h3>
       )}
@@ -247,7 +224,7 @@ function ScoreBoard({ match, goals, size }: { match: Match; goals: MatchGoalEven
 
   return (
     <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-start gap-4"}>
-      <TeamScoreBlock name={match.homeTeam} goals={homeGoals} compact={compact} isHome />
+      <TeamScoreBlock name={match.homeTeam} goals={homeGoals} compact={compact} />
       <div className={compact ? "pt-2 text-center" : "pt-4 text-center"}>
         <p className={compact ? "text-[24px] font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
           {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
@@ -258,12 +235,15 @@ function ScoreBoard({ match, goals, size }: { match: Match; goals: MatchGoalEven
   );
 }
 
-function TeamScoreBlock({ name, goals, compact, isHome = false }: { name: string; goals: MatchGoalEvent[]; compact: boolean; isHome?: boolean }) {
+function TeamScoreBlock({ name, goals, compact }: { name: string; goals: MatchGoalEvent[]; compact: boolean }) {
   const colors = getTeamBadgeColors(name);
 
   return (
     <div className="flex min-w-0 flex-col items-center gap-1">
-      <span className={`${compact ? "h-8 w-8 text-[10px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black shadow-sm`} style={{ backgroundColor: colors.background, color: colors.text }}>
+      <span
+        className={`${compact ? "h-8 w-8 text-[10px]" : "h-12 w-12 text-sm"} flex items-center justify-center rounded-full font-black shadow-sm`}
+        style={{ backgroundColor: colors.background, color: colors.text }}
+      >
         {getTeamShortName(name)}
       </span>
       {goals.length ? (
@@ -279,41 +259,60 @@ function TeamScoreBlock({ name, goals, compact, isHome = false }: { name: string
   );
 }
 
+function RecentForm({ form, size }: { form: string[]; size: "sm" | "md" }) {
+  if (!form.length) return <span className="text-sm font-bold text-slate-400">-</span>;
+
+  return (
+    <div className={size === "sm" ? "flex gap-1.5" : "flex gap-1.5"}>
+      {form.slice(0, 5).map((result, index) => (
+        <span
+          key={`${result}-${index}`}
+          className={`${size === "sm" ? "h-5 w-5 text-[9px]" : "h-7 w-7 text-xs"} flex items-center justify-center rounded-full pt-px font-black leading-none text-white ${
+            result === "W" ? "bg-gangwon-orange" : result === "D" ? "bg-slate-400" : "bg-red-500"
+          }`}
+        >
+          {result}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function formatGoalMinute(goal: MatchGoalEvent) {
   return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}'` : `${goal.minute}'`;
 }
 
 function isSameScoreTeam(goalTeam: string, matchTeam: string) {
-  return matchTeam.includes(goalTeam) || goalTeam.includes(matchTeam.replace("FC", "").replace("HD", "").trim());
+  const goal = normalizeTeamName(goalTeam);
+  const match = normalizeTeamName(matchTeam);
+  return match.includes(goal) || goal.includes(match);
+}
+
+function normalizeTeamName(name: string) {
+  return name.replace(/FC|HD|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
 }
 
 function getTeamBadgeColors(name: string) {
-  const normalized = name.toLowerCase();
   const colors = [
-    { keyword: "강원", background: "#f37021", text: "#ffffff" },
-    { keyword: "울산", background: "#0f4c9a", text: "#ffffff" },
-    { keyword: "전북", background: "#0b8f3a", text: "#ffffff" },
-    { keyword: "서울", background: "#d71920", text: "#ffffff" },
-    { keyword: "포항", background: "#d71920", text: "#ffffff" },
-    { keyword: "대전", background: "#8b1d41", text: "#ffffff" },
-    { keyword: "광주", background: "#f5c400", text: "#111827" },
-    { keyword: "제주", background: "#e35205", text: "#ffffff" },
-    { keyword: "김천", background: "#b91c1c", text: "#ffffff" },
-    { keyword: "안양", background: "#581c87", text: "#ffffff" },
-    { keyword: "수원", background: "#1d4ed8", text: "#ffffff" },
-    { keyword: "인천", background: "#111827", text: "#ffffff" }
+    { keyword: "\uac15\uc6d0", background: "#f37021", text: "#ffffff" },
+    { keyword: "\uc6b8\uc0b0", background: "#0f4c9a", text: "#ffffff" },
+    { keyword: "\uc804\ubd81", background: "#0b8f3a", text: "#ffffff" },
+    { keyword: "\uc11c\uc6b8", background: "#d71920", text: "#ffffff" },
+    { keyword: "\ud3ec\ud56d", background: "#d71920", text: "#ffffff" },
+    { keyword: "\ub300\uc804", background: "#8b1d41", text: "#ffffff" },
+    { keyword: "\uad11\uc8fc", background: "#f5c400", text: "#111827" },
+    { keyword: "\uc81c\uc8fc", background: "#e35205", text: "#ffffff" },
+    { keyword: "\uae40\ucc9c", background: "#b91c1c", text: "#ffffff" },
+    { keyword: "\uc548\uc591", background: "#581c87", text: "#ffffff" },
+    { keyword: "\uc218\uc6d0", background: "#1d4ed8", text: "#ffffff" },
+    { keyword: "\uc778\ucc9c", background: "#111827", text: "#ffffff" }
   ];
 
-  return colors.find((item) => normalized.includes(item.keyword)) ?? { background: "#101827", text: "#ffffff" };
+  return colors.find((item) => name.includes(item.keyword)) ?? { background: "#101827", text: "#ffffff" };
 }
 
 function getTeamShortName(name: string) {
-  return name
-    .replace("FC", "")
-    .replace("HD", "")
-    .replace("하나시티즌", "")
-    .trim()
-    .slice(0, 2);
+  return normalizeTeamName(name).slice(0, 2);
 }
 
 function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direction: "asc" | "desc", team: string) {
@@ -327,24 +326,30 @@ function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direc
 }
 
 function formatRankSuffix(rank: number | null) {
-  return rank ? `(${rank}위)` : "";
+  return rank ? `(${rank}\uc704)` : "";
 }
 
 function OfficialLinks() {
   const links = [
-    { href: "https://www.gangwon-fc.com/", label: "공식 홈페이지", icon: HomeIcon },
-    { href: "https://www.youtube.com/@gangwonfc2008/videos", label: "공식 유튜브", icon: Youtube },
-    { href: "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014", label: "티켓 예매", icon: ExternalLink }
+    { href: "https://www.gangwon-fc.com/", label: "\uacf5\uc2dd \ud648\ud398\uc774\uc9c0", icon: HomeIcon },
+    { href: "https://www.youtube.com/@gangwonfc2008/videos", label: "\uacf5\uc2dd \uc720\ud29c\ube0c", icon: Youtube },
+    { href: "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014", label: "\ud2f0\ucf13 \uc608\ub9e4", icon: ExternalLink }
   ];
 
   return (
     <section>
-      <SectionHeader title={text.officialLinks} eyebrow="바로가기" />
+      <SectionHeader title={text.officialLinks} eyebrow="\ubc14\ub85c\uac00\uae30" />
       <div className="grid gap-2 sm:grid-cols-3">
         {links.map((link) => {
           const Icon = link.icon;
           return (
-            <a key={link.href} href={link.href} target="_blank" rel="noreferrer" className="flex items-center rounded-lg bg-white px-4 py-3 text-sm font-black text-gangwon-navy shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:text-gangwon-orange hover:ring-orange-100">
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center rounded-lg bg-white px-4 py-3 text-sm font-black text-gangwon-navy shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:text-gangwon-orange hover:ring-orange-100"
+            >
               <span className="inline-flex items-center gap-2">
                 <Icon size={17} className="text-gangwon-orange" aria-hidden="true" />
                 {link.label}

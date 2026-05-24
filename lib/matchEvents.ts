@@ -17,8 +17,12 @@ interface KLeagueMatchInfoResponse {
   data?: {
     firstHalf?: KLeagueMatchEvent[];
     secondHalf?: KLeagueMatchEvent[];
+    firstHalfList?: KLeagueMatchEvent[];
+    secondHalfList?: KLeagueMatchEvent[];
     extraTimeFirstHalf?: KLeagueMatchEvent[];
     extraTimeSecondHalf?: KLeagueMatchEvent[];
+    extraTimeFirstHalfList?: KLeagueMatchEvent[];
+    extraTimeSecondHalfList?: KLeagueMatchEvent[];
   };
 }
 
@@ -47,8 +51,12 @@ export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent
   const events = [
     ...(payload.data?.firstHalf ?? []),
     ...(payload.data?.secondHalf ?? []),
+    ...(payload.data?.firstHalfList ?? []),
+    ...(payload.data?.secondHalfList ?? []),
     ...(payload.data?.extraTimeFirstHalf ?? []),
-    ...(payload.data?.extraTimeSecondHalf ?? [])
+    ...(payload.data?.extraTimeSecondHalf ?? []),
+    ...(payload.data?.extraTimeFirstHalfList ?? []),
+    ...(payload.data?.extraTimeSecondHalfList ?? [])
   ];
 
   return events
