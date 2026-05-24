@@ -1,7 +1,9 @@
 import type { Match, MatchGoalEvent } from "@/types";
 
 const kLeagueMatchInfoUrl = "https://www.kleague.com/api/ddf/match/matchInfo.do";
+const kLeagueScheduleUrl = "https://www.kleague.com/getScheduleList.do";
 const kLeaguePlayerRecordUrl = "https://www.kleague.com/record/player.do";
+const gangwonTeamId = "K21";
 
 interface KLeagueMatchEvent {
   eventName?: string;
@@ -26,9 +28,32 @@ interface KLeagueMatchInfoResponse {
   };
 }
 
+interface KLeagueScheduleItem {
+  year: number;
+  leagueId: number;
+  gameId: number;
+  gameDate: string;
+  meetSeq: number;
+  homeTeamName: string;
+  awayTeamName: string;
+}
+
+interface KLeagueScheduleResponse {
+  data?: {
+    scheduleList?: KLeagueScheduleItem[];
+  };
+}
+
+interface KLeagueMatchParams {
+  year: string;
+  gameId: string;
+  meetSeq: string;
+}
+
 export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent[]> {
-  const params = parseKLeagueMatchId(match.id);
-  if (!params || match.status !== "finished") return [];
+  if (match.status !== "finished") return [];
+  const params = await resolveKLeagueMatchParams(match);
+  if (!params) return [];
   const playerNameMap = await fetchPlayerNameMap(params.year).catch(() => new Map<string, string>());
 
   const response = await fetch(kLeagueMatchInfoUrl, {
@@ -65,16 +90,68 @@ export async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent
     .sort((a, b) => (a.minute + (a.stoppageTime ?? 0) / 100) - (b.minute + (b.stoppageTime ?? 0) / 100));
 }
 
-function parseKLeagueMatchId(id: string) {
+async function resolveKLeagueMatchParams(match: Match): Promise<KLeagueMatchParams | null> {
+  return parseKLeagueMatchId(match.id) ?? fetchKLeagueMatchParamsBySchedule(match).catch(() => null);
+}
+
+function parseKLeagueMatchId(id: string): KLeagueMatchParams | null {
   const matched = id.match(/^kleague-match-(\d{4})-(\d+)-(\d+)-(\d+)$/);
   if (!matched) return null;
 
   return {
     year: matched[1],
-    leagueId: matched[2],
     gameId: matched[3],
     meetSeq: matched[4]
   };
+}
+
+async function fetchKLeagueMatchParamsBySchedule(match: Match): Promise<KLeagueMatchParams | null> {
+  const matchDay = match.date.slice(0, 10);
+  const [year = "2026", month = "01"] = matchDay.split("-");
+  const response = await fetch(kLeagueScheduleUrl, {
+    method: "POST",
+    next: { revalidate: 60 * 60 * 6 },
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+      "User-Agent": "OrangePotatoesFanHub/1.0"
+    },
+    body: JSON.stringify({
+      leagueId: "1",
+      year,
+      month,
+      teamId: gangwonTeamId
+    })
+  });
+
+  if (!response.ok) return null;
+
+  const payload = (await response.json()) as KLeagueScheduleResponse;
+  const schedule = (payload.data?.scheduleList ?? []).find((item) => {
+    const itemDay = item.gameDate.replace(/\./g, "-");
+    return (
+      itemDay === matchDay &&
+      isSameTeamName(item.homeTeamName, match.homeTeam) &&
+      isSameTeamName(item.awayTeamName, match.awayTeam)
+    );
+  });
+
+  if (!schedule) return null;
+
+  return {
+    year: String(schedule.year),
+    gameId: String(schedule.gameId),
+    meetSeq: String(schedule.meetSeq)
+  };
+}
+
+function isSameTeamName(a: string, b: string) {
+  const left = normalizeTeamName(a);
+  const right = normalizeTeamName(b);
+  return left.includes(right) || right.includes(left);
+}
+
+function normalizeTeamName(name: string) {
+  return name.replace(/FC|HD|\ud604\ub300|\uc0c1\ubb34|\uc2a4\ud2f8\ub7ec\uc2a4|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
 }
 
 async function fetchPlayerNameMap(year: string) {

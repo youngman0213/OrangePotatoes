@@ -54,7 +54,7 @@ export default async function HomePage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
         <div className="grid gap-6">
           <section className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-            <SectionHeader title={text.nextMatch} eyebrow="\uacbd\uae30 \uc815\ubcf4" href="/matches" compact />
+            <SectionHeader title={text.nextMatch} eyebrow={"\uacbd\uae30 \uc815\ubcf4"} href="/matches" compact />
             {nextMatch ? (
               <MatchCard match={nextMatch} featured embedded />
             ) : (
@@ -62,7 +62,7 @@ export default async function HomePage() {
                 icon={<CalendarDays size={22} />}
                 label={text.nextMatch}
                 title={text.noNextMatch}
-                meta="\uacbd\uae30 \ud398\uc774\uc9c0\uc5d0\uc11c \uc804\uccb4 \uc77c\uc815\uc744 \ud655\uc778\ud574\uc8fc\uc138\uc694."
+                meta={"\uacbd\uae30 \ud398\uc774\uc9c0\uc5d0\uc11c \uc804\uccb4 \uc77c\uc815\uc744 \ud655\uc778\ud574\uc8fc\uc138\uc694."}
               />
             )}
           </section>
@@ -85,7 +85,7 @@ export default async function HomePage() {
           </section>
 
           <section>
-            <SectionHeader title={text.recentNews} eyebrow="\uae30\uc0ac \ubaa8\uc74c" href="/news" />
+            <SectionHeader title={text.recentNews} eyebrow={"\uae30\uc0ac \ubaa8\uc74c"} href="/news" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {sortByPublishedDesc(news).slice(0, 3).map((item) => (
                 <NewsCard key={item.id} item={item} />
@@ -103,7 +103,7 @@ export default async function HomePage() {
             <RankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
           </div>
           <section>
-            <SectionHeader title={text.latestVideos} eyebrow="\uc601\uc0c1 \ubaa8\uc74c" href="/videos" />
+            <SectionHeader title={text.latestVideos} eyebrow={"\uc601\uc0c1 \ubaa8\uc74c"} href="/videos" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               {sortByPublishedDesc(videos).slice(0, 2).map((video) => (
                 <VideoCard key={video.id} video={video} compact />
@@ -134,7 +134,7 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
 function RecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-navy">\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc</p>
+      <p className="text-xs font-black text-gangwon-navy">{"\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc"}</p>
       {match ? (
         <ScoreBoard match={match} goals={goals} size="desktop" />
       ) : (
@@ -206,7 +206,7 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
 function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
   return (
     <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <p className="text-xs font-black text-gangwon-navy">\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc</p>
+      <p className="text-xs font-black text-gangwon-navy">{"\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc"}</p>
       {match ? (
         <ScoreBoard match={match} goals={goals} size="mobile" />
       ) : (
@@ -338,7 +338,7 @@ function OfficialLinks() {
 
   return (
     <section>
-      <SectionHeader title={text.officialLinks} eyebrow="\ubc14\ub85c\uac00\uae30" />
+      <SectionHeader title={text.officialLinks} eyebrow={"\ubc14\ub85c\uac00\uae30"} />
       <div className="grid gap-2 sm:grid-cols-3">
         {links.map((link) => {
           const Icon = link.icon;
