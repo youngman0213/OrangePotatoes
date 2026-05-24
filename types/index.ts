@@ -33,14 +33,6 @@ export interface Match {
   detailUrl?: string | null;
 }
 
-export interface MatchGoalEvent {
-  team: string;
-  playerName: string;
-  minute: number;
-  stoppageTime?: number;
-  half: "first" | "second" | "extra" | "unknown";
-}
-
 export interface NewsItem {
   id: string;
   title: string;

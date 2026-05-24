@@ -5,12 +5,11 @@ import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { VideoCard } from "@/components/VideoCard";
 import { matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
-import { fetchMatchGoalEvents } from "@/lib/matchEvents";
 import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
 import { fetchGangwonVideos } from "@/lib/videoFeed";
-import type { Match, MatchGoalEvent, Standing } from "@/types";
+import type { Match, Standing } from "@/types";
 
 const text = {
   gangwon: "\uac15\uc6d0FC",
@@ -44,7 +43,6 @@ export default async function HomePage() {
   const videos = videosResult.status === "fulfilled" && videosResult.value.length ? videosResult.value : mockVideos;
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
-  const recentMatchGoals = recentMatch ? await fetchMatchGoalEvents(recentMatch).catch(() => []) : [];
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
   const goalsForRank = gangwonStanding ? getMetricRank(standings, "goalsFor", "desc", gangwonStanding.team) : null;
   const goalsAgainstRank = gangwonStanding ? getMetricRank(standings, "goalsAgainst", "asc", gangwonStanding.team) : null;
@@ -71,7 +69,6 @@ export default async function HomePage() {
             <MobileRankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
             <MobileRecentMatchCard
               match={recentMatch}
-              goals={recentMatchGoals}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
           </div>
@@ -79,7 +76,6 @@ export default async function HomePage() {
           <section className="hidden lg:block">
             <RecentMatchCard
               match={recentMatch}
-              goals={recentMatchGoals}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
             />
           </section>
@@ -131,12 +127,12 @@ function InfoCard({ icon, label, title, meta }: { icon: ReactNode; label: string
   );
 }
 
-function RecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
+function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-navy">{"\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc"}</p>
       {match ? (
-        <ScoreBoard match={match} goals={goals} size="desktop" />
+        <ScoreBoard match={match} size="desktop" />
       ) : (
         <h3 className="mt-3 text-center text-2xl font-black text-gangwon-navy">{text.noResult}</h3>
       )}
@@ -203,12 +199,12 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
   );
 }
 
-function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: MatchGoalEvent[]; meta: string }) {
+function MobileRecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   return (
     <article className="flex min-h-[136px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-navy">{"\ucd5c\uadfc \uacbd\uae30 \uacb0\uacfc"}</p>
       {match ? (
-        <ScoreBoard match={match} goals={goals} size="mobile" />
+        <ScoreBoard match={match} size="mobile" />
       ) : (
         <h3 className="mt-4 line-clamp-2 text-center text-[15px] font-black leading-5 text-gangwon-navy">{text.noResult}</h3>
       )}
@@ -217,25 +213,23 @@ function MobileRecentMatchCard({ match, goals, meta }: { match?: Match; goals: M
   );
 }
 
-function ScoreBoard({ match, goals, size }: { match: Match; goals: MatchGoalEvent[]; size: "mobile" | "desktop" }) {
+function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" }) {
   const compact = size === "mobile";
-  const homeGoals = goals.filter((goal) => isSameScoreTeam(goal.team, match.homeTeam));
-  const awayGoals = goals.filter((goal) => isSameScoreTeam(goal.team, match.awayTeam));
 
   return (
     <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] items-start gap-1.5" : "mt-4 grid grid-cols-[1fr_auto_1fr] items-start gap-4"}>
-      <TeamScoreBlock name={match.homeTeam} goals={homeGoals} compact={compact} />
+      <TeamScoreBlock name={match.homeTeam} compact={compact} />
       <div className={compact ? "pt-2 text-center" : "pt-4 text-center"}>
         <p className={compact ? "text-[24px] font-black leading-none text-gangwon-navy" : "text-3xl font-black leading-none text-gangwon-navy"}>
           {match.homeScore ?? "-"}:{match.awayScore ?? "-"}
         </p>
       </div>
-      <TeamScoreBlock name={match.awayTeam} goals={awayGoals} compact={compact} />
+      <TeamScoreBlock name={match.awayTeam} compact={compact} />
     </div>
   );
 }
 
-function TeamScoreBlock({ name, goals, compact }: { name: string; goals: MatchGoalEvent[]; compact: boolean }) {
+function TeamScoreBlock({ name, compact }: { name: string; compact: boolean }) {
   const colors = getTeamBadgeColors(name);
 
   return (
@@ -246,15 +240,6 @@ function TeamScoreBlock({ name, goals, compact }: { name: string; goals: MatchGo
       >
         {getTeamShortName(name)}
       </span>
-      {goals.length ? (
-        <div className="grid max-w-full gap-0.5 text-center">
-          {goals.map((goal, index) => (
-            <span key={`${goal.playerName}-${goal.minute}-${index}`} className={compact ? "truncate text-[9px] font-bold text-slate-400" : "truncate text-[11px] font-bold text-slate-400"}>
-              {formatGoalMinute(goal)} {goal.playerName}
-            </span>
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -276,16 +261,6 @@ function RecentForm({ form, size }: { form: string[]; size: "sm" | "md" }) {
       ))}
     </div>
   );
-}
-
-function formatGoalMinute(goal: MatchGoalEvent) {
-  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}'` : `${goal.minute}'`;
-}
-
-function isSameScoreTeam(goalTeam: string, matchTeam: string) {
-  const goal = normalizeTeamName(goalTeam);
-  const match = normalizeTeamName(matchTeam);
-  return match.includes(goal) || goal.includes(match);
 }
 
 function normalizeTeamName(name: string) {
