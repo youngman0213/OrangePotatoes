@@ -64,8 +64,25 @@ html.theme-dark .border-slate-200,
 html.theme-dark .border-gray-100,
 html.theme-dark .border-gray-200,
 html.theme-dark .border-orange-100,
-html.theme-dark .border-orange-200 {
+html.theme-dark .border-orange-200,
+html.theme-dark .border-white {
   border-color: var(--border-soft) !important;
+}
+
+html.theme-dark .ring-1,
+html.theme-dark .ring-2,
+html.theme-dark .ring-white,
+html.theme-dark .ring-slate-100,
+html.theme-dark .ring-slate-200,
+html.theme-dark .ring-gray-100,
+html.theme-dark .ring-gray-200,
+html.theme-dark .ring-orange-100,
+html.theme-dark .ring-orange-200 {
+  --tw-ring-color: var(--border-soft) !important;
+}
+
+html.theme-dark .ring-transparent {
+  --tw-ring-color: transparent !important;
 }
 
 html.theme-dark .text-gangwon-navy,
