@@ -30,7 +30,11 @@ const text = {
   goalsFor: "\ub4dd\uc810",
   goalsAgainst: "\uc2e4\uc810",
   points: "\uc2b9\uc810",
-  rankSuffix: "\uc704"
+  rankSuffix: "\uc704",
+  todayGangwon: "\uc624\ub298\uc758 \uac15\uc6d0",
+  leaderGap: "\uc120\ub450\uc640",
+  pointGap: "\uc810 \ucc28",
+  recentForm: "\ucd5c\uadfc"
 };
 
 export default async function HomePage() {
@@ -46,8 +50,7 @@ export default async function HomePage() {
   const nextMatch = getNextMatch(matches);
   const recentMatch = getRecentMatch(matches);
   const gangwonStanding = standings.find((team) => team.team === text.gangwon);
-  const goalsForRank = gangwonStanding ? getMetricRank(standings, "goalsFor", "desc", gangwonStanding.team) : null;
-  const goalsAgainstRank = gangwonStanding ? getMetricRank(standings, "goalsAgainst", "asc", gangwonStanding.team) : null;
+  const leaderGap = getLeaderPointGap(standings, gangwonStanding);
 
   return (
     <div className="grid gap-6">
@@ -67,8 +70,10 @@ export default async function HomePage() {
             )}
           </section>
 
+          <TodayGangwonCard standing={gangwonStanding} nextMatch={nextMatch} leaderGap={leaderGap} />
+
           <div className="grid grid-cols-2 gap-3 lg:hidden">
-            <MobileRankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
+            <MobileRankCard standing={gangwonStanding} leaderGap={leaderGap} />
             <MobileRecentMatchCard
               match={recentMatch}
               meta={recentMatch ? `${formatDate(recentMatch.date)} / ${recentMatch.competition}` : text.afterFinished}
@@ -94,7 +99,7 @@ export default async function HomePage() {
 
         <aside className="grid gap-4 lg:sticky lg:top-24">
           <div className="hidden lg:block">
-            <RankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
+            <RankCard standing={gangwonStanding} leaderGap={leaderGap} />
           </div>
           <section>
             <SectionHeader title={text.latestVideos} eyebrow={"\uc601\uc0c1 \ubaa8\uc74c"} href="/videos" />
@@ -135,41 +140,57 @@ function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   );
 }
 
-function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
+function TodayGangwonCard({ standing, nextMatch, leaderGap }: { standing?: Standing; nextMatch?: Match; leaderGap: number | null }) {
+  const formSummary = standing ? summarizeForm(standing.recentForm) : "\ucd5c\uadfc \ud750\ub984 \ud655\uc778 \uc911";
+  const rankSummary = standing ? `\ub9ac\uadf8 ${standing.rank}${text.rankSuffix}, \uc2b9\uc810 ${standing.points}${leaderGap !== null ? `, \uc120\ub450\uc640 ${leaderGap}\uc810 \ucc28` : ""}` : "\uc21c\uc704 \uc815\ubcf4 \ud655\uc778 \uc911";
+  const matchPoint = nextMatch ? `${getOpponentName(nextMatch)} ${nextMatch.isHome ? "\ud648" : "\uc6d0\uc815"}\uc5d0\uc11c \ub2e4\uc2dc \ud55c\ubc88 \ud750\ub984\uc744 \uc774\uc5b4\uac08 \ucc28\ub840\uc785\ub2c8\ub2e4.` : "\ub2e4\uc74c \uacbd\uae30 \ud3ec\uc778\ud2b8\ub97c \uc900\ube44 \uc911\uc785\ub2c8\ub2e4.";
+
+  return (
+    <section className="rounded-lg bg-gangwon-navy p-3.5 text-white shadow-card ring-1 ring-slate-900/10 lg:p-4">
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 h-8 w-1.5 shrink-0 rounded-full bg-gangwon-orange" aria-hidden="true" />
+        <div className="min-w-0">
+          <p className="text-xs font-black text-orange-200">{text.todayGangwon}</p>
+          <p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-white/90 sm:line-clamp-2">
+            {formSummary}, {rankSummary}. {matchPoint}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RankCard({ standing, leaderGap }: { standing?: Standing; leaderGap: number | null }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
       <h3 className="mt-1 text-center text-4xl font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-      <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3 dark:bg-slate-800/80">
-        <div>
-          <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} ${standing.points}\uc810` : "K\ub9ac\uadf81"}
-          </p>
-          {standing ? (
-            <p className="mt-1 text-xs font-bold text-slate-400 dark:text-slate-500">
-              {standing.goalsFor}{text.goalsFor} {formatRankSuffix(goalsForRank)} / {standing.goalsAgainst}{text.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
-            </p>
-          ) : null}
-        </div>
+      <div className="mt-3 grid gap-2 rounded-lg bg-slate-50 px-3 py-3 dark:bg-slate-800/80">
+        <p className="text-center text-sm font-black text-slate-700 dark:text-slate-200">
+          {standing ? `\uc2b9\uc810 ${standing.points} \u00b7 ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K\ub9ac\uadf81"}
+        </p>
+        <p className="text-center text-xs font-bold text-slate-400 dark:text-slate-500">
+          {leaderGap !== null ? `${text.leaderGap} ${leaderGap}${text.pointGap}` : "\uc120\ub450\uc640 \uc2b9\uc810 \ucc28 \ud655\uc778 \uc911"}
+        </p>
+        <div className="flex justify-center">
         <RecentForm form={standing?.recentForm ?? []} size="md" />
+        </div>
       </div>
     </article>
   );
 }
 
-function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
+function MobileRankCard({ standing, leaderGap }: { standing?: Standing; leaderGap: number | null }) {
   return (
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
       <h3 className="mt-1 text-center text-[34px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
       <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-700 dark:text-slate-200">
-        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} ${standing.points}\uc810` : "K\ub9ac\uadf81"}
+        {standing ? `\uc2b9\uc810 ${standing.points} \u00b7 ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K\ub9ac\uadf81"}
       </p>
-      {standing ? (
-        <p className="mt-1 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500">
-          {standing.goalsFor}{text.goalsFor} {formatRankSuffix(goalsForRank)} / {standing.goalsAgainst}{text.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
-        </p>
-      ) : null}
+      <p className="mt-1 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500">
+        {leaderGap !== null ? `${text.leaderGap} ${leaderGap}${text.pointGap}` : "\uc120\ub450\uc640 \ucc28\uc774 \ud655\uc778 \uc911"}
+      </p>
       <div className="mt-auto flex justify-center pt-1.5">
         <RecentForm form={standing?.recentForm ?? []} size="sm" />
       </div>
@@ -335,16 +356,26 @@ function getTeamShortName(name: string) {
   return normalizeTeamName(name).slice(0, 2);
 }
 
-function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direction: "asc" | "desc", team: string) {
-  const sorted = [...rows].sort((a, b) => {
-    const diff = direction === "asc" ? a[key] - b[key] : b[key] - a[key];
-    return diff || a.rank - b.rank;
-  });
-  const index = sorted.findIndex((row) => row.team === team);
+function getLeaderPointGap(rows: Standing[], standing?: Standing) {
+  if (!standing || !rows.length) return null;
 
-  return index >= 0 ? index + 1 : null;
+  const leader = [...rows].sort((a, b) => b.points - a.points || a.rank - b.rank)[0];
+  return Math.max(leader.points - standing.points, 0);
 }
 
-function formatRankSuffix(rank: number | null) {
-  return rank ? `(${rank}\uc704)` : "";
+function summarizeForm(form: Standing["recentForm"]) {
+  const recent = form.slice(0, 5);
+  const wins = recent.filter((result) => result === "W").length;
+  const draws = recent.filter((result) => result === "D").length;
+  const losses = recent.filter((result) => result === "L").length;
+  const unbeaten = recent.length > 0 && losses === 0;
+
+  if (!recent.length) return "\ucd5c\uadfc 5\uacbd\uae30 \ud750\ub984 \ud655\uc778 \uc911";
+  if (unbeaten) return `\ud750\ub984\uc740 \uc88b\uc2b5\ub2c8\ub2e4. \ucd5c\uadfc ${recent.length}\uacbd\uae30 ${wins}\uc2b9 ${draws}\ubb34 \ubb34\ud328`;
+
+  return `\ucd5c\uadfc ${recent.length}\uacbd\uae30 ${wins}\uc2b9 ${draws}\ubb34 ${losses}\ud328`;
+}
+
+function getOpponentName(match: Match) {
+  return match.isHome ? match.awayTeam : match.homeTeam;
 }
