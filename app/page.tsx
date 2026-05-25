@@ -60,7 +60,7 @@ export default async function HomePage() {
             <SectionHeader title={text.nextMatch} eyebrow={"\uacbd\uae30 \uc815\ubcf4"} href="/matches" compact />
             {nextMatch ? (
               <>
-                <MatchCard match={nextMatch} featured embedded />
+                <MatchCard match={nextMatch} embedded />
                 <TodayGangwonCard standing={gangwonStanding} nextMatch={nextMatch} embedded />
               </>
             ) : (
