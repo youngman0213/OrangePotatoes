@@ -17,27 +17,22 @@ type StatKey = "goals" | "assists" | "yellowCards" | "bestEleven";
 type GangwonTabKey = StatKey | "averageRating";
 
 const labels = {
-  gangwonTitle: "강원 선수 개인기록",
-  leagueTitle: "리그 개인 순위",
-  ratingTitle: "평균평점",
-  ratingEyebrow: "K리그 공식 경기 평점 기반",
-  ratingFailed: "평점 데이터를 불러오지 못했습니다.",
-  ratingMatches: "반영",
-  latestRating: "최근",
-  loadFailed: "강원 선수 개인기록을 표시할 수 없습니다.",
-  goals: "득점",
-  assists: "도움",
-  yellowCards: "경고",
-  bestEleven: "베스트11",
-  goal: "골",
-  assist: "도움",
-  card: "장",
-  times: "회",
-  count: "개",
-  played: "출전",
-  games: "경기",
-  empty: "표시할 기록이 없습니다.",
-  gangwonBadge: "강원"
+  gangwonTitle: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d",
+  leagueTitle: "\ub9ac\uadf8 \uac1c\uc778 \uc21c\uc704",
+  ratingTitle: "\ud3c9\uade0\ud3c9\uc810",
+  ratingFailed: "\ud3c9\uc810 \ub370\uc774\ud130\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.",
+  loadFailed: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d\uc744 \ud45c\uc2dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  goals: "\ub4dd\uc810",
+  assists: "\ub3c4\uc6c0",
+  yellowCards: "\uacbd\uace0",
+  bestEleven: "\ubca0\uc2a4\ud2b811",
+  goal: "\uace8",
+  card: "\uc7a5",
+  times: "\ud68c",
+  count: "\uac1c",
+  games: "\uacbd\uae30",
+  empty: "\ud45c\uc2dc\ud560 \uae30\ub85d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  gangwonBadge: "\uac15\uc6d0"
 };
 
 const gangwonTabs = [
@@ -102,16 +97,12 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: 
 function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; hasError: boolean }) {
   return (
     <div>
-      <div className="mb-3">
-        <p className="text-xs font-bold text-slate-400">{labels.ratingEyebrow}</p>
-      </div>
-
       {hasError ? (
         <p className="rounded-lg bg-slate-50 px-4 py-4 text-sm font-bold text-slate-500">{labels.ratingFailed}</p>
       ) : ratings.length ? (
         <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-1">
           {ratings.map((row) => (
-            <div key={row.playerKey} className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-orange-50 px-3 py-3 ring-1 ring-orange-100 sm:px-4">
+            <div key={row.playerKey} className="flex min-w-0 items-center justify-between gap-3 rounded-lg bg-orange-50 px-3 py-3 ring-1 ring-orange-100 sm:px-4 sm:py-4">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gangwon-orange text-xs font-black text-white sm:h-9 sm:w-9 sm:text-sm">
                   {row.rank}
@@ -120,12 +111,9 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
                   <div className="flex min-w-0 items-center gap-2">
                     <p className="truncate text-sm font-black text-slate-900 sm:text-base">{row.playerName}</p>
                     <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-500 ring-1 ring-orange-100">
-                      {row.number} / {row.position}
+                      {row.ratingMatches}{labels.games}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs font-bold text-slate-400">
-                    {labels.ratingMatches} {row.ratingMatches}경기 · {labels.latestRating} {formatRating(row.latestRating)}
-                  </p>
                 </div>
               </div>
               <div className="shrink-0 text-right">
@@ -206,18 +194,15 @@ function StatsList({
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
                   <p className="truncate text-sm font-black text-slate-900 sm:text-base">{row.name}</p>
-                  {showClub ? (
-                    <span className={classNames(
-                      "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black",
-                      gangwonClub ? "bg-gangwon-orange text-white" : "bg-white text-slate-500 ring-1 ring-slate-200"
-                    )}>
-                      {gangwonClub ? labels.gangwonBadge : row.club}
-                    </span>
-                  ) : null}
                   <span className="shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-slate-400 ring-1 ring-slate-200">
                     {row.played || "-"}{labels.games}
                   </span>
                 </div>
+                {showClub ? (
+                  <p className={classNames("mt-0.5 truncate text-[11px] font-black leading-none", gangwonClub ? "text-gangwon-orange" : "text-slate-400")}>
+                    {gangwonClub ? labels.gangwonBadge : row.club}
+                  </p>
+                ) : null}
               </div>
             </div>
             <div className="shrink-0 text-right">
