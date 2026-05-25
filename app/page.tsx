@@ -138,13 +138,13 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
       <h3 className="mt-1 text-center text-4xl font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-      <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
+      <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3 dark:bg-slate-800/80">
         <div>
-          <p className="text-sm font-black text-slate-600">
+          <p className="text-sm font-black text-slate-600 dark:text-slate-100">
             {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} ${standing.points}\uc810` : "K\ub9ac\uadf81"}
           </p>
           {standing ? (
-            <p className="mt-1 text-xs font-bold text-slate-400">
+            <p className="mt-1 text-xs font-bold text-slate-400 dark:text-slate-500">
               {standing.goalsFor}{text.goalsFor} {formatRankSuffix(goalsForRank)} / {standing.goalsAgainst}{text.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
             </p>
           ) : null}
@@ -160,11 +160,11 @@ function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
       <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
       <h3 className="mt-1 text-center text-[34px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-      <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600">
+      <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600 dark:text-slate-100">
         {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} ${standing.points}\uc810` : "K\ub9ac\uadf81"}
       </p>
       {standing ? (
-        <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
+        <p className="mt-1 text-center text-[11px] font-bold text-slate-400 dark:text-slate-500">
           {standing.goalsFor}{text.goalsFor} {formatRankSuffix(goalsForRank)} / {standing.goalsAgainst}{text.goalsAgainst} {formatRankSuffix(goalsAgainstRank)}
         </p>
       ) : null}

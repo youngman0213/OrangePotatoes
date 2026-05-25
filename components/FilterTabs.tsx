@@ -12,14 +12,14 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, active, onChange, wrap = false, dense = false }: FilterTabsProps) {
   return (
-    <div className={classNames("flex px-px", dense ? "gap-1.5 pb-1 pt-0" : "gap-2 pb-2 pt-1", wrap ? "flex-wrap overflow-visible" : "overflow-x-auto")}>
+    <div className={classNames("flex px-px", dense ? "gap-1.5 pb-1 pt-1.5" : "gap-2 pb-2 pt-1.5", wrap ? "flex-wrap overflow-visible" : "overflow-x-auto")}>
       {tabs.map((tab) => (
         <button
           key={tab.value}
           type="button"
           onClick={() => onChange(tab.value)}
           className={classNames(
-            "shrink-0 rounded-full font-bold transition",
+            "shrink-0 rounded-full font-bold leading-none transition",
             dense ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
             active === tab.value
               ? "bg-gangwon-orange text-white shadow-sm"
