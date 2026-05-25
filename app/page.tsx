@@ -70,7 +70,7 @@ export default async function HomePage() {
             )}
           </section>
 
-          <TodayGangwonCard standing={gangwonStanding} nextMatch={nextMatch} leaderGap={leaderGap} />
+          <TodayGangwonCard standing={gangwonStanding} nextMatch={nextMatch} />
 
           <div className="grid grid-cols-2 gap-3 lg:hidden">
             <MobileRankCard standing={gangwonStanding} leaderGap={leaderGap} />
@@ -140,10 +140,9 @@ function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   );
 }
 
-function TodayGangwonCard({ standing, nextMatch, leaderGap }: { standing?: Standing; nextMatch?: Match; leaderGap: number | null }) {
-  const formSummary = standing ? summarizeForm(standing.recentForm) : "\ucd5c\uadfc \ud750\ub984 \ud655\uc778 \uc911";
-  const rankSummary = standing ? `\ub9ac\uadf8 ${standing.rank}${text.rankSuffix}, \uc2b9\uc810 ${standing.points}${leaderGap !== null ? `, \uc120\ub450\uc640 ${leaderGap}\uc810 \ucc28` : ""}` : "\uc21c\uc704 \uc815\ubcf4 \ud655\uc778 \uc911";
-  const matchPoint = nextMatch ? `${getOpponentName(nextMatch)} ${nextMatch.isHome ? "\ud648" : "\uc6d0\uc815"}\uc5d0\uc11c \ub2e4\uc2dc \ud55c\ubc88 \ud750\ub984\uc744 \uc774\uc5b4\uac08 \ucc28\ub840\uc785\ub2c8\ub2e4.` : "\ub2e4\uc74c \uacbd\uae30 \ud3ec\uc778\ud2b8\ub97c \uc900\ube44 \uc911\uc785\ub2c8\ub2e4.";
+function TodayGangwonCard({ standing, nextMatch }: { standing?: Standing; nextMatch?: Match }) {
+  const formSummary = standing ? summarizeBriefingForm(standing.recentForm, standing.rank) : "\ucd5c\uadfc \ud750\ub984 \ud655\uc778 \uc911\uc785\ub2c8\ub2e4.";
+  const matchPoint = nextMatch ? getNextMatchBriefing(nextMatch, standing?.recentForm ?? []) : "\ub2e4\uc74c \uacbd\uae30 \ud3ec\uc778\ud2b8\ub97c \uc900\ube44 \uc911\uc785\ub2c8\ub2e4.";
 
   return (
     <section className="rounded-lg bg-white p-3.5 text-gangwon-navy shadow-card ring-1 ring-slate-100 dark:bg-gangwon-navy dark:text-white dark:ring-slate-900/10 lg:p-4">
@@ -152,7 +151,8 @@ function TodayGangwonCard({ standing, nextMatch, leaderGap }: { standing?: Stand
         <div className="min-w-0">
           <p className="text-xs font-black text-gangwon-orange dark:text-orange-200">{text.todayGangwon}</p>
           <p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-slate-700 dark:text-white/90 sm:line-clamp-2">
-            {formSummary}, {rankSummary}. {matchPoint}
+            {formSummary}<br />
+            {matchPoint}
           </p>
         </div>
       </div>
@@ -363,19 +363,31 @@ function getLeaderPointGap(rows: Standing[], standing?: Standing) {
   return Math.max(leader.points - standing.points, 0);
 }
 
-function summarizeForm(form: Standing["recentForm"]) {
+function summarizeBriefingForm(form: Standing["recentForm"], rank: number) {
   const recent = form.slice(0, 5);
   const wins = recent.filter((result) => result === "W").length;
   const draws = recent.filter((result) => result === "D").length;
   const losses = recent.filter((result) => result === "L").length;
   const unbeaten = recent.length > 0 && losses === 0;
+  const rankText = `\ub9ac\uadf8 ${rank}${text.rankSuffix}`;
 
-  if (!recent.length) return "\ucd5c\uadfc 5\uacbd\uae30 \ud750\ub984 \ud655\uc778 \uc911";
-  if (unbeaten) return `\ud750\ub984\uc740 \uc88b\uc2b5\ub2c8\ub2e4. \ucd5c\uadfc ${recent.length}\uacbd\uae30 ${wins}\uc2b9 ${draws}\ubb34 \ubb34\ud328`;
+  if (!recent.length) return `\ucd5c\uadfc \ud750\ub984 \ud655\uc778 \uc911, ${rankText}.`;
+  if (unbeaten) return `\ucd5c\uadfc ${recent.length}\uacbd\uae30 \ubb34\ud328, ${rankText}.`;
+  if (losses <= 1) return `\ucd5c\uadfc ${recent.length}\uacbd\uae30 \ud750\ub984 \uc548\uc815, ${rankText}.`;
+  if (wins >= losses) return `\uc2b9\uc810 \uad00\ub9ac\uac00 \uc911\uc694\ud55c \uad6c\uac04, ${rankText}.`;
 
-  return `\ucd5c\uadfc ${recent.length}\uacbd\uae30 ${wins}\uc2b9 ${draws}\ubb34 ${losses}\ud328`;
+  return `\ucd5c\uadfc ${recent.length}\uacbd\uae30 \ud750\ub984 \uc810\uac80, ${rankText}.`;
 }
 
 function getOpponentName(match: Match) {
   return match.isHome ? match.awayTeam : match.homeTeam;
+}
+
+function getNextMatchBriefing(match: Match, form: Standing["recentForm"]) {
+  const opponent = getOpponentName(match);
+  const venue = match.isHome ? "\ud648" : "\uc6d0\uc815";
+  const losses = form.slice(0, 5).filter((result) => result === "L").length;
+  const objective = losses >= 2 ? "\ubc18\ub4f1 \ud3ec\uc778\ud2b8\ub97c \ub9cc\ub4e4" : "\uc0c1\uc704\uad8c \ud750\ub984\uc744 \uc774\uc5b4\uac08";
+
+  return `${opponent} ${venue}\uc5d0\uc11c ${objective} \ucc28\ub840\uc785\ub2c8\ub2e4.`;
 }
