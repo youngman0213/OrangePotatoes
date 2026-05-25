@@ -87,7 +87,7 @@ function GoalList({ goals, align }: { goals: NonNullable<Match["goalEvents"]>; a
   if (!goals.length) return <span />;
 
   return (
-    <div className={classNames("grid gap-1", align === "right" ? "justify-items-end text-right" : "justify-items-start text-left")}>
+    <div className={classNames("grid gap-1 text-left", align === "right" ? "justify-items-end" : "justify-items-start")}>
       {goals.map((goal, index) => (
         <span key={`${goal.playerName}-${goal.minute}-${index}`} className="max-w-full truncate">
           {formatGoalMinute(goal)} {goal.playerName}
