@@ -59,7 +59,10 @@ export default async function HomePage() {
           <section className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
             <SectionHeader title={text.nextMatch} eyebrow={"\uacbd\uae30 \uc815\ubcf4"} href="/matches" compact />
             {nextMatch ? (
-              <MatchCard match={nextMatch} featured embedded />
+              <>
+                <MatchCard match={nextMatch} featured embedded />
+                <TodayGangwonCard standing={gangwonStanding} nextMatch={nextMatch} embedded />
+              </>
             ) : (
               <InfoCard
                 icon={<CalendarDays size={22} />}
@@ -69,8 +72,6 @@ export default async function HomePage() {
               />
             )}
           </section>
-
-          <TodayGangwonCard standing={gangwonStanding} nextMatch={nextMatch} />
 
           <div className="grid grid-cols-2 gap-3 lg:hidden">
             <MobileRankCard standing={gangwonStanding} leaderGap={leaderGap} />
@@ -140,18 +141,22 @@ function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
   );
 }
 
-function TodayGangwonCard({ standing, nextMatch }: { standing?: Standing; nextMatch?: Match }) {
+function TodayGangwonCard({ standing, nextMatch, embedded = false }: { standing?: Standing; nextMatch?: Match; embedded?: boolean }) {
   const formSummary = standing ? summarizeBriefingForm(standing.recentForm, standing.rank) : "\ucd5c\uadfc \ud750\ub984 \ud655\uc778 \uc911\uc785\ub2c8\ub2e4.";
   const matchPoint = nextMatch ? getNextMatchBriefing(nextMatch, standing?.recentForm ?? []) : "\ub2e4\uc74c \uacbd\uae30 \ud3ec\uc778\ud2b8\ub97c \uc900\ube44 \uc911\uc785\ub2c8\ub2e4.";
 
   return (
-    <section className="rounded-lg bg-white p-3.5 text-gangwon-navy shadow-card ring-1 ring-slate-100 dark:bg-gangwon-navy dark:text-white dark:ring-slate-900/10 lg:p-4">
+    <section className={embedded ? "mt-3 rounded-lg bg-orange-50 px-3 py-2.5 text-gangwon-navy ring-1 ring-orange-100 dark:bg-slate-800/80 dark:text-white dark:ring-slate-700" : "rounded-lg bg-white p-3.5 text-gangwon-navy shadow-card ring-1 ring-slate-100 dark:bg-gangwon-navy dark:text-white dark:ring-slate-900/10 lg:p-4"}>
       <div>
         <div className="min-w-0">
-          <p className="text-xs font-black text-gangwon-orange dark:text-orange-200">{text.todayGangwon}</p>
-          <p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-slate-700 dark:text-white/90 sm:line-clamp-2">
-            {formSummary}<br />
-            {matchPoint}
+          <p className={embedded ? "text-xs font-black text-gangwon-orange dark:text-orange-200" : "text-xs font-black text-gangwon-orange dark:text-orange-200"}>{text.todayGangwon}</p>
+          <p className={embedded ? "mt-1 line-clamp-2 text-xs font-bold leading-5 text-slate-700 dark:text-white/90 sm:text-sm" : "mt-1 line-clamp-3 text-sm font-bold leading-6 text-slate-700 dark:text-white/90 sm:line-clamp-2"}>
+            {embedded ? `${formSummary.replace(/\.$/, "")} · ${matchPoint}` : (
+              <>
+                {formSummary}<br />
+                {matchPoint}
+              </>
+            )}
           </p>
         </div>
       </div>
