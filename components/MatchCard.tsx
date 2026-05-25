@@ -31,15 +31,15 @@ export function MatchCard({ match, featured = false, embedded = false }: MatchCa
         <span className="text-sm font-bold text-slate-500">{match.isHome ? labels.home : labels.away}</span>
       </div>
 
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4">
         <TeamName name={match.homeTeam} align="right" />
-        <div className="min-w-20 rounded-lg bg-slate-50 px-3 py-2 text-center">
+        <div className="min-w-24 rounded-lg bg-slate-50 px-4 py-2.5 text-center">
           {showScore ? (
-            <p className="text-2xl font-black text-gangwon-navy">
+            <p className="text-2xl font-black text-gangwon-navy sm:text-3xl">
               {match.homeScore} : {match.awayScore}
             </p>
           ) : (
-            <p className="text-sm font-black text-gangwon-navy">{formatTime(match.date)}</p>
+            <p className="text-base font-black text-gangwon-navy sm:text-lg">{formatTime(match.date)}</p>
           )}
         </div>
         <TeamName name={match.awayTeam} align="left" />
@@ -138,7 +138,7 @@ function normalizeTeamName(name: string) {
 
 function TeamName({ name, align }: { name: string; align: "left" | "right" }) {
   return (
-    <p className={classNames("text-base font-black sm:text-lg", align === "right" ? "text-right" : "text-left", isGangwon(name) ? "text-gangwon-orange" : "text-gangwon-navy")}>
+    <p className={classNames("text-lg font-black sm:text-xl", align === "right" ? "text-right" : "text-left", isGangwon(name) ? "text-gangwon-orange" : "text-gangwon-navy")}>
       {name}
     </p>
   );
