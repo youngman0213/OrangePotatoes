@@ -42,7 +42,7 @@ const knownStaleTitleKeys = [
   normalizeNewsTitle("서울·강원FC, 아시아 챔피언스리그 16강 진출…울산은 탈락"),
   normalizeNewsTitle("K리그1 강원-울산, 수원FC-제주 경기 시간 변경")
 ];
-const blockedNewsSources = ["transfermarkt"];
+const blockedNewsSources = ["transfermarkt", "mhnse.com", "mhn"];
 const blockedNewsTitleKeywords = ["군수", "도의원", "선거", "유세", "공약", "후보"];
 
 export async function fetchGangwonNews(limit = 45): Promise<NewsItem[]> {
