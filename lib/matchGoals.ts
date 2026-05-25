@@ -11,12 +11,22 @@ interface KLeagueMatchEvent {
   timeSec?: number;
 }
 
+interface KLeagueScorer {
+  name?: string;
+  isOwnGoal?: boolean;
+  time?: number | string;
+}
+
 interface KLeagueMatchInfoResponse {
   data?: {
     firstHalf?: KLeagueMatchEvent[];
     secondHalf?: KLeagueMatchEvent[];
     extraTimeFirstHalf?: KLeagueMatchEvent[];
     extraTimeSecondHalf?: KLeagueMatchEvent[];
+    EfirstHalf?: KLeagueMatchEvent[];
+    EsecondHalf?: KLeagueMatchEvent[];
+    homeScorer?: KLeagueScorer[];
+    awayScorer?: KLeagueScorer[];
   };
 }
 
@@ -58,17 +68,31 @@ async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent[]> {
   if (!response.ok) return [];
 
   const payload = (await response.json()) as KLeagueMatchInfoResponse;
+  const scorerEvents = getScorerEvents(payload, match);
+  if (scorerEvents.length) return scorerEvents;
+
   const events = [
     ...(payload.data?.firstHalf ?? []),
     ...(payload.data?.secondHalf ?? []),
     ...(payload.data?.extraTimeFirstHalf ?? []),
-    ...(payload.data?.extraTimeSecondHalf ?? [])
+    ...(payload.data?.extraTimeSecondHalf ?? []),
+    ...(payload.data?.EfirstHalf ?? []),
+    ...(payload.data?.EsecondHalf ?? [])
   ];
 
   return events
     .filter((event) => event.eventName === "\ub4dd\uc810" && event.playerName)
     .map(toGoalEvent)
     .sort((a, b) => a.minute + (a.stoppageTime ?? 0) / 100 - (b.minute + (b.stoppageTime ?? 0) / 100));
+}
+
+function getScorerEvents(payload: KLeagueMatchInfoResponse, match: Match): MatchGoalEvent[] {
+  const homeGoals = (payload.data?.homeScorer ?? []).map((scorer) => toScorerGoalEvent(scorer, match.homeTeam));
+  const awayGoals = (payload.data?.awayScorer ?? []).map((scorer) => toScorerGoalEvent(scorer, match.awayTeam));
+
+  return [...homeGoals, ...awayGoals]
+    .filter((event): event is MatchGoalEvent => Boolean(event))
+    .sort((a, b) => a.minute - b.minute);
 }
 
 function parseKLeagueMatchParams(match: Match): KLeagueMatchParams | null {
@@ -100,5 +124,17 @@ function toGoalEvent(event: KLeagueMatchEvent): MatchGoalEvent {
     playerName: event.playerName ?? "",
     minute: displayMinute,
     stoppageTime
+  };
+}
+
+function toScorerGoalEvent(scorer: KLeagueScorer, team: string): MatchGoalEvent | null {
+  const name = scorer.name?.trim();
+  const minute = Number(scorer.time ?? 0);
+  if (!name || !minute) return null;
+
+  return {
+    team,
+    playerName: scorer.isOwnGoal ? `${name}(OG)` : name,
+    minute
   };
 }
