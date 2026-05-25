@@ -5,6 +5,7 @@ import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
 import { VideoCard } from "@/components/VideoCard";
 import { matches as mockMatches, news as mockNews, standings, videos as mockVideos } from "@/data/mock";
+import { attachGoalEvents } from "@/lib/matchGoals";
 import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
@@ -33,7 +34,7 @@ const text = {
 
 export default async function HomePage() {
   const [matchesResult, newsResult, videosResult] = await Promise.allSettled([
-    fetchOfficialMatches(),
+    fetchOfficialMatches().then(attachGoalEvents),
     fetchGangwonNews(8),
     fetchGangwonVideos(8)
   ]);
@@ -225,6 +226,9 @@ function ScoreBoard({ match, size }: { match: Match; size: "mobile" | "desktop" 
         </p>
       </div>
       <TeamScoreBlock name={match.awayTeam} compact={compact} />
+      <div className="col-span-3">
+        <GoalEventSummary match={match} compact={compact} />
+      </div>
     </div>
   );
 }
@@ -240,6 +244,35 @@ function TeamScoreBlock({ name, compact }: { name: string; compact: boolean }) {
       >
         {getTeamShortName(name)}
       </span>
+    </div>
+  );
+}
+
+function GoalEventSummary({ match, compact }: { match: Match; compact: boolean }) {
+  const homeGoals = getTeamGoals(match, match.homeTeam);
+  const awayGoals = getTeamGoals(match, match.awayTeam);
+
+  if (!homeGoals.length && !awayGoals.length) return null;
+
+  return (
+    <div className={compact ? "mt-2 grid grid-cols-[1fr_auto_1fr] gap-1.5 text-[9px] font-bold text-slate-400" : "mt-3 grid grid-cols-[1fr_auto_1fr] gap-4 text-xs font-bold text-slate-400"}>
+      <GoalList goals={homeGoals} align="right" />
+      <span aria-hidden="true" />
+      <GoalList goals={awayGoals} align="left" />
+    </div>
+  );
+}
+
+function GoalList({ goals, align }: { goals: NonNullable<Match["goalEvents"]>; align: "left" | "right" }) {
+  if (!goals.length) return <span />;
+
+  return (
+    <div className={align === "right" ? "grid justify-items-end text-right" : "grid justify-items-start text-left"}>
+      {goals.map((goal, index) => (
+        <span key={`${goal.playerName}-${goal.minute}-${index}`} className="max-w-full truncate">
+          {formatGoalMinute(goal)} {goal.playerName}
+        </span>
+      ))}
     </div>
   );
 }
@@ -263,8 +296,43 @@ function RecentForm({ form, size }: { form: string[]; size: "sm" | "md" }) {
   );
 }
 
+function getTeamGoals(match: Match, teamName: string) {
+  return (match.goalEvents ?? []).filter((goal) => isSameTeam(goal.team, teamName));
+}
+
+function formatGoalMinute(goal: NonNullable<Match["goalEvents"]>[number]) {
+  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}'` : `${goal.minute}'`;
+}
+
+function isSameTeam(goalTeam: string, matchTeam: string) {
+  const goal = normalizeTeamName(goalTeam);
+  const match = normalizeTeamName(matchTeam);
+  return match.includes(goal) || goal.includes(match);
+}
+
 function normalizeTeamName(name: string) {
-  return name.replace(/FC|HD|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
+  const aliases: Record<string, string> = {
+    gangwon: "\uac15\uc6d0",
+    ulsan: "\uc6b8\uc0b0",
+    pohang: "\ud3ec\ud56d",
+    jeju: "\uc81c\uc8fc",
+    jeonbuk: "\uc804\ubd81",
+    seoul: "\uc11c\uc6b8",
+    daejeon: "\ub300\uc804",
+    incheon: "\uc778\ucc9c",
+    anyang: "\uc548\uc591",
+    gimcheon: "\uae40\ucc9c",
+    gwangju: "\uad11\uc8fc",
+    bucheon: "\ubd80\ucc9c"
+  };
+  const normalized = name
+    .toLowerCase()
+    .replace(/fc|hd|hyundai|hana|citizen|steelers|united|sk/g, "")
+    .replace(/[\s-]+/g, "")
+    .trim();
+  const alias = Object.entries(aliases).find(([key]) => normalized.includes(key));
+
+  return alias ? alias[1] : name.replace(/FC|HD|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
 }
 
 function getTeamBadgeColors(name: string) {
