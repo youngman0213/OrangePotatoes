@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Orange Potatoes",
-  description: "강원FC 팬을 위한 비공식 정보 허브"
+  description: "Orange Potatoes - \uac15\uc6d0FC \ud32c\uc744 \uc704\ud55c \ube44\uacf5\uc2dd \uc815\ubcf4 \ud5c8\ube0c"
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

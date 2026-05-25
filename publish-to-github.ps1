@@ -1,7 +1,7 @@
 param(
   [string]$RepoUrl = "https://github.com/youngman0213/OrangePotatoes.git",
   [string]$Branch = "main",
-  [string]$CommitMessage = "Initial Gangwon FC fan hub",
+  [string]$CommitMessage = "Update Orange Potatoes",
   [string]$GitUserName = "youngman0213",
   [string]$GitUserEmail = "youngman0213@users.noreply.github.com"
 )
