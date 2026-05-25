@@ -9,7 +9,7 @@ import { attachGoalEvents } from "@/lib/matchGoals";
 import { fetchGangwonNews } from "@/lib/newsFeed";
 import { fetchOfficialMatches } from "@/lib/officialFeed";
 import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@/lib/utils";
-import { fetchGangwonVideos } from "@/lib/videoFeed";
+import { fetchGangwonOfficialVideos } from "@/lib/youtubeVideos";
 import type { Match, Standing } from "@/types";
 
 const text = {
@@ -36,7 +36,7 @@ export default async function HomePage() {
   const [matchesResult, newsResult, videosResult] = await Promise.allSettled([
     fetchOfficialMatches().then(attachGoalEvents),
     fetchGangwonNews(8),
-    fetchGangwonVideos(8)
+    fetchGangwonOfficialVideos(8)
   ]);
 
   const matches = matchesResult.status === "fulfilled" && matchesResult.value.length ? matchesResult.value : mockMatches;

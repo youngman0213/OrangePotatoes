@@ -7,8 +7,21 @@ const kLeagueHighlightsChannelId = "UCYVxbD_KLbC39PPW9iTBcmQ";
 const gangwonFcChannelId = "UCuLjoid8kKTKITvkUP94kJA";
 const cacheSeconds = 60 * 60 * 3;
 
-const gangwonKeywords = ["강원", "강원FC", "Gangwon", "Gangwon FC"];
-const highlightKeywords = ["하이라이트", "Highlights", "Highlight", "2-Minute", "2 Minute", "5-Min", "5 Minute", "H/L"];
+const gangwonKeywords = ["\uac15\uc6d0", "\uac15\uc6d0FC", "Gangwon", "Gangwon FC"];
+const highlightKeywords = [
+  "\ud558\uc774\ub77c\uc774\ud2b8",
+  "\uace8\uc7a5\uba74",
+  "\uace8\ubaa8\uc74c",
+  "\ub4dd\uc810",
+  "\ud480 \ud558\uc774\ub77c\uc774\ud2b8",
+  "Highlights",
+  "Highlight",
+  "2-Minute",
+  "2 Minute",
+  "5-Min",
+  "5 Minute",
+  "H/L"
+];
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -113,7 +126,7 @@ function toFeedVideo(entry: YouTubeFeedEntry): Video | null {
   const youtubeId = entry.videoId?.trim();
   if (!youtubeId) return null;
 
-  const title = decodeHtml(entry.title?.trim() || "강원FC 영상");
+  const title = decodeHtml(entry.title?.trim() || "\uac15\uc6d0FC \uc601\uc0c1");
   const description = decodeHtml(entry.group?.description?.trim() ?? "");
   const channelTitle = decodeHtml(entry.author?.name?.trim() ?? "YouTube");
 
@@ -140,9 +153,9 @@ function uniqueVideos(videos: Video[]) {
 
 function categorizeVideo(text: string): VideoCategory {
   if (isHighlightVideo({ title: text })) return "highlight";
-  if (/(인터뷰|수훈|소감|기자회견|interview)/i.test(text)) return "interview";
-  if (/(훈련|트레이닝|연습|training)/i.test(text)) return "training";
-  if (/(비하인드|출근길|라커룸|브이로그|스케치|behind)/i.test(text)) return "behind";
+  if (/(\uc778\ud130\ubdf0|\uc218\ud6c8|\uc18c\uac10|\uae30\uc790\ud68c\uacac|interview)/i.test(text)) return "interview";
+  if (/(\ud6c8\ub828|\ud2b8\ub808\uc774\ub2dd|\uc5f0\uc2b5|training)/i.test(text)) return "training";
+  if (/(\ube44\ud558\uc778\ub4dc|\ucd9c\uadfc\uae38|\ub77c\ucee4\ub8f8|\ube0c\uc774\ub85c\uadf8|\uc2a4\ucf00\uce58|behind)/i.test(text)) return "behind";
 
   return "other";
 }
