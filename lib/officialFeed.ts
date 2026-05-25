@@ -233,7 +233,7 @@ function normalizeKLeagueMatch(item: KLeagueScheduleItem): Match {
     ticketUrl: isFinished ? null : createTicketUrl(),
     broadcastUrl: "https://www.coupangplay.com",
     highlightUrl: isFinished ? createKLeagueMatchUrl(item, 4) : null,
-    detailUrl: isFinished ? createKLeagueMatchUrl(item, 0) : null
+    detailUrl: isFinished ? createKLeagueMatchUrl(item, 1) : null
   };
 }
 
@@ -457,8 +457,9 @@ function toIsoDateFromKLeague(date: string, time: string) {
   return `${year}-${month}-${day}T${time}:00+09:00`;
 }
 
-function createKLeagueMatchUrl(item: KLeagueScheduleItem, tab: number) {
-  return `${kLeagueBaseUrl}/match.do?year=${item.year}&leagueId=${item.leagueId}&gameId=${item.gameId}&meetSeq=${item.meetSeq}&startTabNum=${tab}`;
+function createKLeagueMatchUrl(item: KLeagueScheduleItem, tab?: number) {
+  const baseUrl = `${kLeagueBaseUrl}/match.do?year=${item.year}&leagueId=${item.leagueId}&gameId=${item.gameId}&meetSeq=${item.meetSeq}`;
+  return typeof tab === "number" ? `${baseUrl}&startTabNum=${tab}` : baseUrl;
 }
 
 function createKLeagueScheduleUrl(year: number, dateText: string) {
