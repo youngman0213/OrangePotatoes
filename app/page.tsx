@@ -80,9 +80,9 @@ export default async function HomePage() {
             />
           </section>
 
-          <section className="lg:hidden">
+          <section className="lg:mt-6">
             <SectionHeader title={text.recentNews} eyebrow={"\uae30\uc0ac \ubaa8\uc74c"} href="/news" />
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {sortByPublishedDesc(news).slice(0, 3).map((item) => (
                 <NewsCard key={item.id} item={item} />
               ))}
@@ -94,7 +94,7 @@ export default async function HomePage() {
           <div className="hidden lg:block">
             <RankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
           </div>
-          <section className="lg:hidden">
+          <section>
             <SectionHeader title={text.latestVideos} eyebrow={"\uc601\uc0c1 \ubaa8\uc74c"} href="/videos" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               {sortByPublishedDesc(videos).slice(0, 2).map((video) => (
@@ -103,26 +103,6 @@ export default async function HomePage() {
             </div>
           </section>
         </aside>
-      </div>
-
-      <div className="hidden gap-6 lg:grid lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
-        <section>
-          <SectionHeader title={text.recentNews} eyebrow={"\uae30\uc0ac \ubaa8\uc74c"} href="/news" />
-          <div className="grid gap-3 lg:grid-cols-3">
-            {sortByPublishedDesc(news).slice(0, 3).map((item) => (
-              <NewsCard key={item.id} item={item} />
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <SectionHeader title={text.latestVideos} eyebrow={"\uc601\uc0c1 \ubaa8\uc74c"} href="/videos" />
-          <div className="grid gap-3">
-            {sortByPublishedDesc(videos).slice(0, 1).map((video) => (
-              <VideoCard key={video.id} video={video} compact />
-            ))}
-          </div>
-        </section>
       </div>
     </div>
   );
@@ -156,20 +136,14 @@ function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
 function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
-          <h3 className="mt-1 text-3xl font-black text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-black text-slate-400">{text.points}</p>
-          <p className="mt-1 text-2xl font-black text-gangwon-orange">{standing ? standing.points : "-"}</p>
-        </div>
+      <div className="text-center">
+        <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
+        <h3 className="mt-1 text-4xl font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
       </div>
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
+      <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
         <div>
           <p className="text-sm font-black text-slate-600">
-            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K\ub9ac\uadf81"}
+            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} \u00b7 ${standing.points}${text.points}` : "K\ub9ac\uadf81"}
           </p>
           {standing ? (
             <p className="mt-1 text-xs font-bold text-slate-400">
@@ -186,18 +160,12 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
 function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
   return (
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
-          <h3 className="mt-1 text-[32px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-black text-slate-400">{text.points}</p>
-          <p className="mt-1 text-2xl font-black leading-none text-gangwon-orange">{standing ? standing.points : "-"}</p>
-        </div>
+      <div className="text-center">
+        <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
+        <h3 className="mt-1 text-[34px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
       </div>
       <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600">
-        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses}` : "K\ub9ac\uadf81"}
+        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} \u00b7 ${standing.points}${text.points}` : "K\ub9ac\uadf81"}
       </p>
       {standing ? (
         <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
