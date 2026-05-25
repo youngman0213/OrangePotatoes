@@ -80,11 +80,11 @@ export default function MatchesPage() {
   const activeMonth = month !== "all" && months.includes(month) ? month : "all";
 
   return (
-    <div className="grid gap-6">
-      <SectionHeader title={labels.title} eyebrow={labels.eyebrow} />
-      <div className="grid gap-3">
-        <FilterTabs tabs={[{ label: labels.all, value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={activeMonth} onChange={setMonth} wrap />
-        <FilterTabs tabs={[{ label: labels.all, value: "all" }, { label: labels.home, value: "home" }, { label: labels.away, value: "away" }]} active={venue} onChange={setVenue} />
+    <div className="grid gap-4">
+      <SectionHeader title={labels.title} eyebrow={labels.eyebrow} compact />
+      <div className="grid gap-1.5">
+        <FilterTabs tabs={[{ label: labels.all, value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={activeMonth} onChange={setMonth} wrap dense />
+        <FilterTabs tabs={[{ label: labels.all, value: "all" }, { label: labels.home, value: "home" }, { label: labels.away, value: "away" }]} active={venue} onChange={setVenue} dense />
       </div>
 
       {loading ? (
