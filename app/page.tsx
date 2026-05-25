@@ -146,12 +146,12 @@ function TodayGangwonCard({ standing, nextMatch, leaderGap }: { standing?: Stand
   const matchPoint = nextMatch ? `${getOpponentName(nextMatch)} ${nextMatch.isHome ? "\ud648" : "\uc6d0\uc815"}\uc5d0\uc11c \ub2e4\uc2dc \ud55c\ubc88 \ud750\ub984\uc744 \uc774\uc5b4\uac08 \ucc28\ub840\uc785\ub2c8\ub2e4.` : "\ub2e4\uc74c \uacbd\uae30 \ud3ec\uc778\ud2b8\ub97c \uc900\ube44 \uc911\uc785\ub2c8\ub2e4.";
 
   return (
-    <section className="rounded-lg bg-gangwon-navy p-3.5 text-white shadow-card ring-1 ring-slate-900/10 lg:p-4">
+    <section className="rounded-lg bg-white p-3.5 text-gangwon-navy shadow-card ring-1 ring-slate-100 dark:bg-gangwon-navy dark:text-white dark:ring-slate-900/10 lg:p-4">
       <div className="flex items-start gap-3">
         <span className="mt-0.5 h-8 w-1.5 shrink-0 rounded-full bg-gangwon-orange" aria-hidden="true" />
         <div className="min-w-0">
-          <p className="text-xs font-black text-orange-200">{text.todayGangwon}</p>
-          <p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-white/90 sm:line-clamp-2">
+          <p className="text-xs font-black text-gangwon-orange dark:text-orange-200">{text.todayGangwon}</p>
+          <p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-slate-700 dark:text-white/90 sm:line-clamp-2">
             {formSummary}, {rankSummary}. {matchPoint}
           </p>
         </div>
