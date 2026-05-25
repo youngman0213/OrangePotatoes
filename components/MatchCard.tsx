@@ -112,7 +112,28 @@ function isSameTeam(goalTeam: string, matchTeam: string) {
 }
 
 function normalizeTeamName(name: string) {
-  return name.replace(/FC|HD|\ud604\ub300|\uc0c1\ubb34|\uc2a4\ud2f8\ub7ec\uc2a4|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
+  const aliases: Record<string, string> = {
+    gangwon: "\uac15\uc6d0",
+    ulsan: "\uc6b8\uc0b0",
+    pohang: "\ud3ec\ud56d",
+    jeju: "\uc81c\uc8fc",
+    jeonbuk: "\uc804\ubd81",
+    seoul: "\uc11c\uc6b8",
+    daejeon: "\ub300\uc804",
+    incheon: "\uc778\ucc9c",
+    anyang: "\uc548\uc591",
+    gimcheon: "\uae40\ucc9c",
+    gwangju: "\uad11\uc8fc",
+    bucheon: "\ubd80\ucc9c"
+  };
+  const normalized = name
+    .toLowerCase()
+    .replace(/fc|hd|hyundai|hana|citizen|steelers|united|sk/g, "")
+    .replace(/[\s-]+/g, "")
+    .trim();
+  const alias = Object.entries(aliases).find(([key]) => normalized.includes(key));
+
+  return alias ? alias[1] : name.replace(/FC|HD|\ud604\ub300|\uc0c1\ubb34|\uc2a4\ud2f8\ub7ec\uc2a4|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
 }
 
 function TeamName({ name, align }: { name: string; align: "left" | "right" }) {
