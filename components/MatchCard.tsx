@@ -45,6 +45,8 @@ export function MatchCard({ match, featured = false, embedded = false }: MatchCa
         <TeamName name={match.awayTeam} align="left" />
       </div>
 
+      {showScore && match.goalEvents?.length ? <GoalEventSummary match={match} /> : null}
+
       <div className="mt-4 grid justify-items-center gap-2 text-center text-sm text-slate-500">
         <p className="font-bold text-slate-700">
           {formatDate(match.date, { year: "numeric" })} {formatTime(match.date)}
@@ -66,6 +68,51 @@ export function MatchCard({ match, featured = false, embedded = false }: MatchCa
       </div>
     </article>
   );
+}
+
+function GoalEventSummary({ match }: { match: Match }) {
+  const homeGoals = getTeamGoals(match, match.homeTeam);
+  const awayGoals = getTeamGoals(match, match.awayTeam);
+
+  return (
+    <div className="mt-3 grid grid-cols-[1fr_auto_1fr] gap-3 text-xs font-bold text-slate-500">
+      <GoalList goals={homeGoals} align="right" />
+      <span aria-hidden="true" />
+      <GoalList goals={awayGoals} align="left" />
+    </div>
+  );
+}
+
+function GoalList({ goals, align }: { goals: NonNullable<Match["goalEvents"]>; align: "left" | "right" }) {
+  if (!goals.length) return <span />;
+
+  return (
+    <div className={classNames("grid gap-1", align === "right" ? "justify-items-end text-right" : "justify-items-start text-left")}>
+      {goals.map((goal, index) => (
+        <span key={`${goal.playerName}-${goal.minute}-${index}`} className="max-w-full truncate">
+          {formatGoalMinute(goal)} {goal.playerName}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function getTeamGoals(match: Match, teamName: string) {
+  return (match.goalEvents ?? []).filter((goal) => isSameTeam(goal.team, teamName));
+}
+
+function formatGoalMinute(goal: NonNullable<Match["goalEvents"]>[number]) {
+  return goal.stoppageTime ? `${goal.minute}+${goal.stoppageTime}'` : `${goal.minute}'`;
+}
+
+function isSameTeam(goalTeam: string, matchTeam: string) {
+  const goal = normalizeTeamName(goalTeam);
+  const match = normalizeTeamName(matchTeam);
+  return match.includes(goal) || goal.includes(match);
+}
+
+function normalizeTeamName(name: string) {
+  return name.replace(/FC|HD|\ud604\ub300|\uc0c1\ubb34|\uc2a4\ud2f8\ub7ec\uc2a4|\ud558\ub098\uc2dc\ud2f0\uc98c/g, "").trim();
 }
 
 function TeamName({ name, align }: { name: string; align: "left" | "right" }) {

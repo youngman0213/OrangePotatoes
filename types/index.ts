@@ -31,6 +31,14 @@ export interface Match {
   broadcastUrl: string | null;
   highlightUrl: string | null;
   detailUrl?: string | null;
+  goalEvents?: MatchGoalEvent[];
+}
+
+export interface MatchGoalEvent {
+  team: string;
+  playerName: string;
+  minute: number;
+  stoppageTime?: number;
 }
 
 export interface NewsItem {
