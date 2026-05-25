@@ -12,6 +12,8 @@ import { formatDate, getNextMatch, getRecentMatch, sortByPublishedDesc } from "@
 import { fetchGangwonOfficialVideos } from "@/lib/youtubeVideos";
 import type { Match, Standing } from "@/types";
 
+export const revalidate = 1800;
+
 const text = {
   gangwon: "\uac15\uc6d0FC",
   nextMatch: "\ub2e4\uc74c \uacbd\uae30",
