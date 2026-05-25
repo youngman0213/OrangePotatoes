@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { CalendarDays, ExternalLink, HomeIcon, Youtube } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { MatchCard } from "@/components/MatchCard";
 import { NewsCard } from "@/components/NewsCard";
 import { SectionHeader } from "@/components/SectionHeader";
@@ -21,7 +21,6 @@ const text = {
   currentRank: "\ud604\uc7ac \uc21c\uc704",
   recentNews: "\ucd5c\uc2e0 \ub274\uc2a4",
   latestVideos: "\ucd5c\uc2e0 \uc601\uc0c1",
-  officialLinks: "\uacf5\uc2dd \ub9c1\ud06c",
   games: "\uacbd\uae30",
   wins: "\uc2b9",
   draws: "\ubb34",
@@ -89,10 +88,6 @@ export default async function HomePage() {
               ))}
             </div>
           </section>
-
-          <div className="hidden lg:block">
-            <OfficialLinks />
-          </div>
         </div>
 
         <aside className="grid gap-4 lg:sticky lg:top-24">
@@ -108,10 +103,6 @@ export default async function HomePage() {
             </div>
           </section>
         </aside>
-      </div>
-
-      <div className="lg:hidden">
-        <OfficialLinks />
       </div>
     </div>
   );
@@ -370,37 +361,4 @@ function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direc
 
 function formatRankSuffix(rank: number | null) {
   return rank ? `(${rank}\uc704)` : "";
-}
-
-function OfficialLinks() {
-  const links = [
-    { href: "https://www.gangwon-fc.com/", label: "\uacf5\uc2dd \ud648\ud398\uc774\uc9c0", icon: HomeIcon },
-    { href: "https://www.youtube.com/@gangwonfc2008/videos", label: "\uacf5\uc2dd \uc720\ud29c\ube0c", icon: Youtube },
-    { href: "https://ticket.interpark.com/Contents/Sports/GoodsInfo?SportsCode=07002&TeamCode=PS014", label: "\ud2f0\ucf13 \uc608\ub9e4", icon: ExternalLink }
-  ];
-
-  return (
-    <section>
-      <SectionHeader title={text.officialLinks} eyebrow={"\ubc14\ub85c\uac00\uae30"} />
-      <div className="grid gap-2 sm:grid-cols-3">
-        {links.map((link) => {
-          const Icon = link.icon;
-          return (
-            <a
-              key={link.href}
-              href={link.href}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center rounded-lg bg-white px-4 py-3 text-sm font-black text-gangwon-navy shadow-card ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:text-gangwon-orange hover:ring-orange-100"
-            >
-              <span className="inline-flex items-center gap-2">
-                <Icon size={17} className="text-gangwon-orange" aria-hidden="true" />
-                {link.label}
-              </span>
-            </a>
-          );
-        })}
-      </div>
-    </section>
-  );
 }
