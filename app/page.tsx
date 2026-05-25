@@ -146,8 +146,7 @@ function TodayGangwonCard({ standing, nextMatch }: { standing?: Standing; nextMa
 
   return (
     <section className="rounded-lg bg-white p-3.5 text-gangwon-navy shadow-card ring-1 ring-slate-100 dark:bg-gangwon-navy dark:text-white dark:ring-slate-900/10 lg:p-4">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 h-8 w-1.5 shrink-0 rounded-full bg-gangwon-orange" aria-hidden="true" />
+      <div>
         <div className="min-w-0">
           <p className="text-xs font-black text-gangwon-orange dark:text-orange-200">{text.todayGangwon}</p>
           <p className="mt-1 line-clamp-3 text-sm font-bold leading-6 text-slate-700 dark:text-white/90 sm:line-clamp-2">
