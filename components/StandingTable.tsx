@@ -44,7 +44,7 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
       </div>
 
       <div className="overflow-x-auto border-t border-slate-100">
-        <table className="w-full min-w-[680px] text-left text-xs sm:text-sm">
+        <table className="w-full min-w-[560px] text-left text-xs sm:min-w-[680px] sm:text-sm">
           <thead className="bg-gangwon-navy text-white">
             <tr>
               <Th>{labels.rank}</Th>
@@ -57,7 +57,7 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
               <Th>{labels.goalsAgainst}</Th>
               <Th>{labels.goalDifference}</Th>
               <Th>{labels.points}</Th>
-              <Th>{labels.form}</Th>
+              <Th className="hidden lg:table-cell">{labels.form}</Th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -75,7 +75,7 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
                 <Td>{row.goalsAgainst}</Td>
                 <Td>{formatGoalDifference(row.goalDifference)}</Td>
                 <Td strong>{row.points}</Td>
-                <Td>
+                <Td className="hidden lg:table-cell">
                   <FormDots team={row.team} form={row.recentForm.slice(0, 5)} compact />
                 </Td>
               </tr>
@@ -180,10 +180,10 @@ function formatRankSuffix(rank: number | null) {
   return rank ? `(${rank}위)` : "";
 }
 
-function Th({ children }: { children: ReactNode }) {
-  return <th className="whitespace-nowrap px-3 py-2.5 font-black sm:px-4 sm:py-3">{children}</th>;
+function Th({ children, className }: { children: ReactNode; className?: string }) {
+  return <th className={classNames("whitespace-nowrap px-3 py-2.5 font-black sm:px-4 sm:py-3", className)}>{children}</th>;
 }
 
-function Td({ children, strong = false }: { children: ReactNode; strong?: boolean }) {
-  return <td className={classNames("whitespace-nowrap px-3 py-3 text-slate-600 sm:px-4 sm:py-4", strong && "font-black text-gangwon-navy")}>{children}</td>;
+function Td({ children, strong = false, className }: { children: ReactNode; strong?: boolean; className?: string }) {
+  return <td className={classNames("whitespace-nowrap px-3 py-3 text-slate-600 sm:px-4 sm:py-4", strong && "font-black text-gangwon-navy", className)}>{children}</td>;
 }
