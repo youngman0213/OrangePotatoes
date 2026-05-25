@@ -136,14 +136,12 @@ function RecentMatchCard({ match, meta }: { match?: Match; meta: string }) {
 function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
   return (
     <article className="rounded-lg bg-white p-4 shadow-card ring-1 ring-slate-100">
-      <div className="text-center">
-        <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
-        <h3 className="mt-1 text-4xl font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-      </div>
+      <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
+      <h3 className="mt-1 text-center text-4xl font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
       <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-3">
         <div>
           <p className="text-sm font-black text-slate-600">
-            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} \u00b7 ${standing.points}${text.points}` : "K\ub9ac\uadf81"}
+            {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} ${standing.points}\uc810` : "K\ub9ac\uadf81"}
           </p>
           {standing ? (
             <p className="mt-1 text-xs font-bold text-slate-400">
@@ -160,12 +158,10 @@ function RankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Sta
 function MobileRankCard({ standing, goalsForRank, goalsAgainstRank }: { standing?: Standing; goalsForRank: number | null; goalsAgainstRank: number | null }) {
   return (
     <article className="flex min-h-[148px] flex-col rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100">
-      <div className="text-center">
-        <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
-        <h3 className="mt-1 text-[34px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
-      </div>
+      <p className="text-xs font-black text-gangwon-navy">{text.currentRank}</p>
+      <h3 className="mt-1 text-center text-[34px] font-black leading-none text-gangwon-navy">{standing ? `${standing.rank}${text.rankSuffix}` : "-"}</h3>
       <p className="mt-2 truncate text-center text-xs font-black leading-4 text-slate-600">
-        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} \u00b7 ${standing.points}${text.points}` : "K\ub9ac\uadf81"}
+        {standing ? `${standing.played}${text.games} ${standing.wins}${text.wins} ${standing.draws}${text.draws} ${standing.losses}${text.losses} ${standing.points}\uc810` : "K\ub9ac\uadf81"}
       </p>
       {standing ? (
         <p className="mt-1 text-center text-[11px] font-bold text-slate-400">
