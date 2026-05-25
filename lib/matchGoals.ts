@@ -55,6 +55,7 @@ async function fetchMatchGoalEvents(match: Match): Promise<MatchGoalEvent[]> {
     method: "POST",
     next: { revalidate: 60 * 60 * 6 },
     headers: {
+      "Accept-Language": "ko-KR,ko;q=0.9",
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       "User-Agent": "OrangePotatoesFanHub/1.0"
     },
