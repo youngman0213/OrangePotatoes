@@ -80,9 +80,9 @@ export default async function HomePage() {
             />
           </section>
 
-          <section>
+          <section className="lg:hidden">
             <SectionHeader title={text.recentNews} eyebrow={"\uae30\uc0ac \ubaa8\uc74c"} href="/news" />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {sortByPublishedDesc(news).slice(0, 3).map((item) => (
                 <NewsCard key={item.id} item={item} />
               ))}
@@ -94,7 +94,7 @@ export default async function HomePage() {
           <div className="hidden lg:block">
             <RankCard standing={gangwonStanding} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} />
           </div>
-          <section>
+          <section className="lg:hidden">
             <SectionHeader title={text.latestVideos} eyebrow={"\uc601\uc0c1 \ubaa8\uc74c"} href="/videos" />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               {sortByPublishedDesc(videos).slice(0, 2).map((video) => (
@@ -103,6 +103,26 @@ export default async function HomePage() {
             </div>
           </section>
         </aside>
+      </div>
+
+      <div className="hidden gap-6 lg:grid lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.9fr)] lg:items-start">
+        <section>
+          <SectionHeader title={text.recentNews} eyebrow={"\uae30\uc0ac \ubaa8\uc74c"} href="/news" />
+          <div className="grid gap-3 lg:grid-cols-3">
+            {sortByPublishedDesc(news).slice(0, 3).map((item) => (
+              <NewsCard key={item.id} item={item} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <SectionHeader title={text.latestVideos} eyebrow={"\uc601\uc0c1 \ubaa8\uc74c"} href="/videos" />
+          <div className="grid gap-3">
+            {sortByPublishedDesc(videos).slice(0, 1).map((video) => (
+              <VideoCard key={video.id} video={video} compact />
+            ))}
+          </div>
+        </section>
       </div>
     </div>
   );
