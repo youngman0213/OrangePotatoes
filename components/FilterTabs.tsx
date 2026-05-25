@@ -6,11 +6,12 @@ interface FilterTabsProps {
   tabs: Array<{ label: string; value: string }>;
   active: string;
   onChange: (value: string) => void;
+  wrap?: boolean;
 }
 
-export function FilterTabs({ tabs, active, onChange }: FilterTabsProps) {
+export function FilterTabs({ tabs, active, onChange, wrap = false }: FilterTabsProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto px-px pb-2 pt-1">
+    <div className={classNames("flex gap-2 px-px pb-2 pt-1", wrap ? "flex-wrap overflow-visible" : "overflow-x-auto")}>
       {tabs.map((tab) => (
         <button
           key={tab.value}

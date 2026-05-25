@@ -26,7 +26,7 @@ export default function MatchesPage() {
   const [items, setItems] = useState<Match[]>(mockMatches);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [month, setMonth] = useState("all");
+  const [month, setMonth] = useState(getCurrentMonth());
   const [venue, setVenue] = useState("all");
 
   useEffect(() => {
@@ -69,18 +69,21 @@ export default function MatchesPage() {
   const filteredMatches = useMemo(
     () =>
       sortMatchesForResults(items).filter((match) => {
-        const monthMatch = month === "all" || getMatchMonth(match.date) === month;
+        const activeMonth = month !== "all" && months.includes(month) ? month : "all";
+        const monthMatch = activeMonth === "all" || getMatchMonth(match.date) === activeMonth;
         const venueMatch = venue === "all" || (venue === "home" ? match.isHome : !match.isHome);
         return monthMatch && venueMatch;
       }),
-    [items, month, venue]
+    [items, month, months, venue]
   );
+
+  const activeMonth = month !== "all" && months.includes(month) ? month : "all";
 
   return (
     <div className="grid gap-6">
       <SectionHeader title={labels.title} eyebrow={labels.eyebrow} />
       <div className="grid gap-3">
-        <FilterTabs tabs={[{ label: labels.all, value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={month} onChange={setMonth} />
+        <FilterTabs tabs={[{ label: labels.all, value: "all" }, ...months.map((item) => ({ label: item, value: item }))]} active={activeMonth} onChange={setMonth} wrap />
         <FilterTabs tabs={[{ label: labels.all, value: "all" }, { label: labels.home, value: "home" }, { label: labels.away, value: "away" }]} active={venue} onChange={setVenue} />
       </div>
 
@@ -98,6 +101,13 @@ export default function MatchesPage() {
       )}
     </div>
   );
+}
+
+function getCurrentMonth() {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric"
+  }).format(new Date());
 }
 
 function sortMatchesForResults(items: Match[]) {
