@@ -1,57 +1,103 @@
-export function normalizeTeamCode(teamName: string) {
-  const key = normalizeKey(teamName);
-  const teamMap: Record<string, string> = {
-    "울산": "01",
-    "울산hd": "01",
-    "울산hdfc": "01",
-    "포항": "03",
-    "포항스틸러스": "03",
-    "제주": "04",
-    "제주sk": "04",
-    "전북": "05",
-    "전북현대": "05",
-    "서울": "09",
-    "fc서울": "09",
-    "대전": "10",
-    "대전하나시티즌": "10",
-    "인천": "18",
-    "인천유나이티드": "18",
-    "강원": "21",
-    "강원fc": "21",
-    "광주": "22",
-    "광주fc": "22",
-    "부천": "26",
-    "부천fc1995": "26",
-    "안양": "27",
-    "fc안양": "27",
-    "김천": "35",
-    "김천상무": "35"
-  };
+const TEAM_CODE_BY_ALIAS: Record<string, string> = {
+  "01": "01",
+  ulsan: "01",
+  ulsanhd: "01",
+  ulsanhdfc: "01",
+  "\uc6b8\uc0b0": "01",
+  "\uc6b8\uc0b0hd": "01",
+  "\uc6b8\uc0b0hdfc": "01",
 
-  return teamMap[key];
+  "03": "03",
+  pohang: "03",
+  "\ud3ec\ud56d": "03",
+  "\ud3ec\ud56d\uc2a4\ud2f8\ub7ec\uc2a4": "03",
+
+  "04": "04",
+  jeju: "04",
+  jejusk: "04",
+  "\uc81c\uc8fc": "04",
+  "\uc81c\uc8fcsk": "04",
+
+  "05": "05",
+  jeonbuk: "05",
+  jeonbukhdy: "05",
+  "\uc804\ubd81": "05",
+  "\uc804\ubd81\ud604\ub300": "05",
+
+  "09": "09",
+  seoul: "09",
+  fcseoul: "09",
+  "\uc11c\uc6b8": "09",
+  "fc\uc11c\uc6b8": "09",
+
+  "10": "10",
+  daejeon: "10",
+  daejeonhana: "10",
+  "\ub300\uc804": "10",
+  "\ub300\uc804\ud558\ub098": "10",
+  "\ub300\uc804\ud558\ub098\uc2dc\ud2f0\uc98c": "10",
+
+  "18": "18",
+  incheon: "18",
+  "\uc778\ucc9c": "18",
+  "\uc778\ucc9c\uc720\ub098\uc774\ud2f0\ub4dc": "18",
+
+  "21": "21",
+  gangwon: "21",
+  gangwonfc: "21",
+  "\uac15\uc6d0": "21",
+  "\uac15\uc6d0fc": "21",
+
+  "22": "22",
+  gwangju: "22",
+  gwangjufc: "22",
+  "\uad11\uc8fc": "22",
+  "\uad11\uc8fcfc": "22",
+
+  "26": "26",
+  bucheon: "26",
+  bucheonfc1995: "26",
+  "\ubd80\ucc9c": "26",
+  "\ubd80\ucc9cfc1995": "26",
+
+  "27": "27",
+  anyang: "27",
+  fcanyang: "27",
+  "\uc548\uc591": "27",
+  "fc\uc548\uc591": "27",
+
+  "35": "35",
+  gimcheon: "35",
+  "\uae40\ucc9c": "35",
+  "\uae40\ucc9c\uc0c1\ubb34": "35"
+};
+
+const TEAM_NAME_BY_CODE: Record<string, string> = {
+  "01": "\uc6b8\uc0b0 HD",
+  "03": "\ud3ec\ud56d \uc2a4\ud2f8\ub7ec\uc2a4",
+  "04": "\uc81c\uc8fc SK",
+  "05": "\uc804\ubd81 \ud604\ub300",
+  "09": "FC\uc11c\uc6b8",
+  "10": "\ub300\uc804\ud558\ub098\uc2dc\ud2f0\uc98c",
+  "18": "\uc778\ucc9c \uc720\ub098\uc774\ud2f0\ub4dc",
+  "21": "\uac15\uc6d0FC",
+  "22": "\uad11\uc8fcFC",
+  "26": "\ubd80\ucc9cFC1995",
+  "27": "FC\uc548\uc591",
+  "35": "\uae40\ucc9c \uc0c1\ubb34"
+};
+
+export function normalizeTeamCode(teamName: string) {
+  return TEAM_CODE_BY_ALIAS[normalizeKey(teamName)];
 }
 
 export function normalizeTeamName(teamCode: string | undefined, teamName: string) {
-  const teamMap: Record<string, string> = {
-    "01": "\uc6b8\uc0b0 HD",
-    "03": "\ud3ec\ud56d \uc2a4\ud2f8\ub7ec\uc2a4",
-    "04": "\uc81c\uc8fc SK",
-    "05": "\uc804\ubd81 \ud604\ub300",
-    "09": "FC\uc11c\uc6b8",
-    "10": "\ub300\uc804\ud558\ub098\uc2dc\ud2f0\uc98c",
-    "18": "\uc778\ucc9c \uc720\ub098\uc774\ud2f0\ub4dc",
-    "21": "\uac15\uc6d0FC",
-    "22": "\uad11\uc8fcFC",
-    "26": "\ubd80\ucc9cFC1995",
-    "27": "FC\uc548\uc591",
-    "35": "\uae40\ucc9c \uc0c1\ubb34"
-  };
-
-  return teamMap[teamCode ?? ""] ?? teamName;
+  const code = TEAM_CODE_BY_ALIAS[normalizeKey(teamCode ?? "")] ?? normalizeTeamCode(teamName);
+  return TEAM_NAME_BY_CODE[code ?? ""] ?? teamName;
 }
 
 export function makeTeamKey(teamCode: string | undefined, teamName: string) {
-  return teamCode || normalizeTeamCode(teamName) || normalizeKey(teamName);
+  return normalizeTeamName(teamCode, teamName) || teamCode || normalizeKey(teamName);
 }
 
 export function makePlayerKey(playerId: string | undefined, playerName: string, teamCode: string | undefined, teamName: string) {
@@ -92,5 +138,8 @@ export function toNumber(value: number | string | null | undefined) {
 }
 
 function normalizeKey(value: string) {
-  return value.replace(/\s+/g, "").replace(/FC|HD|SK/gi, (match) => match.toLowerCase()).toLowerCase();
+  return value
+    .replace(/\s+/g, "")
+    .replace(/[._-]/g, "")
+    .toLowerCase();
 }

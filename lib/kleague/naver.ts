@@ -133,13 +133,29 @@ export async function fetchNaverPlayerRecords({
 }
 
 export async function fetchNaverCombinedPlayerRecords(seasonCode = KLEAGUE_SEASON) {
-  const [goals, assists, gangwon] = await Promise.all([
+  const [goals, assists, yellowCards, bestEleven, gangwonGoals, gangwonAssists, gangwonCards, gangwonBestEleven, gangwonPlayed] = await Promise.all([
     fetchNaverPlayerRecords({ seasonCode, sortField: "goals", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, sortField: "assists", pageSize: 200 }),
-    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "offencePoints", pageSize: 100 })
+    fetchNaverPlayerRecords({ seasonCode, sortField: "yellowCards", pageSize: 200 }),
+    fetchNaverPlayerRecords({ seasonCode, sortField: "bestEleven", pageSize: 200 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "goals", pageSize: 100 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "assists", pageSize: 100 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "yellowCards", pageSize: 100 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "bestEleven", pageSize: 100 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "matchesPlayed", pageSize: 100 })
   ]);
 
-  return mergePlayerRecords([...goals, ...assists, ...gangwon]);
+  return mergePlayerRecords([
+    ...goals,
+    ...assists,
+    ...yellowCards,
+    ...bestEleven,
+    ...gangwonGoals,
+    ...gangwonAssists,
+    ...gangwonCards,
+    ...gangwonBestEleven,
+    ...gangwonPlayed
+  ]);
 }
 
 function mergePlayerRecords(rows: SourcePlayerRecord[]) {
@@ -157,6 +173,8 @@ function mergePlayerRecords(rows: SourcePlayerRecord[]) {
     merged.set(key, {
       ...current,
       rank: Math.min(current.rank, row.rank),
+      teamCode: current.teamCode || row.teamCode,
+      teamName: normalizeTeamName(current.teamCode || row.teamCode, current.teamName || row.teamName),
       goals: Math.max(current.goals, row.goals),
       assists: Math.max(current.assists, row.assists),
       attackPoints: Math.max(current.attackPoints, row.attackPoints),

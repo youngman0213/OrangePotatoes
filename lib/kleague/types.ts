@@ -6,7 +6,7 @@ export const CACHE_MS = CACHE_SECONDS * 1000;
 
 export type DataSource = "kleague-official" | "naver-sports";
 export type RecordKind = "standings" | "player-records" | "gangwon-summary";
-export type PlayerSortField = "goals" | "assists" | "offencePoints" | "yellowCards";
+export type PlayerSortField = "goals" | "assists" | "offencePoints" | "yellowCards" | "matchesPlayed" | "bestEleven";
 
 export interface KLeagueMismatch {
   type: "standings_mismatch" | "player_record_mismatch";

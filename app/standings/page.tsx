@@ -2,14 +2,15 @@ import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
 import { StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
+import { normalizeTeamName } from "@/lib/kleague/normalize";
 import { getGangwonAverageRatings } from "@/lib/kleague/ratings";
 import type { LeaguePlayerStat } from "@/types";
 
 export const revalidate = 21600;
 
 const labels = {
-  source: "데이터 출처: K리그 공식 기록 / 검증: 네이버 스포츠",
-  checkedAt: "기준 시각"
+  source: "\ub370\uc774\ud130 \ucd9c\ucc98: K\ub9ac\uadf8 \uacf5\uc2dd \uae30\ub85d / \uac80\uc99d: \ub124\uc774\ubc84 \uc2a4\ud3ec\uce20",
+  checkedAt: "\uae30\uc900 \uc2dc\uac01"
 };
 
 export default async function StandingsPage() {
@@ -18,6 +19,7 @@ export default async function StandingsPage() {
     getVerifiedCombinedPlayerRecords(),
     getGangwonAverageRatings()
   ]);
+
   const tableStandings = standingsResult.status === "fulfilled" && standingsResult.value.data.length ? standingsResult.value.data.map((row) => ({
     rank: row.rank,
     team: row.teamName,
@@ -31,10 +33,11 @@ export default async function StandingsPage() {
     points: row.points,
     recentForm: row.recentForm.filter((value): value is "W" | "D" | "L" => value === "W" || value === "D" || value === "L")
   })) : standings;
+
   const fetchedPlayerStats = statsResult.status === "fulfilled" ? statsResult.value.data.map((row) => ({
     rank: row.rank,
     name: row.playerName,
-    club: row.teamCode === "21" ? "강원FC" : row.teamName,
+    club: normalizeTeamName(row.teamCode, row.teamName),
     goals: row.goals,
     assists: row.assists,
     attackPoints: row.attackPoints,
@@ -43,7 +46,8 @@ export default async function StandingsPage() {
     played: row.matches,
     bestEleven: row.bestEleven ?? 0
   })) : [];
-  const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : fallbackPlayerStats;
+
+  const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : normalizeFallbackPlayerStats(fallbackPlayerStats);
   const playerRatings = ratingsResult.status === "fulfilled" ? ratingsResult.value : [];
   const ratingsError = ratingsResult.status === "rejected";
   const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
@@ -58,28 +62,39 @@ export default async function StandingsPage() {
   );
 }
 
+function normalizeFallbackPlayerStats(rows: LeaguePlayerStat[]) {
+  return rows.map((row) => ({
+    ...row,
+    club: normalizeTeamName(undefined, row.club)
+  }));
+}
+
 function mergePlayerStats(rows: LeaguePlayerStat[]) {
   const merged = new Map<string, LeaguePlayerStat>();
 
   for (const row of rows) {
-    const key = `${row.name}-${row.club}`;
+    const normalizedRow = {
+      ...row,
+      club: normalizeTeamName(undefined, row.club)
+    };
+    const key = `${normalizedRow.name}-${normalizedRow.club}`;
     const current = merged.get(key);
 
     if (!current) {
-      merged.set(key, row);
+      merged.set(key, normalizedRow);
       continue;
     }
 
     merged.set(key, {
       ...current,
-      rank: Math.min(current.rank, row.rank),
-      goals: Math.max(current.goals, row.goals),
-      assists: Math.max(current.assists, row.assists),
-      attackPoints: Math.max(current.attackPoints, row.attackPoints),
-      yellowCards: Math.max(current.yellowCards, row.yellowCards),
-      redCards: Math.max(current.redCards, row.redCards),
-      played: Math.max(current.played, row.played),
-      bestEleven: Math.max(current.bestEleven ?? 0, row.bestEleven ?? 0)
+      rank: Math.min(current.rank, normalizedRow.rank),
+      goals: Math.max(current.goals, normalizedRow.goals),
+      assists: Math.max(current.assists, normalizedRow.assists),
+      attackPoints: Math.max(current.attackPoints, normalizedRow.attackPoints),
+      yellowCards: Math.max(current.yellowCards, normalizedRow.yellowCards),
+      redCards: Math.max(current.redCards, normalizedRow.redCards),
+      played: Math.max(current.played, normalizedRow.played),
+      bestEleven: Math.max(current.bestEleven ?? 0, normalizedRow.bestEleven ?? 0)
     });
   }
 

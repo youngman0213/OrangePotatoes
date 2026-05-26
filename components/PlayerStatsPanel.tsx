@@ -200,7 +200,7 @@ function StatsList({
                 </div>
                 {showClub ? (
                   <p className={classNames("mt-0.5 truncate text-[11px] font-black leading-none", gangwonClub ? "text-gangwon-orange" : "text-slate-400")}>
-                    {gangwonClub ? labels.gangwonBadge : row.club}
+                    {gangwonClub ? labels.gangwonBadge : formatClubLabel(row.club)}
                   </p>
                 ) : null}
               </div>
@@ -213,4 +213,22 @@ function StatsList({
       })}
     </div>
   );
+}
+
+function formatClubLabel(club: string) {
+  const clubMap: Record<string, string> = {
+    "\uc6b8\uc0b0 HD": "\uc6b8\uc0b0 HD",
+    "\ud3ec\ud56d \uc2a4\ud2f8\ub7ec\uc2a4": "\ud3ec\ud56d",
+    "\uc81c\uc8fc SK": "\uc81c\uc8fc",
+    "\uc804\ubd81 \ud604\ub300": "\uc804\ubd81",
+    "FC\uc11c\uc6b8": "\uc11c\uc6b8",
+    "\ub300\uc804\ud558\ub098\uc2dc\ud2f0\uc98c": "\ub300\uc804",
+    "\uc778\ucc9c \uc720\ub098\uc774\ud2f0\ub4dc": "\uc778\ucc9c",
+    "\uad11\uc8fcFC": "\uad11\uc8fc",
+    "\ubd80\ucc9cFC1995": "\ubd80\ucc9c",
+    "FC\uc548\uc591": "\uc548\uc591",
+    "\uae40\ucc9c \uc0c1\ubb34": "\uae40\ucc9c"
+  };
+
+  return clubMap[club] ?? club;
 }
