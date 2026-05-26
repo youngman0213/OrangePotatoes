@@ -101,10 +101,10 @@ function GangwonSummaryCard({
   goalsAgainstRank: number | null;
 }) {
   return (
-    <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-3.5 text-white shadow-card sm:p-5">
+    <article className="rounded-lg border-l-4 border-gangwon-orange bg-white p-3.5 text-gangwon-navy shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:text-white dark:ring-slate-800 sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <h2 className="text-lg font-black sm:text-xl">{labels.summaryTitle}</h2>
-        <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange">
+        <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-black text-gangwon-orange ring-1 ring-orange-100 dark:bg-orange-500/10 dark:ring-orange-500/30">
           {standing.rank}{labels.place}
         </span>
       </div>
@@ -116,8 +116,8 @@ function GangwonSummaryCard({
         <SummaryMetric label={labels.goalsAgainst} value={`${standing.goalsAgainst} ${formatRankSuffix(goalsAgainstRank)}`} />
         <SummaryMetric label={labels.goalDifference} value={formatGoalDifference(standing.goalDifference)} />
       </div>
-      <div className="mt-2.5 flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2">
-        <span className="text-xs font-black text-white/75">{labels.form}</span>
+      <div className="mt-2.5 flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800">
+        <span className="text-xs font-black text-slate-500 dark:text-slate-400">{labels.form}</span>
         <FormDots team={standing.team} form={standing.recentForm} light />
       </div>
     </article>
@@ -126,16 +126,16 @@ function GangwonSummaryCard({
 
 function SummaryMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-lg bg-white/10 px-2.5 py-2">
-      <p className="text-[11px] font-bold text-white/70 sm:text-xs">{label}</p>
-      <p className="mt-0.5 text-lg font-black sm:mt-1 sm:text-2xl">{value}</p>
+    <div className="rounded-lg bg-slate-50 px-2.5 py-2 dark:bg-slate-800">
+      <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 sm:text-xs">{label}</p>
+      <p className="mt-0.5 text-lg font-black text-gangwon-navy dark:text-white sm:mt-1 sm:text-2xl">{value}</p>
     </div>
   );
 }
 
 function FormDots({ team, form, light = false, compact = false }: { team: string; form: Standing["recentForm"]; light?: boolean; compact?: boolean }) {
   if (!form.length) {
-    return <span className={classNames("text-xs font-bold", light ? "text-white/75" : "text-slate-400")}>-</span>;
+    return <span className="text-xs font-bold text-slate-400">-</span>;
   }
 
   return (
@@ -146,9 +146,9 @@ function FormDots({ team, form, light = false, compact = false }: { team: string
           className={classNames(
             "flex items-center justify-center rounded-full pt-px text-xs font-black leading-none text-white",
             compact ? "h-[18px] w-[18px] text-[9px]" : "h-6 w-6",
-            result === "W" && "bg-emerald-500",
-            result === "D" && "bg-slate-400",
-            result === "L" && "bg-red-500"
+            result === "W" && "bg-gangwon-orange",
+            result === "D" && "bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-white",
+            result === "L" && "bg-red-100 text-red-600 dark:bg-red-900/60 dark:text-red-100"
           )}
         >
           {result}
