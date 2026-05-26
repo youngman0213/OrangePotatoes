@@ -3,22 +3,22 @@ import type { Standing } from "@/types";
 import { classNames, isGangwon } from "@/lib/utils";
 
 const labels = {
-  summaryTitle: "강원FC 현재 순위",
-  leagueListTitle: "리그 순위",
-  rank: "순위",
-  place: "위",
-  team: "팀",
-  played: "경기",
-  wins: "승",
-  draws: "무",
-  losses: "패",
-  wdl: "승/무/패",
-  goalsFor: "득점",
-  goalsAgainst: "실점",
-  goalDifference: "득실",
-  points: "승점",
-  form: "최근 5경기",
-  empty: "표시할 순위 정보가 없습니다."
+  summaryTitle: "\ud604\uc7ac \uc21c\uc704",
+  leagueListTitle: "\ub9ac\uadf8 \uc21c\uc704",
+  rank: "\uc21c\uc704",
+  place: "\uc704",
+  team: "\ud300",
+  played: "\uacbd\uae30",
+  wins: "\uc2b9",
+  draws: "\ubb34",
+  losses: "\ud328",
+  wdl: "\uc2b9/\ubb34/\ud328",
+  goalsFor: "\ub4dd\uc810",
+  goalsAgainst: "\uc2e4\uc810",
+  goalDifference: "\ub4dd\uc2e4",
+  points: "\uc2b9\uc810",
+  form: "\ucd5c\uadfc 5\uacbd\uae30",
+  empty: "\ud45c\uc2dc\ud560 \uc21c\uc704 \uc815\ubcf4\uac00 \uc5c6\uc2b5\ub2c8\ub2e4."
 };
 
 export function StandingTable({ standings }: { standings: Standing[] }) {
@@ -36,16 +36,14 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
 
 function LeagueTable({ standings }: { standings: Standing[] }) {
   return (
-    <div className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100">
+    <div className="overflow-hidden rounded-lg bg-white shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800">
       <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <div>
-          <h3 className="text-lg font-black text-gangwon-navy">{labels.leagueListTitle}</h3>
-        </div>
+        <h3 className="text-lg font-black text-gangwon-navy dark:text-white">{labels.leagueListTitle}</h3>
       </div>
 
-      <div className="overflow-x-auto border-t border-slate-100">
-        <table className="w-full min-w-[560px] text-left text-xs sm:min-w-[680px] sm:text-sm">
-          <thead className="bg-gangwon-navy text-white">
+      <div className="overflow-x-auto border-t border-slate-100 dark:border-slate-800">
+        <table className="w-full min-w-[520px] text-left text-xs sm:min-w-[680px] sm:text-sm">
+          <thead className="bg-gangwon-navy text-white dark:bg-slate-950">
             <tr>
               <Th>{labels.rank}</Th>
               <Th>{labels.team}</Th>
@@ -60,12 +58,12 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
               <Th className="hidden lg:table-cell">{labels.form}</Th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {standings.length ? standings.map((row) => (
-              <tr key={row.team} className={classNames(isGangwon(row.team) ? "bg-orange-50" : "bg-white")}>
+              <tr key={row.team} className={classNames(isGangwon(row.team) ? "bg-orange-50 dark:bg-orange-500/10" : "bg-white dark:bg-slate-900")}>
                 <Td strong>{row.rank || "-"}</Td>
                 <Td>
-                  <span className={classNames("font-black", isGangwon(row.team) ? "text-gangwon-orange" : "text-gangwon-navy")}>{row.team}</span>
+                  <span className={classNames("font-black", isGangwon(row.team) ? "text-gangwon-orange" : "text-gangwon-navy dark:text-white")}>{row.team}</span>
                 </Td>
                 <Td>{row.played}</Td>
                 <Td>{row.wins}</Td>
@@ -81,7 +79,7 @@ function LeagueTable({ standings }: { standings: Standing[] }) {
               </tr>
             )) : (
               <tr>
-                <td colSpan={11} className="px-4 py-6 text-center text-sm font-bold text-slate-500">
+                <td colSpan={11} className="px-4 py-6 text-center text-sm font-bold text-slate-500 dark:text-slate-400">
                   {labels.empty}
                 </td>
               </tr>
@@ -105,9 +103,7 @@ function GangwonSummaryCard({
   return (
     <article className="rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 p-3.5 text-white shadow-card sm:p-5">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-black sm:text-xl">{labels.summaryTitle}</h2>
-        </div>
+        <h2 className="text-lg font-black sm:text-xl">{labels.summaryTitle}</h2>
         <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-gangwon-orange">
           {standing.rank}{labels.place}
         </span>
@@ -177,13 +173,13 @@ function getMetricRank(rows: Standing[], key: "goalsFor" | "goalsAgainst", direc
 }
 
 function formatRankSuffix(rank: number | null) {
-  return rank ? `(${rank}위)` : "";
+  return rank ? `(${rank}\uc704)` : "";
 }
 
 function Th({ children, className }: { children: ReactNode; className?: string }) {
-  return <th className={classNames("whitespace-nowrap px-3 py-2.5 font-black sm:px-4 sm:py-3", className)}>{children}</th>;
+  return <th className={classNames("whitespace-nowrap px-2.5 py-2.5 font-black sm:px-4 sm:py-3", className)}>{children}</th>;
 }
 
 function Td({ children, strong = false, className }: { children: ReactNode; strong?: boolean; className?: string }) {
-  return <td className={classNames("whitespace-nowrap px-3 py-3 text-slate-600 sm:px-4 sm:py-4", strong && "font-black text-gangwon-navy", className)}>{children}</td>;
+  return <td className={classNames("whitespace-nowrap px-2.5 py-3 text-slate-600 dark:text-slate-300 sm:px-4 sm:py-4", strong && "font-black text-gangwon-navy dark:text-white", className)}>{children}</td>;
 }

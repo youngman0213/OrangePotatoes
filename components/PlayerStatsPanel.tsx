@@ -24,9 +24,9 @@ type TopCard = {
 };
 
 const labels = {
-  gangwonTitle: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d",
+  gangwonTitle: "\uac15\uc6d0 \uac1c\uc778 \uc21c\uc704",
   leagueTitle: "\ub9ac\uadf8 \uac1c\uc778 \uc21c\uc704",
-  ratingTitle: "\ud3c9\uade0\ud3c9\uc810",
+  ratingTitle: "\ud3c9\uc810",
   ratingFailed: "\ud3c9\uc810 \ub370\uc774\ud130\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.",
   loadFailed: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d\uc744 \ud45c\uc2dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
   summary: "\uc694\uc57d",
@@ -34,7 +34,7 @@ const labels = {
   assists: "\ub3c4\uc6c0",
   attackPoints: "\uacf5\uaca9P",
   yellowCards: "\uacbd\uace0",
-  bestEleven: "\ubca0\uc2a4\ud2b811",
+  bestEleven: "B11",
   mom: "MOM",
   goal: "\uace8",
   card: "\uc7a5",
@@ -60,10 +60,10 @@ const gangwonTabs = [
   { label: labels.goals, value: "goals" },
   { label: labels.assists, value: "assists" },
   { label: labels.attackPoints, value: "attackPoints" },
-  { label: labels.yellowCards, value: "yellowCards" },
-  { label: labels.bestEleven, value: "bestEleven" },
   { label: labels.mom, value: "mom" },
-  { label: labels.ratingTitle, value: "averageRating" }
+  { label: labels.bestEleven, value: "bestEleven" },
+  { label: labels.ratingTitle, value: "averageRating" },
+  { label: labels.yellowCards, value: "yellowCards" }
 ];
 
 const leagueTabs = [
@@ -103,7 +103,7 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false, te
     <section className="grid gap-3 sm:gap-5">
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
         <StatsHeader title={labels.gangwonTitle}>
-          <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as GangwonTabKey)} />
+          <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as GangwonTabKey)} wrap dense />
         </StatsHeader>
         {activeGangwon === "summary" ? (
           <TopCards cards={topCards} onSelect={(tab) => setActiveGangwon(tab)} />
