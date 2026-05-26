@@ -66,7 +66,7 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: 
   const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("goals");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
   const gangwonStats = useMemo(() => stats.filter((item) => isGangwon(item.club)), [stats]);
-  const gangwonRows = useMemo(() => activeGangwon === "averageRating" ? [] : getTopRows(gangwonStats, activeGangwon, true), [activeGangwon, gangwonStats]);
+  const gangwonRows = useMemo(() => activeGangwon === "averageRating" ? [] : getTopRows(gangwonStats, activeGangwon, activeGangwon !== "mom"), [activeGangwon, gangwonStats]);
   const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
 
   if (!stats.length) {
