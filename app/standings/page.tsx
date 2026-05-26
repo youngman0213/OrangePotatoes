@@ -51,13 +51,14 @@ export default async function StandingsPage() {
   const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : normalizeFallbackPlayerStats(fallbackPlayerStats);
   const playerRatings = ratingsResult.status === "fulfilled" ? ratingsResult.value : [];
   const ratingsError = ratingsResult.status === "rejected";
+  const gangwonStanding = tableStandings.find((row) => row.team.includes("\uac15\uc6d0"));
   const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
 
   return (
     <div className="grid gap-5 sm:gap-6">
       <StandingTable standings={tableStandings} />
 
-      <PlayerStatsPanel stats={playerStats} ratings={playerRatings} ratingsError={ratingsError} />
+      <PlayerStatsPanel stats={playerStats} ratings={playerRatings} ratingsError={ratingsError} teamGoalsFor={gangwonStanding?.goalsFor ?? 0} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
   );
