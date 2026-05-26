@@ -13,7 +13,7 @@ interface PlayerStatsPanelProps {
   ratingsError?: boolean;
 }
 
-type StatKey = "goals" | "assists" | "yellowCards" | "bestEleven";
+type StatKey = "goals" | "assists" | "attackPoints" | "yellowCards" | "bestEleven";
 type GangwonTabKey = StatKey | "averageRating";
 
 const labels = {
@@ -24,12 +24,14 @@ const labels = {
   loadFailed: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d\uc744 \ud45c\uc2dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
   goals: "\ub4dd\uc810",
   assists: "\ub3c4\uc6c0",
+  attackPoints: "\uacf5\uaca9P",
   yellowCards: "\uacbd\uace0",
   bestEleven: "\ubca0\uc2a4\ud2b811",
   goal: "\uace8",
   card: "\uc7a5",
   times: "\ud68c",
   count: "\uac1c",
+  point: "P",
   games: "\uacbd\uae30",
   empty: "\ud45c\uc2dc\ud560 \uae30\ub85d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
   gangwonBadge: "\uac15\uc6d0"
@@ -38,6 +40,7 @@ const labels = {
 const gangwonTabs = [
   { label: labels.goals, value: "goals" },
   { label: labels.assists, value: "assists" },
+  { label: labels.attackPoints, value: "attackPoints" },
   { label: labels.yellowCards, value: "yellowCards" },
   { label: labels.bestEleven, value: "bestEleven" },
   { label: labels.ratingTitle, value: "averageRating" }
@@ -51,6 +54,7 @@ const leagueTabs = [
 const suffixMap: Record<StatKey, string> = {
   goals: labels.goal,
   assists: labels.count,
+  attackPoints: labels.point,
   yellowCards: labels.card,
   bestEleven: labels.times
 };

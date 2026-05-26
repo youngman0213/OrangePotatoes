@@ -133,13 +133,14 @@ export async function fetchNaverPlayerRecords({
 }
 
 export async function fetchNaverCombinedPlayerRecords(seasonCode = KLEAGUE_SEASON) {
-  const [goals, assists, yellowCards, bestEleven, gangwonGoals, gangwonAssists, gangwonCards, gangwonBestEleven, gangwonPlayed] = await Promise.all([
+  const [goals, assists, yellowCards, bestEleven, gangwonGoals, gangwonAssists, gangwonAttackPoints, gangwonCards, gangwonBestEleven, gangwonPlayed] = await Promise.all([
     fetchNaverPlayerRecords({ seasonCode, sortField: "goals", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, sortField: "assists", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, sortField: "yellowCards", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, sortField: "bestEleven", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "goals", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "assists", pageSize: 100 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "offencePoints", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "yellowCards", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "bestEleven", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "matchesPlayed", pageSize: 100 })
@@ -152,6 +153,7 @@ export async function fetchNaverCombinedPlayerRecords(seasonCode = KLEAGUE_SEASO
     ...bestEleven,
     ...gangwonGoals,
     ...gangwonAssists,
+    ...gangwonAttackPoints,
     ...gangwonCards,
     ...gangwonBestEleven,
     ...gangwonPlayed
