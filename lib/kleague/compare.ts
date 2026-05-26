@@ -113,16 +113,19 @@ function collectStandingMismatches(officialValue: SourceStanding, naverValue: So
 
 function collectPlayerMismatches(officialValue: SourcePlayerRecord, naverValue: SourcePlayerRecord, checkedAt: string) {
   return playerFields.flatMap((field) => {
-    if (officialValue[field] === naverValue[field]) return [];
+    const officialFieldValue = officialValue[field] ?? null;
+    const naverFieldValue = naverValue[field] ?? null;
+
+    if (officialFieldValue === naverFieldValue) return [];
 
     return [{
       type: "player_record_mismatch" as const,
       teamName: naverValue.teamName,
       playerName: naverValue.playerName,
       field,
-      officialValue: officialValue[field],
-      naverValue: naverValue[field],
-      appliedValue: naverValue[field],
+      officialValue: officialFieldValue,
+      naverValue: naverFieldValue,
+      appliedValue: naverFieldValue,
       checkedAt
     }];
   });
