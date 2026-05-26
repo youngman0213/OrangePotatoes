@@ -13,7 +13,7 @@ interface PlayerStatsPanelProps {
   ratingsError?: boolean;
 }
 
-type StatKey = "goals" | "assists" | "attackPoints" | "yellowCards" | "bestEleven";
+type StatKey = "goals" | "assists" | "attackPoints" | "yellowCards" | "bestEleven" | "mom";
 type GangwonTabKey = StatKey | "averageRating";
 
 const labels = {
@@ -27,6 +27,7 @@ const labels = {
   attackPoints: "\uacf5\uaca9P",
   yellowCards: "\uacbd\uace0",
   bestEleven: "\ubca0\uc2a4\ud2b811",
+  mom: "MOM",
   goal: "\uace8",
   card: "\uc7a5",
   times: "\ud68c",
@@ -43,6 +44,7 @@ const gangwonTabs = [
   { label: labels.attackPoints, value: "attackPoints" },
   { label: labels.yellowCards, value: "yellowCards" },
   { label: labels.bestEleven, value: "bestEleven" },
+  { label: labels.mom, value: "mom" },
   { label: labels.ratingTitle, value: "averageRating" }
 ];
 
@@ -56,7 +58,8 @@ const suffixMap: Record<StatKey, string> = {
   assists: labels.count,
   attackPoints: labels.point,
   yellowCards: labels.card,
-  bestEleven: labels.times
+  bestEleven: labels.times,
+  mom: labels.times
 };
 
 export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false }: PlayerStatsPanelProps) {

@@ -13,14 +13,16 @@ const standingFields: Array<keyof Pick<SourceStanding, "rank" | "played" | "wins
   "points"
 ];
 
-const playerFields: Array<keyof Pick<SourcePlayerRecord, "rank" | "goals" | "assists" | "attackPoints" | "matches" | "yellowCards" | "redCards">> = [
+const playerFields: Array<keyof Pick<SourcePlayerRecord, "rank" | "goals" | "assists" | "attackPoints" | "matches" | "yellowCards" | "redCards" | "bestEleven" | "mom">> = [
   "rank",
   "goals",
   "assists",
   "attackPoints",
   "matches",
   "yellowCards",
-  "redCards"
+  "redCards",
+  "bestEleven",
+  "mom"
 ];
 
 export function compareStandings(officialRows: SourceStanding[], naverRows: SourceStanding[]) {

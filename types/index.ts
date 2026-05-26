@@ -119,4 +119,5 @@ export interface LeaguePlayerStat {
   redCards: number;
   played: number;
   bestEleven?: number;
+  mom?: number;
 }

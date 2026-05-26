@@ -92,7 +92,7 @@ export const playerStats: LeaguePlayerStat[] = [
   { rank: 2, name: "\uc774\ud638\uc7ac", club: "POHANG", goals: 7, assists: 0, attackPoints: 7, yellowCards: 3, redCards: 0, played: 15 },
   { rank: 3, name: "\uc57c\uace0", club: "ULSAN", goals: 6, assists: 0, attackPoints: 6, yellowCards: 1, redCards: 0, played: 12 },
   { rank: 4, name: "\uc544\ubd80\ub2ec\ub77c", club: "GANGWON", goals: 6, assists: 0, attackPoints: 6, yellowCards: 2, redCards: 0, played: 15 },
-  { rank: 5, name: "\uae40\ub300\uc6d0", club: "GANGWON", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 15, bestEleven: 5 },
+  { rank: 5, name: "\uae40\ub300\uc6d0", club: "GANGWON", goals: 5, assists: 3, attackPoints: 8, yellowCards: 3, redCards: 0, played: 15, bestEleven: 5, mom: 6 },
   { rank: 5, name: "\ub9d0\ucef9", club: "ULSAN", goals: 5, assists: 2, attackPoints: 7, yellowCards: 0, redCards: 0, played: 9 },
   { rank: 6, name: "\uac15\ud22c\uc9c0", club: "GANGWON", goals: 2, assists: 0, attackPoints: 2, yellowCards: 4, redCards: 0, played: 12, bestEleven: 2 },
   { rank: 7, name: "\ubaa8\uc7ac\ud604", club: "GANGWON", goals: 2, assists: 3, attackPoints: 5, yellowCards: 3, redCards: 0, played: 15, bestEleven: 2 },

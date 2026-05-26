@@ -44,7 +44,8 @@ export default async function StandingsPage() {
     yellowCards: row.yellowCards,
     redCards: row.redCards,
     played: row.matches,
-    bestEleven: row.bestEleven ?? 0
+    bestEleven: row.bestEleven ?? 0,
+    mom: row.mom ?? 0
   })) : [];
 
   const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : normalizeFallbackPlayerStats(fallbackPlayerStats);
@@ -94,7 +95,8 @@ function mergePlayerStats(rows: LeaguePlayerStat[]) {
       yellowCards: Math.max(current.yellowCards, normalizedRow.yellowCards),
       redCards: Math.max(current.redCards, normalizedRow.redCards),
       played: Math.max(current.played, normalizedRow.played),
-      bestEleven: Math.max(current.bestEleven ?? 0, normalizedRow.bestEleven ?? 0)
+      bestEleven: Math.max(current.bestEleven ?? 0, normalizedRow.bestEleven ?? 0),
+      mom: Math.max(current.mom ?? 0, normalizedRow.mom ?? 0)
     });
   }
 

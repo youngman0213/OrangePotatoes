@@ -46,6 +46,7 @@ interface NaverPlayerStatRow {
   redCards?: number | null;
   matchesPlayed?: number | null;
   bestEleven?: number | null;
+  mom?: number | null;
 }
 
 export async function fetchNaverStandings(seasonCode = KLEAGUE_SEASON): Promise<SourceStanding[]> {
@@ -127,13 +128,14 @@ export async function fetchNaverPlayerRecords({
       matches: toNumber(row.matchesPlayed),
       yellowCards: toNumber(row.yellowCards),
       redCards: toNumber(row.redCards),
-      bestEleven: toNumber(row.bestEleven)
+      bestEleven: toNumber(row.bestEleven),
+      mom: toNumber(row.mom)
     };
   });
 }
 
 export async function fetchNaverCombinedPlayerRecords(seasonCode = KLEAGUE_SEASON) {
-  const [goals, assists, yellowCards, bestEleven, gangwonGoals, gangwonAssists, gangwonAttackPoints, gangwonCards, gangwonBestEleven, gangwonPlayed] = await Promise.all([
+  const [goals, assists, yellowCards, bestEleven, gangwonGoals, gangwonAssists, gangwonAttackPoints, gangwonCards, gangwonBestEleven, gangwonMom, gangwonPlayed] = await Promise.all([
     fetchNaverPlayerRecords({ seasonCode, sortField: "goals", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, sortField: "assists", pageSize: 200 }),
     fetchNaverPlayerRecords({ seasonCode, sortField: "yellowCards", pageSize: 200 }),
@@ -143,6 +145,7 @@ export async function fetchNaverCombinedPlayerRecords(seasonCode = KLEAGUE_SEASO
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "offencePoints", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "yellowCards", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "bestEleven", pageSize: 100 }),
+    fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "mom", pageSize: 100 }),
     fetchNaverPlayerRecords({ seasonCode, teamCode: GANGWON_TEAM_CODE, sortField: "matchesPlayed", pageSize: 100 })
   ]);
 
@@ -156,6 +159,7 @@ export async function fetchNaverCombinedPlayerRecords(seasonCode = KLEAGUE_SEASO
     ...gangwonAttackPoints,
     ...gangwonCards,
     ...gangwonBestEleven,
+    ...gangwonMom,
     ...gangwonPlayed
   ]);
 }
@@ -183,7 +187,8 @@ function mergePlayerRecords(rows: SourcePlayerRecord[]) {
       matches: Math.max(current.matches, row.matches),
       yellowCards: Math.max(current.yellowCards, row.yellowCards),
       redCards: Math.max(current.redCards, row.redCards),
-      bestEleven: Math.max(current.bestEleven ?? 0, row.bestEleven ?? 0)
+      bestEleven: Math.max(current.bestEleven ?? 0, row.bestEleven ?? 0),
+      mom: Math.max(current.mom ?? 0, row.mom ?? 0)
     });
   }
 
