@@ -12,9 +12,6 @@ interface PlayerStatsPanelProps {
   ratings?: GangwonPlayerRating[];
   ratingsError?: boolean;
   teamGoalsFor?: number;
-  teamGoalsAgainst?: number;
-  teamGoalsAgainstRank?: number | null;
-  teamPlayed?: number;
 }
 
 type StatKey = "goals" | "assists" | "attackPoints" | "yellowCards" | "bestEleven" | "mom";
@@ -53,9 +50,6 @@ const labels = {
   scoringTop: "\ub4dd\uc810 TOP10",
   recognized: "\ub9ac\uadf8\uac00 \uc778\uc815\ud55c \uac15\uc6d0",
   ratingTop: "\ud3c9\uade0\ud3c9\uc810",
-  defensiveStability: "\uc218\ube44 \uc548\uc815\uac10",
-  averageAgainst: "\ud3c9\uade0",
-  leastConceded: "\ub9ac\uadf8",
   combinedGoals: "\ud569\uc0b0",
   teamGoalsShare: "\ud300 \ub4dd\uc810\uc758",
   bestElevenTotal: "\ubca0\uc2a4\ud2b811",
@@ -93,25 +87,14 @@ export function PlayerStatsPanel({
   stats,
   ratings = [],
   ratingsError = false,
-  teamGoalsFor = 0,
-  teamGoalsAgainst = 0,
-  teamGoalsAgainstRank = null,
-  teamPlayed = 0
+  teamGoalsFor = 0
 }: PlayerStatsPanelProps) {
   const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("summary");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
   const gangwonStats = useMemo(() => stats.filter((item) => isGangwon(item.club)), [stats]);
   const gangwonRows = useMemo(() => isStatTab(activeGangwon) ? getTopRows(gangwonStats, activeGangwon, activeGangwon !== "mom") : [], [activeGangwon, gangwonStats]);
   const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
-  const topCards = useMemo(
-    () => createTopCards(stats, gangwonStats, ratings, {
-      goalsFor: teamGoalsFor,
-      goalsAgainst: teamGoalsAgainst,
-      goalsAgainstRank: teamGoalsAgainstRank,
-      played: teamPlayed
-    }),
-    [stats, gangwonStats, ratings, teamGoalsFor, teamGoalsAgainst, teamGoalsAgainstRank, teamPlayed]
-  );
+  const topCards = useMemo(() => createTopCards(stats, gangwonStats, ratings, teamGoalsFor), [stats, gangwonStats, ratings, teamGoalsFor]);
 
   if (!stats.length) {
     return (
@@ -307,36 +290,19 @@ function createTopCards(
   stats: LeaguePlayerStat[],
   gangwonStats: LeaguePlayerStat[],
   ratings: GangwonPlayerRating[],
-  teamSummary: {
-    goalsFor: number;
-    goalsAgainst: number;
-    goalsAgainstRank: number | null;
-    played: number;
-  }
+  teamGoalsFor: number
 ): TopCard[] {
   const cards: TopCard[] = [];
   const scoringDuo = getTopRows(gangwonStats, "goals").slice(0, 2);
   const scoringDuoGoals = scoringDuo.reduce((sum, row) => sum + row.goals, 0);
 
   if (scoringDuo.length >= 2 && scoringDuoGoals > 0) {
-    const share = teamSummary.goalsFor > 0 ? Math.round((scoringDuoGoals / teamSummary.goalsFor) * 100) : 0;
+    const share = teamGoalsFor > 0 ? Math.round((scoringDuoGoals / teamGoalsFor) * 100) : 0;
     cards.push({
       title: labels.scoringDuo,
       primary: scoringDuo.map((row) => row.name).join(" + "),
       secondary: `${labels.combinedGoals} ${scoringDuoGoals}${labels.goal}${share ? ` \u00b7 ${labels.teamGoalsShare} ${share}%` : ""}`,
       tab: "goals"
-    });
-  }
-
-  if (teamSummary.goalsAgainst > 0 && teamSummary.played > 0) {
-    const averageAgainst = teamSummary.goalsAgainst / teamSummary.played;
-    cards.push({
-      title: labels.defensiveStability,
-      primary: `${teamSummary.goalsAgainst}${labels.goalsAgainst}${teamSummary.goalsAgainstRank ? ` (${teamSummary.goalsAgainstRank}\uc704)` : ""}`,
-      secondary: [
-        `${labels.averageAgainst} ${averageAgainst.toFixed(2)}${labels.goalsAgainst}`,
-        teamSummary.goalsAgainstRank ? `${labels.leastConceded} ${teamSummary.goalsAgainstRank}\uc704` : ""
-      ].filter(Boolean).join(" \u00b7 ")
     });
   }
 

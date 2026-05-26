@@ -29,9 +29,12 @@ export function StandingTable({ standings }: { standings: Standing[] }) {
   return (
     <section className="grid gap-3">
       {gangwon ? <GangwonSummaryCard standing={gangwon} goalsForRank={goalsForRank} goalsAgainstRank={goalsAgainstRank} /> : null}
-      <LeagueTable standings={standings} />
     </section>
   );
+}
+
+export function LeagueStandingTable({ standings }: { standings: Standing[] }) {
+  return <LeagueTable standings={standings} />;
 }
 
 function LeagueTable({ standings }: { standings: Standing[] }) {
@@ -147,7 +150,7 @@ function FormDots({ team, form, light = false, compact = false }: { team: string
             "flex items-center justify-center rounded-full pt-px text-xs font-black leading-none text-white",
             compact ? "h-[18px] w-[18px] text-[9px]" : "h-6 w-6",
             result === "W" && "bg-gangwon-orange",
-            result === "D" && "bg-slate-200 text-slate-600 dark:bg-slate-600 dark:text-white",
+            result === "D" && "bg-slate-400 text-white dark:bg-slate-600",
             result === "L" && "bg-red-100 text-red-600 dark:bg-red-900/60 dark:text-red-100"
           )}
         >

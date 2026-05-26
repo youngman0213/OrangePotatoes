@@ -1,5 +1,5 @@
 import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
-import { StandingTable } from "@/components/StandingTable";
+import { LeagueStandingTable, StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
 import { normalizeTeamName } from "@/lib/kleague/normalize";
@@ -52,7 +52,6 @@ export default async function StandingsPage() {
   const playerRatings = ratingsResult.status === "fulfilled" ? ratingsResult.value : [];
   const ratingsError = ratingsResult.status === "rejected";
   const gangwonStanding = tableStandings.find((row) => row.team.includes("\uac15\uc6d0"));
-  const gangwonGoalsAgainstRank = gangwonStanding ? getMetricRank(tableStandings, "goalsAgainst", "asc", gangwonStanding.team) : null;
   const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
 
   return (
@@ -64,23 +63,11 @@ export default async function StandingsPage() {
         ratings={playerRatings}
         ratingsError={ratingsError}
         teamGoalsFor={gangwonStanding?.goalsFor ?? 0}
-        teamGoalsAgainst={gangwonStanding?.goalsAgainst ?? 0}
-        teamGoalsAgainstRank={gangwonGoalsAgainstRank}
-        teamPlayed={gangwonStanding?.played ?? 0}
       />
+      <LeagueStandingTable standings={tableStandings} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
   );
-}
-
-function getMetricRank(rows: Array<{ rank: number; team: string; goalsAgainst: number }>, key: "goalsAgainst", direction: "asc" | "desc", team: string) {
-  const sorted = [...rows].sort((a, b) => {
-    const diff = direction === "asc" ? a[key] - b[key] : b[key] - a[key];
-    return diff || a.rank - b.rank;
-  });
-  const index = sorted.findIndex((row) => row.team === team);
-
-  return index >= 0 ? index + 1 : null;
 }
 
 function normalizeFallbackPlayerStats(rows: LeaguePlayerStat[]) {
