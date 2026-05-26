@@ -1,4 +1,4 @@
-import { PlayerStatsPanel } from "@/components/PlayerStatsPanel";
+import { LeaguePlayerStatsPanel, PlayerStatsPanel } from "@/components/PlayerStatsPanel";
 import { LeagueStandingTable, StandingTable } from "@/components/StandingTable";
 import { playerStats as fallbackPlayerStats, standings } from "@/data/mock";
 import { getVerifiedCombinedPlayerRecords, getVerifiedStandings } from "@/lib/kleague";
@@ -63,8 +63,10 @@ export default async function StandingsPage() {
         ratings={playerRatings}
         ratingsError={ratingsError}
         teamGoalsFor={gangwonStanding?.goalsFor ?? 0}
+        showLeagueStats={false}
       />
       <LeagueStandingTable standings={tableStandings} />
+      <LeaguePlayerStatsPanel stats={playerStats} />
       <p className="text-xs font-bold text-slate-400">{labels.source} / {labels.checkedAt}: {new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(updatedAt))}</p>
     </div>
   );

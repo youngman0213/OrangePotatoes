@@ -12,6 +12,7 @@ interface PlayerStatsPanelProps {
   ratings?: GangwonPlayerRating[];
   ratingsError?: boolean;
   teamGoalsFor?: number;
+  showLeagueStats?: boolean;
 }
 
 type StatKey = "goals" | "assists" | "attackPoints" | "yellowCards" | "bestEleven" | "mom";
@@ -87,7 +88,8 @@ export function PlayerStatsPanel({
   stats,
   ratings = [],
   ratingsError = false,
-  teamGoalsFor = 0
+  teamGoalsFor = 0,
+  showLeagueStats = true
 }: PlayerStatsPanelProps) {
   const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("summary");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
@@ -120,13 +122,34 @@ export function PlayerStatsPanel({
         )}
       </article>
 
-      <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
-        <StatsHeader title={labels.leagueTitle}>
-          <FilterTabs tabs={leagueTabs} active={activeLeague} onChange={(value) => setActiveLeague(value as "goals" | "assists")} />
-        </StatsHeader>
-        <StatsList rows={leagueRows} valueKey={activeLeague} showClub />
-      </article>
+      {showLeagueStats ? <LeaguePlayerStatsCard rows={leagueRows} active={activeLeague} onChange={setActiveLeague} /> : null}
     </section>
+  );
+}
+
+export function LeaguePlayerStatsPanel({ stats }: { stats: LeaguePlayerStat[] }) {
+  const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
+  const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
+
+  return <LeaguePlayerStatsCard rows={leagueRows} active={activeLeague} onChange={setActiveLeague} />;
+}
+
+function LeaguePlayerStatsCard({
+  rows,
+  active,
+  onChange
+}: {
+  rows: LeaguePlayerStat[];
+  active: "goals" | "assists";
+  onChange: (value: "goals" | "assists") => void;
+}) {
+  return (
+    <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
+      <StatsHeader title={labels.leagueTitle}>
+        <FilterTabs tabs={leagueTabs} active={active} onChange={(value) => onChange(value as "goals" | "assists")} />
+      </StatsHeader>
+      <StatsList rows={rows} valueKey={active} showClub />
+    </article>
   );
 }
 
