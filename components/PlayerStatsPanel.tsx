@@ -15,7 +15,7 @@ interface PlayerStatsPanelProps {
 }
 
 type StatKey = "goals" | "assists" | "attackPoints" | "yellowCards" | "bestEleven" | "mom";
-type GangwonTabKey = StatKey | "averageRating";
+type GangwonTabKey = "summary" | StatKey | "averageRating";
 type TopCard = {
   title: string;
   primary: string;
@@ -29,6 +29,7 @@ const labels = {
   ratingTitle: "\ud3c9\uade0\ud3c9\uc810",
   ratingFailed: "\ud3c9\uc810 \ub370\uc774\ud130\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.",
   loadFailed: "\uac15\uc6d0 \uc120\uc218 \uac1c\uc778\uae30\ub85d\uc744 \ud45c\uc2dc\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+  summary: "\uc694\uc57d",
   goals: "\ub4dd\uc810",
   assists: "\ub3c4\uc6c0",
   attackPoints: "\uacf5\uaca9P",
@@ -55,6 +56,7 @@ const labels = {
 };
 
 const gangwonTabs = [
+  { label: labels.summary, value: "summary" },
   { label: labels.goals, value: "goals" },
   { label: labels.assists, value: "assists" },
   { label: labels.attackPoints, value: "attackPoints" },
@@ -81,10 +83,10 @@ const suffixMap: Record<StatKey, string> = {
 const topTenLimit = 10;
 
 export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false, teamGoalsFor = 0 }: PlayerStatsPanelProps) {
-  const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("goals");
+  const [activeGangwon, setActiveGangwon] = useState<GangwonTabKey>("summary");
   const [activeLeague, setActiveLeague] = useState<"goals" | "assists">("goals");
   const gangwonStats = useMemo(() => stats.filter((item) => isGangwon(item.club)), [stats]);
-  const gangwonRows = useMemo(() => activeGangwon === "averageRating" ? [] : getTopRows(gangwonStats, activeGangwon, activeGangwon !== "mom"), [activeGangwon, gangwonStats]);
+  const gangwonRows = useMemo(() => isStatTab(activeGangwon) ? getTopRows(gangwonStats, activeGangwon, activeGangwon !== "mom") : [], [activeGangwon, gangwonStats]);
   const leagueRows = useMemo(() => getTopRows(stats, activeLeague), [activeLeague, stats]);
   const topCards = useMemo(() => createTopCards(stats, gangwonStats, ratings, teamGoalsFor), [stats, gangwonStats, ratings, teamGoalsFor]);
 
@@ -99,33 +101,13 @@ export function PlayerStatsPanel({ stats, ratings = [], ratingsError = false, te
 
   return (
     <section className="grid gap-3 sm:gap-5">
-      {topCards.length ? (
-        <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
-          <StatsHeader title={labels.topTitle}>
-            <span className="hidden text-xs font-black text-slate-400 sm:inline">{labels.gangwonBadge}</span>
-          </StatsHeader>
-          <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
-            {topCards.map((card) => (
-              <button
-                key={card.title}
-                type="button"
-                onClick={() => card.tab ? setActiveGangwon(card.tab) : undefined}
-                className="rounded-lg bg-slate-50 px-3 py-3 text-left ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-orange-50 hover:ring-orange-100 dark:bg-slate-800/70 dark:ring-slate-700 dark:hover:bg-slate-800 sm:px-4 sm:py-4"
-              >
-                <p className="text-xs font-black text-gangwon-orange">{card.title}</p>
-                <p className="mt-1 truncate text-base font-black text-slate-900 dark:text-white sm:text-lg">{card.primary}</p>
-                {card.secondary ? <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">{card.secondary}</p> : null}
-              </button>
-            ))}
-          </div>
-        </article>
-      ) : null}
-
       <article className="rounded-lg bg-white p-3 shadow-card ring-1 ring-slate-100 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
         <StatsHeader title={labels.gangwonTitle}>
           <FilterTabs tabs={gangwonTabs} active={activeGangwon} onChange={(value) => setActiveGangwon(value as GangwonTabKey)} />
         </StatsHeader>
-        {activeGangwon === "averageRating" ? (
+        {activeGangwon === "summary" ? (
+          <TopCards cards={topCards} onSelect={(tab) => setActiveGangwon(tab)} />
+        ) : activeGangwon === "averageRating" ? (
           <RatingPanel ratings={ratings} hasError={ratingsError} />
         ) : (
           <StatsList rows={gangwonRows} valueKey={activeGangwon} highlighted />
@@ -177,11 +159,38 @@ function RatingPanel({ ratings, hasError }: { ratings: GangwonPlayerRating[]; ha
   );
 }
 
+function TopCards({ cards, onSelect }: { cards: TopCard[]; onSelect: (tab: GangwonTabKey) => void }) {
+  if (!cards.length) {
+    return <p className="rounded-lg bg-slate-50 px-4 py-5 text-sm font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">{labels.empty}</p>;
+  }
+
+  return (
+    <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
+      {cards.map((card) => (
+        <button
+          key={card.title}
+          type="button"
+          onClick={() => card.tab ? onSelect(card.tab) : undefined}
+          className="rounded-lg bg-slate-50 px-3 py-3 text-left ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-orange-50 hover:ring-orange-100 dark:bg-slate-800/70 dark:ring-slate-700 dark:hover:bg-slate-800 sm:px-4 sm:py-4"
+        >
+          <p className="text-xs font-black text-gangwon-orange">{card.title}</p>
+          <p className="mt-1 truncate text-base font-black text-slate-900 dark:text-white sm:text-lg">{card.primary}</p>
+          {card.secondary ? <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">{card.secondary}</p> : null}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function getTopRows(rows: LeaguePlayerStat[], key: StatKey, includeZero = false, limit = 5) {
   return [...rows]
     .filter((row) => includeZero || getStatValue(row, key) > 0)
     .sort((a, b) => getStatValue(b, key) - getStatValue(a, key) || b.attackPoints - a.attackPoints || b.played - a.played)
     .slice(0, limit);
+}
+
+function isStatTab(value: GangwonTabKey): value is StatKey {
+  return value !== "summary" && value !== "averageRating";
 }
 
 function getStatValue(row: LeaguePlayerStat, key: StatKey) {
