@@ -6,11 +6,11 @@ import { normalizeTeamName } from "@/lib/kleague/normalize";
 import { getGangwonAverageRatings } from "@/lib/kleague/ratings";
 import type { LeaguePlayerStat } from "@/types";
 
-export const revalidate = 21600;
+export const revalidate = 600;
 
 const labels = {
-  source: "\ub370\uc774\ud130 \ucd9c\ucc98: K\ub9ac\uadf8 \uacf5\uc2dd \uae30\ub85d / \uac80\uc99d: \ub124\uc774\ubc84 \uc2a4\ud3ec\uce20",
-  checkedAt: "\uae30\uc900 \uc2dc\uac01"
+  source: "데이터 출처: K리그 공식 기록 / 검증: 네이버 스포츠",
+  checkedAt: "기준 시각"
 };
 
 export default async function StandingsPage() {
@@ -51,7 +51,7 @@ export default async function StandingsPage() {
   const playerStats = fetchedPlayerStats.length ? mergePlayerStats(fetchedPlayerStats) : normalizeFallbackPlayerStats(fallbackPlayerStats);
   const playerRatings = ratingsResult.status === "fulfilled" ? ratingsResult.value : [];
   const ratingsError = ratingsResult.status === "rejected";
-  const gangwonStanding = tableStandings.find((row) => row.team.includes("\uac15\uc6d0"));
+  const gangwonStanding = tableStandings.find((row) => row.team.includes("강원"));
   const updatedAt = standingsResult.status === "fulfilled" ? standingsResult.value.updatedAt : statsResult.status === "fulfilled" ? statsResult.value.updatedAt : new Date().toISOString();
 
   return (
