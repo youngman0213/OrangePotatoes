@@ -14,7 +14,7 @@ export async function fetchOfficialStandings(seasonCode = KLEAGUE_SEASON): Promi
     .split("\n")
     .map(normalizeLine)
     .filter(Boolean);
-  const startIndex = lines.findIndex((line) => line.includes("\ud300\uc21c\uc704\ud45c"));
+  const startIndex = lines.findIndex((line) => line.includes("팀순위표"));
 
   if (startIndex === -1) {
     logUnexpected("standings", lines.slice(0, 80));
@@ -24,7 +24,7 @@ export async function fetchOfficialStandings(seasonCode = KLEAGUE_SEASON): Promi
   const standings: SourceStanding[] = [];
 
   for (const line of lines.slice(startIndex)) {
-    if (line.includes("\ucd5c\uadfc 6\uacbd\uae30")) break;
+    if (line.includes("최근 6경기")) break;
 
     const matched = line.match(/^(\d{1,2})\s+([\uac00-\ud7a3A-Za-z0-9 ]+?)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(-?\d+)$/);
     if (!matched) continue;
@@ -120,7 +120,8 @@ export async function fetchOfficialPlayerRecords(seasonCode = KLEAGUE_SEASON): P
 
 async function requestText(url: string) {
   const response = await fetch(url, {
-    next: { revalidate: 60 * 60 * 6 },
+    next: { revalidate: 60 * 10 },
+    signal: AbortSignal.timeout(5000),
     headers: {
       "User-Agent": "OrangePotatoesFanHub/1.0"
     }
