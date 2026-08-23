@@ -21,7 +21,7 @@ export function getCacheSeconds() {
 }
 
 export function getCacheControlHeader() {
-  return "public, s-maxage=21600, stale-while-revalidate=21600, stale-if-error=86400";
+  return `public, s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS}, stale-if-error=86400`;
 }
 
 export async function cachedExternalJson<T>(key: string, request: () => Promise<T>): Promise<T> {
@@ -30,11 +30,6 @@ export async function cachedExternalJson<T>(key: string, request: () => Promise<
 
   if (cached && now - cached.cachedAt < CACHE_MS) {
     return cached.data;
-  }
-
-  if (!isRefreshWindow()) {
-    if (cached) return cached.data;
-    throw new Error("K League external cache is empty and refresh is blocked before 12:00 KST.");
   }
 
   const activeRequest = pending.get(key) as Promise<T> | undefined;
@@ -47,7 +42,6 @@ export async function cachedExternalJson<T>(key: string, request: () => Promise<
     })
     .catch((error) => {
       if (cached) {
-        cache.set(key, { data: cached.data, cachedAt: Date.now() });
         console.error(`[kleague-cache] Keeping stale cache after request failure: ${getErrorMessage(error)}`);
         return cached.data;
       }
@@ -63,8 +57,7 @@ export async function cachedExternalJson<T>(key: string, request: () => Promise<
 }
 
 export function isRefreshWindow() {
-  const koreaHour = (new Date().getUTCHours() + 9) % 24;
-  return koreaHour >= 12;
+  return true;
 }
 
 function getErrorMessage(error: unknown) {
