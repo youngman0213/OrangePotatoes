@@ -197,7 +197,8 @@ function mergePlayerRecords(rows: SourcePlayerRecord[]) {
 
 async function requestJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
-    next: { revalidate: 60 * 60 * 6 },
+    next: { revalidate: 60 * 10 },
+    signal: AbortSignal.timeout(5000),
     headers: {
       Accept: "application/json",
       Referer: "https://m.sports.naver.com/",
