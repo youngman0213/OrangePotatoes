@@ -1,7 +1,7 @@
 export const KLEAGUE_SEASON = "2026";
 export const KLEAGUE_NAME = "K League 1";
 export const GANGWON_TEAM_CODE = "21";
-export const CACHE_SECONDS = 60 * 60 * 6;
+export const CACHE_SECONDS = 60 * 10;
 export const CACHE_MS = CACHE_SECONDS * 1000;
 
 export type DataSource = "kleague-official" | "naver-sports";
