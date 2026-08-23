@@ -2,6 +2,14 @@
 
 import { FormEvent, useMemo, useState } from 'react'
 
+const STREAMERS = [
+  { id: 'kymakyma', label: '키마' },
+  { id: 'chaenna02', label: '챈나' },
+  { id: 'singgyul', label: '띵귤' },
+  { id: 'ldrboo', label: '솜주먹' },
+  { id: 'whatcherry4', label: '연초록' },
+]
+
 type LiveInfo = {
   streamerId: string
   isLive: boolean
@@ -71,11 +79,25 @@ export default function SoopChatPage() {
         </header>
 
         <section className="mb-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 sm:p-4">
+          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {STREAMERS.map((streamer) => (
+              <button
+                key={streamer.id}
+                type="button"
+                onClick={() => void loadStreamer(streamer.id)}
+                disabled={loading}
+                className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-3 text-sm font-semibold text-white/85 transition hover:bg-white/10 disabled:opacity-40"
+              >
+                {streamer.label}
+              </button>
+            ))}
+          </div>
+
           <form onSubmit={submit} className="flex gap-2">
             <input
               value={streamerId}
               onChange={(e) => setStreamerId(e.target.value)}
-              placeholder="SOOP 스트리머 ID"
+              placeholder="SOOP 스트리머 ID 직접 입력"
               autoCapitalize="none"
               autoCorrect="off"
               className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-base outline-none placeholder:text-white/35 focus:border-[#2cff9b]/60"
@@ -88,7 +110,6 @@ export default function SoopChatPage() {
               {loading ? '확인 중' : '열기'}
             </button>
           </form>
-          <p className="mt-2 text-xs text-white/35">SOOP 방송 주소의 아이디 부분을 입력하면 됩니다.</p>
         </section>
 
         {error && (
@@ -159,7 +180,7 @@ export default function SoopChatPage() {
 
         {!live && !loading && !error && (
           <div className="flex min-h-64 flex-1 items-center justify-center rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">
-            스트리머 ID를 입력해 채팅을 여세요.
+            위에서 스트리머를 선택하면 방송 중일 때 채팅창이 열립니다.
           </div>
         )}
 
