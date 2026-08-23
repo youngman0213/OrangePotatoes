@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getCacheControlHeader } from "@/lib/kleague/cache";
+import { getCacheControlHeader, getCacheSeconds } from "@/lib/kleague/cache";
 import { getVerifiedStandings } from "@/lib/kleague";
 
-export const revalidate = 21600;
+export const revalidate = getCacheSeconds();
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
