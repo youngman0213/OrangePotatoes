@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCacheControlHeader } from "@/lib/kleague/cache";
 import { getVerifiedGangwonSummary } from "@/lib/kleague";
 
-export const revalidate = 21600;
+export const revalidate = 600;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
