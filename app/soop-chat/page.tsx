@@ -2,14 +2,6 @@
 
 import { FormEvent, useMemo, useState } from 'react'
 
-const DEFAULT_STREAMERS = [
-  { id: 'kimma', label: '키마' },
-  { id: 'ddinggul', label: '띵귤' },
-  { id: 'chaenna', label: '챈나' },
-  { id: 'somjumeok', label: '솜주먹' },
-  { id: 'yeonchorok', label: '연초록' },
-]
-
 type LiveInfo = {
   streamerId: string
   isLive: boolean
@@ -96,19 +88,7 @@ export default function SoopChatPage() {
               {loading ? '확인 중' : '열기'}
             </button>
           </form>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            {DEFAULT_STREAMERS.map((streamer) => (
-              <button
-                key={streamer.id}
-                type="button"
-                onClick={() => void loadStreamer(streamer.id)}
-                className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-sm text-white/80 transition hover:bg-white/10"
-              >
-                {streamer.label}
-              </button>
-            ))}
-          </div>
+          <p className="mt-2 text-xs text-white/35">SOOP 방송 주소의 아이디 부분을 입력하면 됩니다.</p>
         </section>
 
         {error && (
@@ -179,7 +159,7 @@ export default function SoopChatPage() {
 
         {!live && !loading && !error && (
           <div className="flex min-h-64 flex-1 items-center justify-center rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-white/40">
-            스트리머 ID를 입력하거나 위 버튼에서 선택하세요.
+            스트리머 ID를 입력해 채팅을 여세요.
           </div>
         )}
 
