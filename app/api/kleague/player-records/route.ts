@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCacheControlHeader } from "@/lib/kleague/cache";
 import { getVerifiedPlayerRecords } from "@/lib/kleague";
 
-export const revalidate = 21600;
+export const revalidate = 600;
 
 const allowedSortFields = new Set(["goals", "assists", "offencePoints", "yellowCards", "matchesPlayed", "bestEleven", "mom"]);
 
