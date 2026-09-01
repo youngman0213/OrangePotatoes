@@ -21,8 +21,8 @@
         <div class="field"><label>키</label><select id="key"><option value="0">원키</option><option value="-1">-1</option><option value="-2">-2</option><option value="-3">-3</option><option value="1">+1</option></select></div>
       </div>
       <div class="field"><label>녹음 환경</label><select id="env"><option>노래방</option><option>집 / 반주 있음</option><option>무반주</option></select></div>
-      <button id="analyzeBtn" class="btn primary">분석 시작</button>
-      <div id="status" class="status">파일을 선택해줘.</div>
+      <button id="analyzeBtn" class="btn primary" disabled>분석 시작</button>
+      <div id="status" class="status">분석 엔진을 준비하는 중…</div>
     </div>
 
     <div id="result" class="hidden">
@@ -47,9 +47,35 @@
   <section id="profilePage" class="hidden"><div class="card"><h2>내 보컬 기준</h2><div class="profile-grid"><div class="field"><label>편안한 최고음</label><select id="comfortable"><option>D4</option><option selected>D#4</option><option>E4</option><option>F4</option></select></div><div class="field"><label>도전 최고음</label><select id="challenge"><option>D#4</option><option selected>E4</option><option>F4</option><option>F#4</option></select></div></div><button id="saveProfile" class="btn secondary">프로필 저장</button><div id="profileStatus" class="status"></div></div></section>
 </div>
 <div class="tabs"><div><button class="tab active" data-page="analyzePage"><em>🎙️</em>분석</button><button class="tab" data-page="historyPage"><em>📈</em>기록</button><button class="tab" data-page="recommendPage"><em>🎵</em>추천</button><button class="tab" data-page="profilePage"><em>👤</em>내 정보</button></div></div>
-<script src="/vocal-coach-accuracy/part0.js"></script>
-<script src="/vocal-coach-accuracy/part1.js"></script>
-<script src="/vocal-coach-accuracy/part2.js"></script>
-<script src="/vocal-coach-accuracy/part3.js"></script>
+<script>
+(() => {
+  const input = document.getElementById('audioFile');
+  const status = document.getElementById('status');
+  const btn = document.getElementById('analyzeBtn');
+  const showSelected = () => {
+    const file = input.files && input.files[0];
+    status.textContent = file ? `${file.name} 선택됨` : '파일을 선택해줘.';
+  };
+  input.addEventListener('change', showSelected);
+  (async () => {
+    try {
+      const parts = ['part0.js','part1.js','part2.js','part3.js'];
+      const chunks = [];
+      for (const part of parts) {
+        const res = await fetch(part, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`${part} 로드 실패 (${res.status})`);
+        chunks.push(await res.text());
+      }
+      new Function(chunks.join('\n'))();
+      btn.disabled = false;
+      showSelected();
+    } catch (err) {
+      console.error('[Vocal Coach bootstrap error]', err);
+      btn.disabled = true;
+      status.textContent = '분석 엔진 초기화 실패: ' + (err && err.message ? err.message : String(err));
+    }
+  })();
+})();
+</script>
 </body>
 </html>
