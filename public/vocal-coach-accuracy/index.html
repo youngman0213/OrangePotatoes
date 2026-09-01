@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0b0d12" />
+<title>Vocal Coach Test</title>
+<link rel="stylesheet" href="/vocal-coach-accuracy/style.css">
+</head>
+<body>
+<div class="app">
+  <div class="top"><div><div class="brand">Vocal Coach</div><div class="sub">정확도 우선 보컬 분석 테스트</div></div><div class="badge">ENGINE v0.7</div></div>
+
+  <section id="analyzePage">
+    <div class="card">
+      <h2>녹음 분석</h2>
+      <div class="sub">노래방·반주 녹음은 먼저 목소리를 분리한 뒤 분석해. 첫 정밀 분석은 보컬 분리 AI 모델 준비 때문에 시간이 더 걸릴 수 있어.</div>
+      <div class="field"><label>녹음 파일</label><input id="audioFile" type="file" accept="audio/*,.m4a,.mp3,.wav,.aac" /></div>
+      <div class="row">
+        <div class="field"><label>곡 제목</label><input id="song" placeholder="예: 그런가봐요" /></div>
+        <div class="field"><label>키</label><select id="key"><option value="0">원키</option><option value="-1">-1</option><option value="-2">-2</option><option value="-3">-3</option><option value="1">+1</option></select></div>
+      </div>
+      <div class="field"><label>녹음 환경</label><select id="env"><option>노래방</option><option>집 / 반주 있음</option><option>무반주</option></select></div>
+      <button id="analyzeBtn" class="btn primary">분석 시작</button>
+      <div id="status" class="status">파일을 선택해줘.</div>
+    </div>
+
+    <div id="result" class="hidden">
+      <div class="card">
+        <div class="sub">감지 음역</div><div id="range" class="range">-</div>
+        <div class="sub">이번 녹음에서 실제로 검출된 유성 구간 기준이야. 편안한 음역과는 다를 수 있어.</div>
+        <div class="metrics">
+          <div class="metric"><span>피치 안정도</span><b id="pitchScore">-</b></div>
+          <div class="metric"><span>고음 안정도</span><b id="highScore">-</b></div>
+        </div>
+        <div id="qualityWarning" class="warnbox hidden" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card"><h2>집중해서 볼 구간</h2><div class="sub">피치 변화가 특히 불안정했던 후보 구간이야.</div><div id="issues" class="issues" style="margin-top:10px"></div></div>
+
+      <div class="card"><h2>코치</h2><div id="coach" class="coach"></div><p class="note">현재 테스트판은 기준 멜로디 없이 분석하므로 ‘원곡 음정을 맞혔는지’는 판정하지 않아. 목 힘·성대 접촉 같은 항목도 녹음만으로 확정하지 않는다.</p></div>
+    </div>
+  </section>
+
+  <section id="historyPage" class="hidden"><div class="card"><h2>최근 분석</h2><div id="history"></div></div></section>
+  <section id="recommendPage" class="hidden"><div class="card"><h2>곡 추천 테스트</h2><div class="sub">현재 프로필 최고음과 최근 고음 안정도를 기준으로 임시 후보를 정렬해.</div><div id="recommendations" style="margin-top:12px"></div><p class="note">추천곡 데이터는 아직 검증 DB가 아니므로 실제 최고음·TJ 번호는 정식 DB 연결 전 참고용이야.</p></div></section>
+  <section id="profilePage" class="hidden"><div class="card"><h2>내 보컬 기준</h2><div class="profile-grid"><div class="field"><label>편안한 최고음</label><select id="comfortable"><option>D4</option><option selected>D#4</option><option>E4</option><option>F4</option></select></div><div class="field"><label>도전 최고음</label><select id="challenge"><option>D#4</option><option selected>E4</option><option>F4</option><option>F#4</option></select></div></div><button id="saveProfile" class="btn secondary">프로필 저장</button><div id="profileStatus" class="status"></div></div></section>
+</div>
+<div class="tabs"><div><button class="tab active" data-page="analyzePage"><em>🎙️</em>분석</button><button class="tab" data-page="historyPage"><em>📈</em>기록</button><button class="tab" data-page="recommendPage"><em>🎵</em>추천</button><button class="tab" data-page="profilePage"><em>👤</em>내 정보</button></div></div>
+<script src="/vocal-coach-accuracy/part0.js"></script>
+<script src="/vocal-coach-accuracy/part1.js"></script>
+<script src="/vocal-coach-accuracy/part2.js"></script>
+<script src="/vocal-coach-accuracy/part3.js"></script>
+</body>
+</html>
